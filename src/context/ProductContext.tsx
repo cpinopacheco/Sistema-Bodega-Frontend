@@ -283,9 +283,9 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
 
       const lowercaseQuery = query.toLowerCase();
       return products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(lowercaseQuery) ||
-          product.description.toLowerCase().includes(lowercaseQuery)
+        (product) => product.name.toLowerCase().includes(lowercaseQuery)
+        // Removemos la búsqueda en description:
+        // || product.description.toLowerCase().includes(lowercaseQuery)
       );
     },
     [products]

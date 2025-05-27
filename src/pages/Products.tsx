@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   FaPlus,
   FaSearch,
@@ -15,110 +15,123 @@ import {
   FaShoppingCart,
   FaArrowUp,
   FaArrowDown,
-} from "react-icons/fa"
-import { useProducts, type Product } from "../context/ProductContext"
-import { useWithdrawal } from "../context/WithdrawalContext"
-import ProductForm from "../components/products/ProductForm"
-import CategoriesList from "../components/categories/CategoriesList"
-import { Tooltip } from "../components/ui/Tooltip"
-import StockManagementForm from "../components/products/StockManagementForm"
+} from "react-icons/fa";
+import { useProducts, type Product } from "../context/ProductContext";
+import { useWithdrawal } from "../context/WithdrawalContext";
+import ProductForm from "../components/products/ProductForm";
+import CategoriesList from "../components/categories/CategoriesList";
+import { Tooltip } from "../components/ui/Tooltip";
+import StockManagementForm from "../components/products/StockManagementForm";
 
 const Products = () => {
-  const { products, categories, deleteProduct } = useProducts()
-  const { addToCart } = useWithdrawal()
+  const { products, categories, deleteProduct } = useProducts();
+  const { addToCart } = useWithdrawal();
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [showProductForm, setShowProductForm] = useState(false)
-  const [showCategoriesList, setShowCategoriesList] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [sortField, setSortField] = useState<"name" | "stock" | "category">("name")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [quantityInputs, setQuantityInputs] = useState<Record<number, number>>({})
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
-  const [showStockManagementForm, setShowStockManagementForm] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [showCategoriesList, setShowCategoriesList] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [sortField, setSortField] = useState<"name" | "stock" | "category">(
+    "name"
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [quantityInputs, setQuantityInputs] = useState<Record<number, number>>(
+    {}
+  );
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [showStockManagementForm, setShowStockManagementForm] = useState(false);
 
   // Inicializar cantidades
   useEffect(() => {
-    const initialQuantities: Record<number, number> = {}
+    const initialQuantities: Record<number, number> = {};
     products.forEach((product) => {
-      initialQuantities[product.id] = 1
-    })
-    setQuantityInputs(initialQuantities)
-  }, [products])
+      initialQuantities[product.id] = 1;
+    });
+    setQuantityInputs(initialQuantities);
+  }, [products]);
 
   // Función para cambiar cantidad
   const handleQuantityChange = (id: number, value: number) => {
-    if (value < 1) value = 1
+    if (value < 1) value = 1;
     setQuantityInputs((prev) => ({
       ...prev,
       [id]: value,
-    }))
-  }
+    }));
+  };
 
   // Función para abrir modal de edición
   const handleEdit = (product: Product) => {
-    setSelectedProduct(product)
-    setShowProductForm(true)
-  }
+    setSelectedProduct(product);
+    setShowProductForm(true);
+  };
 
   // Función para confirmar eliminación
   const handleDeleteConfirm = (id: number) => {
-    setConfirmDelete(id)
-  }
+    setConfirmDelete(id);
+  };
 
   // Función para eliminar producto
   const handleDelete = (id: number) => {
-    deleteProduct(id)
-    setConfirmDelete(null)
-  }
+    deleteProduct(id);
+    setConfirmDelete(null);
+  };
 
   // Función para agregar al carrito
   const handleAddToCart = (product: Product, quantity: number) => {
-    addToCart(product, quantity)
-  }
+    addToCart(product, quantity);
+  };
 
   // Función para cambiar el ordenamiento
   const handleSort = (field: "name" | "stock" | "category") => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection("asc");
     }
-  }
+  };
 
   // Función para abrir modal de gestión de stock
   const handleManageStock = (product: Product) => {
-    setSelectedProduct(product)
-    setShowStockManagementForm(true)
-  }
+    setSelectedProduct(product);
+    setShowStockManagementForm(true);
+  };
 
   // Filtrar y ordenar productos
   const filteredProducts = products
     .filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      // Remover esta línea que busca en la descripción:
+      // || product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory =
+        selectedCategory === "all" || product.category === selectedCategory;
 
-      return matchesSearch && matchesCategory
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       if (sortField === "name") {
-        return sortDirection === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+        return sortDirection === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
       } else if (sortField === "stock") {
-        return sortDirection === "asc" ? a.stock - b.stock : b.stock - a.stock
+        return sortDirection === "asc" ? a.stock - b.stock : b.stock - a.stock;
       } else if (sortField === "category") {
-        return sortDirection === "asc" ? a.category.localeCompare(b.category) : b.category.localeCompare(a.category)
+        return sortDirection === "asc"
+          ? a.category.localeCompare(b.category)
+          : b.category.localeCompare(a.category);
       }
-      return 0
-    })
+      return 0;
+    });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-neutral-dark">Gestión de Productos</h1>
+        <h1 className="text-2xl font-bold text-neutral-dark">
+          Gestión de Productos
+        </h1>
         <div className="flex space-x-2">
           <button
             onClick={() => setShowCategoriesList(true)}
@@ -129,8 +142,8 @@ const Products = () => {
           </button>
           <button
             onClick={() => {
-              setSelectedProduct(null)
-              setShowProductForm(true)
+              setSelectedProduct(null);
+              setShowProductForm(true);
             }}
             className="inline-flex items-center px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors"
           >
@@ -184,7 +197,10 @@ const Products = () => {
               <thead className="bg-primary-lightest">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    <button onClick={() => handleSort("name")} className="flex items-center focus:outline-none">
+                    <button
+                      onClick={() => handleSort("name")}
+                      className="flex items-center focus:outline-none"
+                    >
                       Producto
                       {sortField === "name" &&
                         (sortDirection === "asc" ? (
@@ -195,7 +211,10 @@ const Products = () => {
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    <button onClick={() => handleSort("category")} className="flex items-center focus:outline-none">
+                    <button
+                      onClick={() => handleSort("category")}
+                      className="flex items-center focus:outline-none"
+                    >
                       Categoría
                       {sortField === "category" &&
                         (sortDirection === "asc" ? (
@@ -206,7 +225,10 @@ const Products = () => {
                     </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    <button onClick={() => handleSort("stock")} className="flex items-center focus:outline-none">
+                    <button
+                      onClick={() => handleSort("stock")}
+                      className="flex items-center focus:outline-none"
+                    >
                       Stock
                       {sortField === "stock" &&
                         (sortDirection === "asc" ? (
@@ -226,14 +248,20 @@ const Products = () => {
                   <tr
                     key={product.id}
                     className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
-                      product.stock <= product.minStock ? "bg-state-error bg-opacity-10" : ""
+                      product.stock <= product.minStock
+                        ? "bg-state-error bg-opacity-10"
+                        : ""
                     }`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-0">
-                          <div className="text-sm font-medium text-neutral-dark">{product.name}</div>
-                          <div className="text-sm text-neutral-medium max-w-xs truncate">{product.description}</div>
+                          <div className="text-sm font-medium text-neutral-dark">
+                            {product.name}
+                          </div>
+                          <div className="text-sm text-neutral-medium max-w-xs truncate">
+                            {product.description}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -248,20 +276,30 @@ const Products = () => {
                           product.stock <= product.minStock
                             ? "text-state-error"
                             : product.stock <= product.minStock * 2
-                              ? "text-state-warning"
-                              : "text-state-success"
+                            ? "text-state-warning"
+                            : "text-state-success"
                         }`}
                       >
                         {product.stock} unidades
                       </div>
-                      {product.stock <= product.minStock && <div className="text-xs text-state-error">Stock bajo</div>}
+                      {product.stock <= product.minStock && (
+                        <div className="text-xs text-state-error">
+                          Stock bajo
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-6">
                         <div className="flex items-center">
                           <button
                             onClick={() =>
-                              handleQuantityChange(product.id, Math.max(1, (quantityInputs[product.id] || 1) - 1))
+                              handleQuantityChange(
+                                product.id,
+                                Math.max(
+                                  1,
+                                  (quantityInputs[product.id] || 1) - 1
+                                )
+                              )
                             }
                             className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
                             aria-label="Disminuir cantidad"
@@ -272,12 +310,22 @@ const Products = () => {
                             type="number"
                             min="1"
                             value={quantityInputs[product.id] || 1}
-                            onChange={(e) => handleQuantityChange(product.id, Number.parseInt(e.target.value) || 1)}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                product.id,
+                                Number.parseInt(e.target.value) || 1
+                              )
+                            }
                             className="w-16 h-8 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
                             style={{ textAlign: "center" }}
                           />
                           <button
-                            onClick={() => handleQuantityChange(product.id, (quantityInputs[product.id] || 1) + 1)}
+                            onClick={() =>
+                              handleQuantityChange(
+                                product.id,
+                                (quantityInputs[product.id] || 1) + 1
+                              )
+                            }
                             className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
                             aria-label="Aumentar cantidad"
                           >
@@ -288,7 +336,12 @@ const Products = () => {
                         <div className="flex items-center space-x-4">
                           <Tooltip content="Añadir al carrito" position="top">
                             <button
-                              onClick={() => handleAddToCart(product, quantityInputs[product.id] || 1)}
+                              onClick={() =>
+                                handleAddToCart(
+                                  product,
+                                  quantityInputs[product.id] || 1
+                                )
+                              }
                               className="text-primary-lighter hover:bg-primary-lighter hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
                               disabled={product.stock <= 0}
                             >
@@ -302,7 +355,10 @@ const Products = () => {
                               className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 group"
                             >
                               <div className="flex items-center">
-                                <FaArrowUp size={13} className="text-state-success group-hover:text-neutral-white" />
+                                <FaArrowUp
+                                  size={13}
+                                  className="text-state-success group-hover:text-neutral-white"
+                                />
                                 <FaArrowDown
                                   size={13}
                                   className="text-state-error group-hover:text-neutral-white ml-0"
@@ -340,7 +396,9 @@ const Products = () => {
       ) : (
         <div className="bg-neutral-white rounded-lg shadow-md p-8 text-center">
           <FaBoxes className="mx-auto text-neutral-medium text-5xl mb-4" />
-          <h3 className="text-lg font-medium text-neutral-dark mb-1">No se encontraron productos</h3>
+          <h3 className="text-lg font-medium text-neutral-dark mb-1">
+            No se encontraron productos
+          </h3>
           <p className="text-neutral-medium">
             {searchTerm || selectedCategory !== "all"
               ? "Intenta ajustar los filtros de búsqueda"
@@ -354,8 +412,8 @@ const Products = () => {
           <ProductForm
             product={selectedProduct || undefined}
             onClose={() => {
-              setShowProductForm(false)
-              setSelectedProduct(null)
+              setShowProductForm(false);
+              setSelectedProduct(null);
             }}
             isVisible={showProductForm}
           />
@@ -363,7 +421,9 @@ const Products = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showCategoriesList && <CategoriesList onClose={() => setShowCategoriesList(false)} />}
+        {showCategoriesList && (
+          <CategoriesList onClose={() => setShowCategoriesList(false)} />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -380,9 +440,12 @@ const Products = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-              <h3 className="text-lg font-medium text-neutral-dark mb-3">Confirmar eliminación</h3>
+              <h3 className="text-lg font-medium text-neutral-dark mb-3">
+                Confirmar eliminación
+              </h3>
               <p className="text-neutral-medium mb-6">
-                ¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.
+                ¿Estás seguro de que deseas eliminar este producto? Esta acción
+                no se puede deshacer.
               </p>
               <div className="flex justify-end space-x-3">
                 <button
@@ -408,15 +471,15 @@ const Products = () => {
           <StockManagementForm
             product={selectedProduct}
             onClose={() => {
-              setShowStockManagementForm(false)
-              setSelectedProduct(null)
+              setShowStockManagementForm(false);
+              setSelectedProduct(null);
             }}
             isVisible={showStockManagementForm}
           />
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default Products
+export default Products;
