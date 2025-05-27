@@ -68,6 +68,20 @@ export const authAPI = {
     return handleResponse(response);
   },
 
+  // Actualizar perfil del usuario actual
+  updateProfile: async (profileData: {
+    name: string;
+    email: string;
+    section: string;
+  }) => {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: "PUT",
+      headers: createAuthHeaders(),
+      body: JSON.stringify(profileData),
+    });
+    return handleResponse(response);
+  },
+
   // Obtener información del usuario actual
   getMe: async () => {
     console.log("🔍 API: Verificando usuario actual...");

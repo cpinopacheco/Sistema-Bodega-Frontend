@@ -30,7 +30,12 @@ interface AuthContextType {
     currentPassword: string,
     newPassword: string
   ) => Promise<boolean>;
-  updateCurrentUser: (updatedUser: User) => void; // ← Nueva función
+  updateProfile: (profileData: {
+    name: string;
+    email: string;
+    section: string;
+  }) => Promise<boolean>;
+  updateCurrentUser: (updatedUser: User) => void;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -78,31 +83,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
 
-      // COMENTAMOS LA VERIFICACIÓN DE DATOS MOCK PARA FORZAR CONEXIÓN AL BACKEND
-      // if (employeeCode === "123456a" && password === "password") {
-      //   console.log("⚠️ USANDO DATOS MOCK - NO CONECTANDO AL BACKEND")
-      //
-      //   // Simular respuesta del backend
-      //   const mockUser = {
-      //     id: 1,
-      //     name: "Usuario Demo",
-      //     email: "demo@cenpecar.com",
-      //     employeeCode: "123456a",
-      //     role: "admin" as const,
-      //     section: "Administración",
-      //   }
-      //
-      //   const mockToken = "mock-jwt-token-12345"
-      //
-      //   // Guardar token mock
-      //   localStorage.setItem("authToken", mockToken)
-      //   setUser(mockUser)
-      //
-      //   toast.success("Inicio de sesión exitoso (MODO DEMO)")
-      //   navigate("/dashboard")
-      //   return
-      // }
-
       console.log("🌐 Intentando conectar con el backend...");
       const response = await authAPI.login(employeeCode, password);
       console.log("✅ Respuesta del backend recibida:", response);
@@ -145,6 +125,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Función para actualizar perfil
+  const updateProfile = async (profileData: {
+    name: string;
+    email: string;
+    section: string;
+  }): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response = await authAPI.updateProfile(profileData);
+
+      // Actualizar el usuario en el estado local
+      setUser(response.user);
+
+      toast.success("Perfil actualizado correctamente");
+      return true;
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      toast.error(error.message || "Error al actualizar el perfil");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Función para cerrar sesión
   const logout = () => {
     setUser(null);
@@ -167,7 +172,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         changePassword,
-        updateCurrentUser, // ← Agregar aquí
+        updateProfile,
+        updateCurrentUser,
         isAuthenticated,
         loading,
       }}

@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useRef } from "react"
-import { Link } from "react-router-dom"
-import { AnimatePresence, motion } from "framer-motion"
-import { FaUser, FaSignOutAlt, FaKey } from "react-icons/fa"
-import { HiOutlineShoppingCart } from "react-icons/hi"
-import { useAuth } from "../../context/AuthContext"
-import { useOnClickOutside } from "../../hooks/useOnClickOutside"
-import { useWithdrawal } from "../../context/WithdrawalContext"
+import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaUser, FaSignOutAlt, FaKey, FaUserEdit } from "react-icons/fa";
+import { HiOutlineShoppingCart } from "react-icons/hi";
+import { useAuth } from "../../context/AuthContext";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
+import { useWithdrawal } from "../../context/WithdrawalContext";
 
 interface NavbarProps {
-  toggleSidebar: () => void
-  sidebarOpen: boolean
+  toggleSidebar: () => void;
+  sidebarOpen: boolean;
 }
 
 const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
-  const { user, logout } = useAuth()
-  const { cartTotalItems } = useWithdrawal()
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const userMenuRef = useRef<HTMLDivElement>(null)
+  const { user, logout } = useAuth();
+  const { cartTotalItems } = useWithdrawal();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(userMenuRef, () => setUserMenuOpen(false))
+  useOnClickOutside(userMenuRef, () => setUserMenuOpen(false));
 
   return (
     <header className="bg-neutral-white border-b border-neutral-light shadow-sm">
@@ -29,7 +29,9 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
           <motion.button
             onClick={toggleSidebar}
             className="mr-4 text-primary hover:text-primary-light focus:outline-none w-8 h-8 flex items-center justify-center relative"
-            aria-label={sidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
+            aria-label={
+              sidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"
+            }
             whileTap={{ scale: 0.9 }}
           >
             <motion.div
@@ -80,10 +82,6 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
             )}
           </Link>
 
-          {/* <button className="p-2 text-primary hover:text-primary-light" aria-label="Notificaciones">
-            <FaBell size={20} />
-          </button> */}
-
           <div className="relative" ref={userMenuRef}>
             <button
               className="flex items-center space-x-2 focus:outline-none"
@@ -94,7 +92,9 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
               <div className="w-10 h-10 rounded-full bg-primary-lightest flex items-center justify-center">
                 <FaUser className="text-primary" />
               </div>
-              <span className="hidden md:inline text-sm font-medium text-neutral-dark">{user?.name}</span>
+              <span className="hidden md:inline text-sm font-medium text-neutral-dark">
+                {user?.name}
+              </span>
             </button>
 
             <AnimatePresence>
@@ -107,13 +107,31 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
                   className="absolute right-0 mt-2 w-48 bg-neutral-white rounded-md shadow-lg py-1 z-20 border border-neutral-light"
                 >
                   <div className="px-4 py-2 border-b border-neutral-light">
-                    <p className="text-sm font-medium text-neutral-dark">{user?.name}</p>
+                    <p className="text-sm font-medium text-neutral-dark">
+                      {user?.name}
+                    </p>
                     <p className="text-xs text-neutral-medium">{user?.email}</p>
-                    <p className="text-xs text-neutral-medium">Sección: {user?.section}</p>
+                    <p className="text-xs text-neutral-medium">
+                      Sección: {user?.section}
+                    </p>
                   </div>
-                  <Link to="/change-password" className="flex items-center px-4 py-2 hover:bg-gray-100 text-gray-700">
+
+                  <Link
+                    to="/user-profile"
+                    className="flex items-center px-4 py-2 hover:bg-gray-100 text-gray-700"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <FaUserEdit className="mr-2" /> Mi Perfil
+                  </Link>
+
+                  <Link
+                    to="/change-password"
+                    className="flex items-center px-4 py-2 hover:bg-gray-100 text-gray-700"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
                     <FaKey className="mr-2" /> Cambiar Contraseña
                   </Link>
+
                   <button
                     onClick={logout}
                     className="w-full px-4 py-2 text-sm text-left text-neutral-dark hover:bg-neutral-light flex items-center"
@@ -128,7 +146,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

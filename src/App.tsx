@@ -18,6 +18,7 @@ import LowStock from "./pages/LowStock";
 import Statistics from "./pages/Statistics";
 import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
+import UserProfile from "./pages/UserProfile";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -88,6 +89,7 @@ function App() {
                       path="user-management"
                       element={<UserManagement />}
                     />
+                    <Route path="user-profile" element={<UserProfile />} />
                   </Route>
                 </Routes>
               </WithdrawalProvider>
