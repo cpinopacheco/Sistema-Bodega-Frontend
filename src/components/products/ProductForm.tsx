@@ -1,136 +1,158 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { FaPlus, FaSave, FaTimes } from "react-icons/fa"
-import { type Product, useProducts } from "../../context/ProductContext"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { type Product, useProducts } from "../../context/ProductContext";
 
 interface ProductFormProps {
-  product?: Product
-  onClose: () => void
-  isVisible: boolean
+  product?: Product;
+  onClose: () => void;
+  isVisible: boolean;
 }
 
 const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
-  const { addProduct, updateProduct, categories } = useProducts()
+  const { addProduct, updateProduct, categories } = useProducts();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     category: "",
+    categoryId: 0,
     stock: 0,
     minStock: 0,
-  })
+  });
   const [errors, setErrors] = useState({
     name: "",
     category: "",
     stock: "",
     minStock: "",
-  })
+  });
 
   useEffect(() => {
     if (product) {
+      // Encontrar la categoría por nombre para obtener el ID
+      const category = categories.find((cat) => cat.name === product.category);
       setFormData({
         name: product.name,
         description: product.description,
         category: product.category,
+        categoryId: category?.id || 0,
         stock: product.stock,
         minStock: product.minStock,
-      })
+      });
     } else {
       // Set default category if available
       if (categories.length > 0) {
         setFormData((prev) => ({
           ...prev,
           category: categories[0].name,
-        }))
+          categoryId: categories[0].id,
+        }));
       }
     }
-  }, [product, categories])
+  }, [product, categories]);
 
   const validateForm = () => {
-    let isValid = true
+    let isValid = true;
     const newErrors = {
       name: "",
       category: "",
       stock: "",
       minStock: "",
-    }
+    };
 
     if (!formData.name.trim()) {
-      newErrors.name = "El nombre es obligatorio"
-      isValid = false
+      newErrors.name = "El nombre es obligatorio";
+      isValid = false;
     }
 
-    if (!formData.category) {
-      newErrors.category = "La categoría es obligatoria"
-      isValid = false
+    if (!formData.categoryId) {
+      newErrors.category = "La categoría es obligatoria";
+      isValid = false;
     }
 
     if (formData.stock < 0) {
-      newErrors.stock = "El stock no puede ser negativo"
-      isValid = false
+      newErrors.stock = "El stock no puede ser negativo";
+      isValid = false;
     }
 
     if (formData.minStock < 0) {
-      newErrors.minStock = "El stock mínimo no puede ser negativo"
-      isValid = false
+      newErrors.minStock = "El stock mínimo no puede ser negativo";
+      isValid = false;
     }
 
-    setErrors(newErrors)
-    return isValid
-  }
+    setErrors(newErrors);
+    return isValid;
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "stock" || name === "minStock" ? Number.parseFloat(value) || 0 : value,
-    }))
-  }
+    if (name === "category") {
+      // Encontrar la categoría seleccionada para obtener su ID
+      const selectedCategory = categories.find((cat) => cat.name === value);
+      setFormData((prev) => ({
+        ...prev,
+        category: value,
+        categoryId: selectedCategory?.id || 0,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]:
+          name === "stock" || name === "minStock"
+            ? Number.parseFloat(value) || 0
+            : value,
+      }));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
     if (product) {
-      updateProduct(product.id, formData)
+      updateProduct(product.id, formData);
     } else {
-      addProduct(formData)
+      addProduct(formData);
     }
 
-    onClose()
-  }
+    onClose();
+  };
 
   // Manejar cierre con tecla Escape
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isVisible) {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isVisible) {
-      window.addEventListener("keydown", handleEscapeKey)
+      window.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
-      window.removeEventListener("keydown", handleEscapeKey)
-    }
-  }, [isVisible, onClose])
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isVisible, onClose]);
 
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
     exit: { opacity: 0, y: 50, transition: { duration: 0.2 } },
-  }
+  };
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   return (
     <motion.div
@@ -142,7 +164,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
       onClick={(e) => {
         // Cerrar al hacer clic en el overlay
         if (e.target === e.currentTarget) {
-          onClose()
+          onClose();
         }
       }}
     >
@@ -155,7 +177,9 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b border-neutral-light">
-          <h2 className="text-xl font-semibold text-primary">{product ? "Editar Producto" : "Nuevo Producto"}</h2>
+          <h2 className="text-xl font-semibold text-primary">
+            {product ? "Editar Producto" : "Nuevo Producto"}
+          </h2>
           <button
             onClick={onClose}
             className="text-neutral-medium hover:text-neutral-dark focus:outline-none"
@@ -168,7 +192,10 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
         <form onSubmit={handleSubmit} className="p-4">
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-neutral-dark">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-neutral-dark"
+              >
                 Nombre <span className="text-state-error">*</span>
               </label>
               <input
@@ -182,11 +209,16 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
                 }`}
                 required
               />
-              {errors.name && <p className="mt-1 text-sm text-state-error">{errors.name}</p>}
+              {errors.name && (
+                <p className="mt-1 text-sm text-state-error">{errors.name}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-neutral-dark">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-neutral-dark"
+              >
                 Descripción
               </label>
               <textarea
@@ -200,7 +232,10 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-neutral-dark">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-neutral-dark"
+              >
                 Categoría <span className="text-state-error">*</span>
               </label>
               <select
@@ -220,12 +255,19 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
                   </option>
                 ))}
               </select>
-              {errors.category && <p className="mt-1 text-sm text-state-error">{errors.category}</p>}
+              {errors.category && (
+                <p className="mt-1 text-sm text-state-error">
+                  {errors.category}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="stock" className="block text-sm font-medium text-neutral-dark">
+                <label
+                  htmlFor="stock"
+                  className="block text-sm font-medium text-neutral-dark"
+                >
                   Stock <span className="text-state-error">*</span>
                 </label>
                 <input
@@ -240,11 +282,18 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
                   }`}
                   required
                 />
-                {errors.stock && <p className="mt-1 text-sm text-state-error">{errors.stock}</p>}
+                {errors.stock && (
+                  <p className="mt-1 text-sm text-state-error">
+                    {errors.stock}
+                  </p>
+                )}
               </div>
 
               <div>
-                <label htmlFor="minStock" className="block text-sm font-medium text-neutral-dark">
+                <label
+                  htmlFor="minStock"
+                  className="block text-sm font-medium text-neutral-dark"
+                >
                   Stock Mínimo <span className="text-state-error">*</span>
                 </label>
                 <input
@@ -259,7 +308,11 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
                   }`}
                   required
                 />
-                {errors.minStock && <p className="mt-1 text-sm text-state-error">{errors.minStock}</p>}
+                {errors.minStock && (
+                  <p className="mt-1 text-sm text-state-error">
+                    {errors.minStock}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -293,7 +346,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
         </form>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ProductForm
+export default ProductForm;
