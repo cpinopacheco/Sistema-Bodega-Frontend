@@ -1,10 +1,21 @@
-"use client"
+"use client";
 
-import { NavLink } from "react-router-dom"
-import { motion } from "framer-motion"
-import { FaHome, FaBoxes, FaClipboardList, FaFileAlt, FaExclamationTriangle, FaChartBar } from "react-icons/fa"
+import { NavLink } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  FaHome,
+  FaBoxes,
+  FaClipboardList,
+  FaFileAlt,
+  FaExclamationTriangle,
+  FaChartBar,
+  FaUsers,
+} from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = () => {
+  const { user } = useAuth();
+
   const navLinks = [
     { to: "/dashboard", icon: <FaHome />, label: "Dashboard" },
     { to: "/products", icon: <FaBoxes />, label: "Productos" },
@@ -12,12 +23,25 @@ const Sidebar = () => {
     { to: "/reports", icon: <FaFileAlt />, label: "Reportes" },
     { to: "/low-stock", icon: <FaExclamationTriangle />, label: "Stock Bajo" },
     { to: "/statistics", icon: <FaChartBar />, label: "Estadísticas" },
-  ]
+  ];
+
+  // Agregar gestión de usuarios solo para admins
+  if (user?.role === "admin") {
+    navLinks.push({
+      to: "/user-management",
+      icon: <FaUsers />,
+      label: "Gestión de Usuarios",
+    });
+  }
 
   return (
     <div className="w-full h-full bg-primary text-neutral-white flex flex-col">
       <div className="p-4 border-b border-primary-light flex justify-center items-center">
-        <img src="/cenpecar-logo.png" alt="CENPECAR Logo" style={{ width: "75px", height: "auto" }} />
+        <img
+          src="/cenpecar-logo.png"
+          alt="CENPECAR Logo"
+          style={{ width: "75px", height: "auto" }}
+        />
       </div>
       <nav className="mt-6 flex-1">
         <ul>
@@ -27,7 +51,9 @@ const Sidebar = () => {
                 to={link.to}
                 className={({ isActive }) =>
                   `flex items-center p-2 rounded-md transition-all ${
-                    isActive ? "bg-primary-lighter text-neutral-white" : "text-neutral-light hover:bg-primary-light"
+                    isActive
+                      ? "bg-primary-lighter text-neutral-white"
+                      : "text-neutral-light hover:bg-primary-light"
                   }`
                 }
               >
@@ -52,7 +78,7 @@ const Sidebar = () => {
         </ul>
       </nav>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

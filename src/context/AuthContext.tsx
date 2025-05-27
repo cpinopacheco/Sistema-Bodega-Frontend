@@ -30,6 +30,7 @@ interface AuthContextType {
     currentPassword: string,
     newPassword: string
   ) => Promise<boolean>;
+  updateCurrentUser: (updatedUser: User) => void; // ← Nueva función
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -152,11 +153,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/login");
   };
 
+  // Función para actualizar el usuario actual
+  const updateCurrentUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, changePassword, isAuthenticated, loading }}
+      value={{
+        user,
+        login,
+        logout,
+        changePassword,
+        updateCurrentUser, // ← Agregar aquí
+        isAuthenticated,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

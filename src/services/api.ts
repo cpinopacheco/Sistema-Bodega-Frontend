@@ -88,6 +88,83 @@ export const authAPI = {
 };
 
 // =====================================================
+// USUARIOS API (NUEVO)
+// =====================================================
+
+export const usersAPI = {
+  // Obtener todos los usuarios (solo admin)
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Obtener un usuario específico (solo admin)
+  getById: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Crear nuevo usuario (solo admin)
+  create: async (userData: {
+    name: string;
+    email: string;
+    employeeCode: string;
+    password: string;
+    role: "admin" | "user";
+    section: string;
+  }) => {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: "POST",
+      headers: createAuthHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(response);
+  },
+
+  // Actualizar usuario (solo admin)
+  update: async (
+    id: number,
+    userData: {
+      name: string;
+      email: string;
+      employeeCode: string;
+      role: "admin" | "user";
+      section: string;
+      isActive: boolean;
+    }
+  ) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: "PUT",
+      headers: createAuthHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(response);
+  },
+
+  // Eliminar usuario (solo admin)
+  delete: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: "DELETE",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Activar/desactivar usuario (solo admin)
+  toggleStatus: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}/toggle-status`, {
+      method: "PATCH",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
+// =====================================================
 // CATEGORÍAS API
 // =====================================================
 

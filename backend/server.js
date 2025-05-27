@@ -8,6 +8,7 @@ console.log("🔄 Importando rutas...")
 const categoriesRoutes = require("./src/routes/categories")
 const productsRoutes = require("./src/routes/products")
 const withdrawalsRoutes = require("./src/routes/withdrawals")
+const usersRoutes = require("./src/routes/users")
 const { router: authRoutes } = require("./src/routes/auth")
 console.log("✅ Rutas importadas correctamente")
 
@@ -32,6 +33,8 @@ console.log("🔐 Ruta /api/auth registrada")
 app.use("/api/categories", categoriesRoutes)
 app.use("/api/products", productsRoutes)
 app.use("/api/withdrawals", withdrawalsRoutes)
+app.use("/api/users", usersRoutes)
+console.log("👥 Ruta /api/users registrada")
 console.log("✅ Todas las rutas registradas")
 
 // Ruta de prueba
