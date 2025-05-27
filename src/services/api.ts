@@ -1,6 +1,13 @@
 // Configuración base para las peticiones HTTP al backend
 const API_BASE_URL = "http://localhost:3001/api";
 
+console.log("🔧 API configurada para:", API_BASE_URL);
+
+// Función helper para obtener el token de autenticación
+const getAuthToken = () => {
+  return localStorage.getItem("authToken");
+};
+
 // Función helper para manejar respuestas HTTP
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
@@ -12,6 +19,74 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
+// Función helper para crear headers con autenticación
+const createAuthHeaders = () => {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
+// =====================================================
+// AUTENTICACIÓN API
+// =====================================================
+
+export const authAPI = {
+  // Iniciar sesión
+  login: async (employeeCode: string, password: string) => {
+    console.log(
+      "🌐 API: Enviando petición de login a:",
+      `${API_BASE_URL}/auth/login`
+    );
+    console.log("📤 Datos enviados:", { employeeCode, password: "***" });
+
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ employeeCode, password }),
+    });
+
+    console.log("📥 Respuesta recibida - Status:", response.status);
+    return handleResponse(response);
+  },
+
+  // Cambiar contraseña
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+      method: "POST",
+      headers: createAuthHeaders(),
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    return handleResponse(response);
+  },
+
+  // Obtener información del usuario actual
+  getMe: async () => {
+    console.log("🔍 API: Verificando usuario actual...");
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Verificar token
+  verifyToken: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+      method: "POST",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
 // =====================================================
 // CATEGORÍAS API
 // =====================================================
@@ -19,7 +94,9 @@ const handleResponse = async (response: Response) => {
 export const categoriesAPI = {
   // Obtener todas las categorías
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/categories`);
+    const response = await fetch(`${API_BASE_URL}/categories`, {
+      headers: createAuthHeaders(),
+    });
     return handleResponse(response);
   },
 
@@ -27,9 +104,7 @@ export const categoriesAPI = {
   create: async (name: string) => {
     const response = await fetch(`${API_BASE_URL}/categories`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify({ name }),
     });
     return handleResponse(response);
@@ -39,9 +114,7 @@ export const categoriesAPI = {
   update: async (id: number, name: string) => {
     const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify({ name }),
     });
     return handleResponse(response);
@@ -51,6 +124,7 @@ export const categoriesAPI = {
   delete: async (id: number) => {
     const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
       method: "DELETE",
+      headers: createAuthHeaders(),
     });
     return handleResponse(response);
   },
@@ -63,13 +137,17 @@ export const categoriesAPI = {
 export const productsAPI = {
   // Obtener todos los productos
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/products`);
+    const response = await fetch(`${API_BASE_URL}/products`, {
+      headers: createAuthHeaders(),
+    });
     return handleResponse(response);
   },
 
   // Obtener un producto específico
   getById: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      headers: createAuthHeaders(),
+    });
     return handleResponse(response);
   },
 
@@ -83,9 +161,7 @@ export const productsAPI = {
   }) => {
     const response = await fetch(`${API_BASE_URL}/products`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify(productData),
     });
     return handleResponse(response);
@@ -104,9 +180,7 @@ export const productsAPI = {
   ) => {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify(productData),
     });
     return handleResponse(response);
@@ -116,9 +190,7 @@ export const productsAPI = {
   updateStock: async (id: number, quantity: number) => {
     const response = await fetch(`${API_BASE_URL}/products/${id}/stock`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify({ quantity }),
     });
     return handleResponse(response);
@@ -128,6 +200,7 @@ export const productsAPI = {
   delete: async (id: number) => {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: "DELETE",
+      headers: createAuthHeaders(),
     });
     return handleResponse(response);
   },
@@ -140,13 +213,17 @@ export const productsAPI = {
 export const withdrawalsAPI = {
   // Obtener todos los retiros
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals`);
+    const response = await fetch(`${API_BASE_URL}/withdrawals`, {
+      headers: createAuthHeaders(),
+    });
     return handleResponse(response);
   },
 
   // Obtener un retiro específico
   getById: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals/${id}`);
+    const response = await fetch(`${API_BASE_URL}/withdrawals/${id}`, {
+      headers: createAuthHeaders(),
+    });
     return handleResponse(response);
   },
 
@@ -166,9 +243,7 @@ export const withdrawalsAPI = {
   }) => {
     const response = await fetch(`${API_BASE_URL}/withdrawals`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createAuthHeaders(),
       body: JSON.stringify(withdrawalData),
     });
     return handleResponse(response);
@@ -178,6 +253,7 @@ export const withdrawalsAPI = {
   delete: async (id: number) => {
     const response = await fetch(`${API_BASE_URL}/withdrawals/${id}`, {
       method: "DELETE",
+      headers: createAuthHeaders(),
     });
     return handleResponse(response);
   },

@@ -1,8 +1,15 @@
 "use client";
 
-import { createContext, useState, useContext, type ReactNode } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  type ReactNode,
+  useEffect,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { authAPI } from "../services/api";
 
 // Define los tipos para los usuarios
 interface User {
@@ -24,49 +31,95 @@ interface AuthContextType {
     newPassword: string
   ) => Promise<boolean>;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 // Crear el contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Usuario de muestra para desarrollo
-const sampleUser: User = {
-  id: 1,
-  name: "Admin Usuario",
-  email: "admin@example.com",
-  employeeCode: "123456a", // Código de funcionario: 6 dígitos + 1 letra minúscula
-  role: "admin",
-  section: "IT",
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Verificar si hay un token válido al cargar la aplicación
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log("🔍 Verificando token existente...");
+        const userData = await authAPI.getMe();
+        setUser(userData);
+        console.log("✅ Token válido, usuario autenticado");
+      } catch (error) {
+        // Token inválido o expirado
+        localStorage.removeItem("authToken");
+        console.error("❌ Token inválido:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   // Función para iniciar sesión
   const login = async (employeeCode: string, password: string) => {
+    console.log("🚀 AuthContext: Iniciando proceso de login...");
+    console.log("👤 Código de empleado:", employeeCode);
+
     try {
-      // Simulación de autenticación
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setLoading(true);
 
-      // Obtener la contraseña almacenada o usar la predeterminada
-      const storedPassword = localStorage.getItem("userPassword") || "password";
+      // COMENTAMOS LA VERIFICACIÓN DE DATOS MOCK PARA FORZAR CONEXIÓN AL BACKEND
+      // if (employeeCode === "123456a" && password === "password") {
+      //   console.log("⚠️ USANDO DATOS MOCK - NO CONECTANDO AL BACKEND")
+      //
+      //   // Simular respuesta del backend
+      //   const mockUser = {
+      //     id: 1,
+      //     name: "Usuario Demo",
+      //     email: "demo@cenpecar.com",
+      //     employeeCode: "123456a",
+      //     role: "admin" as const,
+      //     section: "Administración",
+      //   }
+      //
+      //   const mockToken = "mock-jwt-token-12345"
+      //
+      //   // Guardar token mock
+      //   localStorage.setItem("authToken", mockToken)
+      //   setUser(mockUser)
+      //
+      //   toast.success("Inicio de sesión exitoso (MODO DEMO)")
+      //   navigate("/dashboard")
+      //   return
+      // }
 
-      // En una aplicación real, aquí se verificarían las credenciales con el backend
-      if (employeeCode === "123456a" && password === storedPassword) {
-        setUser(sampleUser);
-        localStorage.setItem("user", JSON.stringify(sampleUser));
-        toast.success("Inicio de sesión exitoso");
-        navigate("/dashboard");
-      } else {
-        toast.error("Credenciales incorrectas");
-      }
-    } catch (error) {
-      toast.error("Error al iniciar sesión");
-      console.error("Login error:", error);
+      console.log("🌐 Intentando conectar con el backend...");
+      const response = await authAPI.login(employeeCode, password);
+      console.log("✅ Respuesta del backend recibida:", response);
+
+      // Guardar token en localStorage
+      localStorage.setItem("authToken", response.token);
+
+      // Establecer usuario en el estado
+      setUser(response.user);
+
+      toast.success("Inicio de sesión exitoso");
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("❌ Login error:", error);
+      toast.error(error.message || "Error al iniciar sesión");
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,33 +129,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     newPassword: string
   ): Promise<boolean> => {
     try {
-      // Simulación de tiempo de procesamiento
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      setLoading(true);
 
-      // Obtener la contraseña almacenada o usar la predeterminada
-      const storedPassword = localStorage.getItem("userPassword") || "password";
+      await authAPI.changePassword(currentPassword, newPassword);
 
-      // Verificar que la contraseña actual sea correcta
-      if (currentPassword !== storedPassword) {
-        toast.error("La contraseña actual es incorrecta");
-        return false;
-      }
-
-      // Almacenar la nueva contraseña
-      localStorage.setItem("userPassword", newPassword);
       toast.success("Contraseña actualizada correctamente");
       return true;
-    } catch (error) {
-      toast.error("Error al cambiar la contraseña");
+    } catch (error: any) {
       console.error("Change password error:", error);
+      toast.error(error.message || "Error al cambiar la contraseña");
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Función para cerrar sesión
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
     toast.success("Sesión cerrada");
     navigate("/login");
   };
@@ -111,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, changePassword, isAuthenticated }}
+      value={{ user, login, logout, changePassword, isAuthenticated, loading }}
     >
       {children}
     </AuthContext.Provider>
