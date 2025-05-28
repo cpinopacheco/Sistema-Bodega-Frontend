@@ -142,6 +142,7 @@ const UserManagement = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className="bg-neutral-white rounded-lg shadow-md p-6"
         >
           <div className="flex items-center">
@@ -160,7 +161,7 @@ const UserManagement = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.2, ease: "easeOut" }}
           className="bg-neutral-white rounded-lg shadow-md p-6"
         >
           <div className="flex items-center">
@@ -179,7 +180,7 @@ const UserManagement = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
           className="bg-neutral-white rounded-lg shadow-md p-6"
         >
           <div className="flex items-center">
@@ -245,6 +246,7 @@ const UserManagement = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="bg-neutral-white rounded-lg shadow-md overflow-hidden"
         >
           <div className="overflow-x-auto">
@@ -435,12 +437,14 @@ const UserManagement = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 p-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
               <h3 className="text-lg font-medium text-neutral-dark mb-3">

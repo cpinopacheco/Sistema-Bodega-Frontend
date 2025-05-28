@@ -168,9 +168,13 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
   }, [isVisible, onClose]);
 
   const formVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: 50, transition: { duration: 0.2 } },
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" },
+    },
+    exit: { opacity: 0, y: 30, transition: { duration: 0.3, ease: "easeIn" } },
   };
 
   if (!isVisible) return null;
@@ -182,6 +186,7 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
