@@ -429,10 +429,11 @@ const Products = () => {
       <AnimatePresence>
         {confirmDelete !== null && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0, marginTop: 0 }}
+            animate={{ opacity: 1, marginTop: 0 }}
+            exit={{ opacity: 0, marginTop: 0 }}
+            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
+            style={{ marginTop: "0px !important" }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

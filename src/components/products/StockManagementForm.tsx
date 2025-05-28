@@ -1,75 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { FaTimes, FaArrowUp, FaArrowDown } from "react-icons/fa"
-import { useProducts, type Product } from "../../context/ProductContext"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaTimes, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { useProducts, type Product } from "../../context/ProductContext";
 
 interface StockManagementFormProps {
-  product: Product
-  onClose: () => void
-  isVisible: boolean
+  product: Product;
+  onClose: () => void;
+  isVisible: boolean;
 }
 
-const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFormProps) => {
-  const { updateStock } = useProducts()
-  const [quantity, setQuantity] = useState<number>(1)
-  const [operation, setOperation] = useState<"add" | "subtract">("add")
-  const [error, setError] = useState("")
+const StockManagementForm = ({
+  product,
+  onClose,
+  isVisible,
+}: StockManagementFormProps) => {
+  const { updateStock } = useProducts();
+  const [quantity, setQuantity] = useState<number>(1);
+  const [operation, setOperation] = useState<"add" | "subtract">("add");
+  const [error, setError] = useState("");
 
   // Manejar cierre con tecla Escape
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isVisible) {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isVisible) {
-      window.addEventListener("keydown", handleEscapeKey)
+      window.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
-      window.removeEventListener("keydown", handleEscapeKey)
-    }
-  }, [isVisible, onClose])
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isVisible, onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (quantity <= 0) {
-      setError("La cantidad debe ser mayor a 0")
-      return
+      setError("La cantidad debe ser mayor a 0");
+      return;
     }
 
     if (operation === "subtract" && quantity > product.stock) {
-      setError(`No puede retirar más de ${product.stock} unidades disponibles`)
-      return
+      setError(`No puede retirar más de ${product.stock} unidades disponibles`);
+      return;
     }
 
     // Actualizar el stock sumando o restando la cantidad ingresada
-    const changeAmount = operation === "add" ? quantity : -quantity
-    updateStock(product.id, changeAmount)
-    onClose()
-  }
+    const changeAmount = operation === "add" ? quantity : -quantity;
+    updateStock(product.id, changeAmount);
+    onClose();
+  };
 
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
     exit: { opacity: 0, y: 50, transition: { duration: 0.2 } },
-  }
+  };
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   return (
     <div
-      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 m-0 p-0"
+      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
+      style={{ marginTop: "0px !important" }}
       onClick={(e) => {
         // Cerrar al hacer clic en el overlay
         if (e.target === e.currentTarget) {
-          onClose()
+          onClose();
         }
       }}
     >
@@ -82,7 +87,9 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b border-neutral-light">
-          <h2 className="text-xl font-semibold text-primary">Gestionar Stock</h2>
+          <h2 className="text-xl font-semibold text-primary">
+            Gestionar Stock
+          </h2>
           <button
             onClick={onClose}
             className="text-neutral-medium hover:text-neutral-dark focus:outline-none"
@@ -96,22 +103,36 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
           <div className="space-y-4">
             <div className="bg-primary-lightest p-4 rounded-md">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-primary">Producto:</span>
-                <span className="text-sm text-neutral-dark">{product.name}</span>
+                <span className="text-sm font-medium text-primary">
+                  Producto:
+                </span>
+                <span className="text-sm text-neutral-dark">
+                  {product.name}
+                </span>
               </div>
               <div className="flex justify-between items-center mt-2">
-                <span className="text-sm font-medium text-primary">Stock Actual:</span>
-                <span className="text-sm text-neutral-dark">{product.stock} unidades</span>
+                <span className="text-sm font-medium text-primary">
+                  Stock Actual:
+                </span>
+                <span className="text-sm text-neutral-dark">
+                  {product.stock} unidades
+                </span>
               </div>
               <div className="flex justify-between items-center mt-2">
-                <span className="text-sm font-medium text-primary">Stock Mínimo:</span>
-                <span className="text-sm text-neutral-dark">{product.minStock} unidades</span>
+                <span className="text-sm font-medium text-primary">
+                  Stock Mínimo:
+                </span>
+                <span className="text-sm text-neutral-dark">
+                  {product.minStock} unidades
+                </span>
               </div>
             </div>
 
             <div className="border border-neutral-light rounded-md p-4">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-neutral-dark mb-2">Operación</label>
+                <label className="block text-sm font-medium text-neutral-dark mb-2">
+                  Operación
+                </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center">
                     <input
@@ -122,7 +143,8 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
                       className="mr-2 text-primary focus:ring-primary"
                     />
                     <span className="flex items-center">
-                      <FaArrowUp className="text-state-success mr-1" /> Agregar stock
+                      <FaArrowUp className="text-state-success mr-1" /> Agregar
+                      stock
                     </span>
                   </label>
                   <label className="flex items-center">
@@ -134,14 +156,18 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
                       className="mr-2 text-primary focus:ring-primary"
                     />
                     <span className="flex items-center">
-                      <FaArrowDown className="text-state-error mr-1" /> Retirar stock
+                      <FaArrowDown className="text-state-error mr-1" /> Retirar
+                      stock
                     </span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="quantity" className="block text-sm font-medium text-neutral-dark">
+                <label
+                  htmlFor="quantity"
+                  className="block text-sm font-medium text-neutral-dark"
+                >
                   Cantidad <span className="text-state-error">*</span>
                 </label>
                 <input
@@ -150,8 +176,8 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
                   name="quantity"
                   value={quantity}
                   onChange={(e) => {
-                    setQuantity(Math.max(1, Number(e.target.value)))
-                    setError("")
+                    setQuantity(Math.max(1, Number(e.target.value)));
+                    setError("");
                   }}
                   min="1"
                   className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm ${
@@ -159,15 +185,22 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
                   }`}
                   required
                 />
-                {error && <p className="mt-1 text-sm text-state-error">{error}</p>}
+                {error && (
+                  <p className="mt-1 text-sm text-state-error">{error}</p>
+                )}
               </div>
             </div>
 
             <div className="bg-accent-light p-4 rounded-md">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-primary">Nuevo Stock Total:</span>
+                <span className="text-sm font-medium text-primary">
+                  Nuevo Stock Total:
+                </span>
                 <span className="text-sm font-bold text-primary">
-                  {operation === "add" ? product.stock + quantity : product.stock - quantity} unidades
+                  {operation === "add"
+                    ? product.stock + quantity
+                    : product.stock - quantity}{" "}
+                  unidades
                 </span>
               </div>
             </div>
@@ -206,7 +239,7 @@ const StockManagementForm = ({ product, onClose, isVisible }: StockManagementFor
         </form>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default StockManagementForm
+export default StockManagementForm;
