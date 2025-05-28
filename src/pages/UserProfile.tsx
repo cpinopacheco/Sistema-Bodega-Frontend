@@ -18,6 +18,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import UserAvatar from "../components/ui/UserAvatar";
+import ConfirmModal from "../components/ui/ConfirmModal";
 
 const UserProfile = () => {
   const {
@@ -39,6 +40,8 @@ const UserProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   // Inicializar el formulario con los datos del usuario
   useEffect(() => {
@@ -160,14 +163,10 @@ const UserProfile = () => {
   };
 
   const handleDeletePhoto = async () => {
-    const confirmDelete = window.confirm(
-      "¿Estás seguro de que quieres eliminar tu foto de perfil?"
-    );
-    if (!confirmDelete) return;
-
     try {
       setIsUploadingPhoto(true);
       await deleteProfilePhoto();
+      setShowDeleteModal(false);
     } catch (error) {
       // El error ya se maneja en el contexto
     } finally {
@@ -175,13 +174,20 @@ const UserProfile = () => {
     }
   };
 
+  const handleDeletePhotoClick = () => {
+    setShowDeleteModal(true);
+  };
+
   const handleCancel = () => {
     if (hasChanges) {
-      const confirmCancel = window.confirm(
-        "¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados."
-      );
-      if (!confirmCancel) return;
+      setShowCancelModal(true);
+    } else {
+      navigate(-1);
     }
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelModal(false);
     navigate(-1);
   };
 
@@ -269,7 +275,7 @@ const UserProfile = () => {
                 {user.profilePhoto && (
                   <motion.button
                     type="button"
-                    onClick={handleDeletePhoto}
+                    onClick={handleDeletePhotoClick}
                     disabled={isUploadingPhoto}
                     className="flex items-center px-3 py-2 bg-state-error text-neutral-white rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                     whileHover={{ scale: !isUploadingPhoto ? 1.02 : 1 }}
@@ -468,6 +474,30 @@ const UserProfile = () => {
           )}
         </form>
       </div>
+      {/* Modal de confirmación para eliminar foto */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeletePhoto}
+        title="Eliminar Foto de Perfil"
+        message="¿Estás seguro de que quieres eliminar tu foto de perfil? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        isLoading={isUploadingPhoto}
+      />
+      {/* Modal de confirmación para cancelar cambios */}
+      <ConfirmModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancelar Cambios"
+        message="¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados."
+        confirmText="Sí, cancelar"
+        cancelText="No, continuar editando"
+        type="warning"
+        isLoading={false}
+      />
     </motion.div>
   );
 };
