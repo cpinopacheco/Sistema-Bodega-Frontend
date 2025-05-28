@@ -19,6 +19,7 @@ interface User {
   employeeCode: string; // Código de funcionario
   role: "admin" | "user";
   section: string;
+  profilePhoto?: string | null;
 }
 
 // Define los tipos para el contexto
@@ -35,6 +36,8 @@ interface AuthContextType {
     email: string;
     section: string;
   }) => Promise<boolean>;
+  uploadProfilePhoto: (file: File) => Promise<boolean>;
+  deleteProfilePhoto: () => Promise<boolean>;
   updateCurrentUser: (updatedUser: User) => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -150,6 +153,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Función para subir foto de perfil
+  const uploadProfilePhoto = async (file: File): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response = await authAPI.uploadProfilePhoto(file);
+
+      // Actualizar el usuario en el estado local
+      setUser(response.user);
+
+      toast.success("Foto de perfil actualizada correctamente");
+      return true;
+    } catch (error: any) {
+      console.error("Upload profile photo error:", error);
+      toast.error(error.message || "Error al subir la foto de perfil");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para eliminar foto de perfil
+  const deleteProfilePhoto = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response = await authAPI.deleteProfilePhoto();
+
+      // Actualizar el usuario en el estado local
+      setUser(response.user);
+
+      toast.success("Foto de perfil eliminada correctamente");
+      return true;
+    } catch (error: any) {
+      console.error("Delete profile photo error:", error);
+      toast.error(error.message || "Error al eliminar la foto de perfil");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Función para cerrar sesión
   const logout = () => {
     setUser(null);
@@ -173,6 +218,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         changePassword,
         updateProfile,
+        uploadProfilePhoto,
+        deleteProfilePhoto,
         updateCurrentUser,
         isAuthenticated,
         loading,

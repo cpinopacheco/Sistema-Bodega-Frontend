@@ -33,6 +33,18 @@ const createAuthHeaders = () => {
   return headers;
 };
 
+// Función helper para crear headers con autenticación para FormData
+const createAuthHeadersForFormData = () => {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
 // =====================================================
 // AUTENTICACIÓN API
 // =====================================================
@@ -82,6 +94,28 @@ export const authAPI = {
     return handleResponse(response);
   },
 
+  // Subir foto de perfil
+  uploadProfilePhoto: async (file: File) => {
+    const formData = new FormData();
+    formData.append("profilePhoto", file);
+
+    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-photo`, {
+      method: "POST",
+      headers: createAuthHeadersForFormData(),
+      body: formData,
+    });
+    return handleResponse(response);
+  },
+
+  // Eliminar foto de perfil
+  deleteProfilePhoto: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/delete-profile-photo`, {
+      method: "DELETE",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   // Obtener información del usuario actual
   getMe: async () => {
     console.log("🔍 API: Verificando usuario actual...");
@@ -99,6 +133,14 @@ export const authAPI = {
     });
     return handleResponse(response);
   },
+};
+
+// Función helper para obtener URL de foto de perfil
+export const getProfilePhotoUrl = (
+  filename: string | null | undefined
+): string | null => {
+  if (!filename) return null;
+  return `http://localhost:3001/uploads/profile-photos/${filename}`;
 };
 
 // =====================================================

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
@@ -14,11 +14,22 @@ import {
   FaBuilding,
   FaIdCard,
   FaShieldAlt,
+  FaCamera,
+  FaTrash,
 } from "react-icons/fa";
+import UserAvatar from "../components/ui/UserAvatar";
 
 const UserProfile = () => {
-  const { user, updateProfile, loading } = useAuth();
+  const {
+    user,
+    updateProfile,
+    uploadProfilePhoto,
+    deleteProfilePhoto,
+    loading,
+  } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,6 +38,7 @@ const UserProfile = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   // Inicializar el formulario con los datos del usuario
   useEffect(() => {
@@ -110,6 +122,59 @@ const UserProfile = () => {
     }
   };
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Solo se permiten archivos de imagen (JPEG, PNG, GIF, WebP)");
+      return;
+    }
+
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("El archivo es demasiado grande. Máximo 5MB.");
+      return;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      await uploadProfilePhoto(file);
+    } catch (error) {
+      // El error ya se maneja en el contexto
+    } finally {
+      setIsUploadingPhoto(false);
+      // Limpiar el input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    const confirmDelete = window.confirm(
+      "¿Estás seguro de que quieres eliminar tu foto de perfil?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setIsUploadingPhoto(true);
+      await deleteProfilePhoto();
+    } catch (error) {
+      // El error ya se maneja en el contexto
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   const handleCancel = () => {
     if (hasChanges) {
       const confirmCancel = window.confirm(
@@ -163,13 +228,7 @@ const UserProfile = () => {
               <h1 className="text-2xl font-bold text-primary">Mi Perfil</h1>
             </div>
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mr-3">
-                {user.role === "admin" ? (
-                  <FaShieldAlt className="text-neutral-white text-xl" />
-                ) : (
-                  <FaUser className="text-neutral-white text-xl" />
-                )}
-              </div>
+              <UserAvatar user={user} size="lg" showRole className="mr-3" />
               <div>
                 <p className="text-sm font-medium text-primary">{user.name}</p>
                 <p className="text-xs text-neutral-medium">
@@ -178,6 +237,61 @@ const UserProfile = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Sección de foto de perfil */}
+        <div className="px-6 py-4 bg-accent-light border-b border-neutral-light">
+          <h3 className="text-lg font-medium text-primary mb-3">
+            Foto de Perfil
+          </h3>
+          <div className="flex items-center space-x-4">
+            <UserAvatar user={user} size="xl" />
+            <div className="flex-1">
+              <div className="flex flex-wrap gap-2">
+                <motion.button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  className="flex items-center px-3 py-2 bg-primary text-neutral-white rounded hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  whileHover={{ scale: !isUploadingPhoto ? 1.02 : 1 }}
+                  whileTap={{ scale: !isUploadingPhoto ? 0.98 : 1 }}
+                >
+                  {isUploadingPhoto ? (
+                    "Subiendo..."
+                  ) : (
+                    <>
+                      <FaCamera className="mr-2" />
+                      {user.profilePhoto ? "Cambiar Foto" : "Subir Foto"}
+                    </>
+                  )}
+                </motion.button>
+
+                {user.profilePhoto && (
+                  <motion.button
+                    type="button"
+                    onClick={handleDeletePhoto}
+                    disabled={isUploadingPhoto}
+                    className="flex items-center px-3 py-2 bg-state-error text-neutral-white rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    whileHover={{ scale: !isUploadingPhoto ? 1.02 : 1 }}
+                    whileTap={{ scale: !isUploadingPhoto ? 0.98 : 1 }}
+                  >
+                    <FaTrash className="mr-2" />
+                    Eliminar
+                  </motion.button>
+                )}
+              </div>
+              <p className="text-xs text-neutral-medium mt-2">
+                Formatos permitidos: JPEG, PNG, GIF, WebP. Tamaño máximo: 5MB.
+              </p>
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
         </div>
 
         {/* Información no editable */}

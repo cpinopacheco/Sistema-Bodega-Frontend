@@ -3,11 +3,12 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaUser, FaSignOutAlt, FaKey, FaUserEdit } from "react-icons/fa";
+import { FaSignOutAlt, FaKey, FaUserEdit } from "react-icons/fa";
 import { HiOutlineShoppingCart } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { useWithdrawal } from "../../context/WithdrawalContext";
+import UserAvatar from "../ui/UserAvatar";
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -38,7 +39,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
               className="absolute w-6 h-0.5 bg-current rounded-full"
               animate={{
                 rotate: sidebarOpen ? 45 : 0,
-                y: sidebarOpen ? 0 : -6, // Cambiar de -4 a -6 para mayor separación
+                y: sidebarOpen ? 0 : -6,
               }}
               transition={{ duration: 0.3 }}
             />
@@ -54,7 +55,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
               className="absolute w-6 h-0.5 bg-current rounded-full"
               animate={{
                 rotate: sidebarOpen ? -45 : 0,
-                y: sidebarOpen ? 0 : 6, // Cambiar de 4 a 6 para mayor separación
+                y: sidebarOpen ? 0 : 6,
               }}
               transition={{ duration: 0.3 }}
             />
@@ -84,14 +85,12 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
 
           <div className="relative" ref={userMenuRef}>
             <button
-              className="flex items-center space-x-2 focus:outline-none"
+              className="flex items-center space-x-2 focus:outline-none hover:opacity-80 transition-opacity"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               aria-expanded={userMenuOpen}
               aria-haspopup="true"
             >
-              <div className="w-10 h-10 rounded-full bg-primary-lightest flex items-center justify-center">
-                <FaUser className="text-primary" />
-              </div>
+              {user && <UserAvatar user={user} size="md" />}
               <span className="hidden md:inline text-sm font-medium text-neutral-dark">
                 {user?.name}
               </span>
