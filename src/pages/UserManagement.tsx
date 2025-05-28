@@ -28,6 +28,7 @@ const UserManagement = () => {
     updateUser,
     deleteUser,
     toggleUserStatus,
+    checkUserWithdrawals,
   } = useUsers();
   const { user: currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +40,12 @@ const UserManagement = () => {
   >("all");
   const [showUserForm, setShowUserForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    id: number | null;
+    userName: string;
+    hasWithdrawals: boolean;
+    withdrawalCount: number;
+  } | null>(null);
 
   // Verificar que el usuario actual es admin
   if (!currentUser || currentUser.role !== "admin") {
@@ -65,8 +71,32 @@ const UserManagement = () => {
   };
 
   // Función para confirmar eliminación
-  const handleDeleteConfirm = (id: number) => {
-    setConfirmDelete(id);
+  const handleDeleteConfirm = async (id: number) => {
+    const user = users.find((u) => u.id === id);
+    if (!user) return;
+
+    try {
+      // Verificar si el usuario tiene retiros antes de mostrar el modal
+      const { hasWithdrawals, withdrawalCount } = await checkUserWithdrawals(
+        id
+      );
+
+      setConfirmDelete({
+        id,
+        userName: user.name,
+        hasWithdrawals,
+        withdrawalCount,
+      });
+    } catch (error) {
+      console.error("Error verificando retiros:", error);
+      // En caso de error, mostrar modal de eliminación normal
+      setConfirmDelete({
+        id,
+        userName: user.name,
+        hasWithdrawals: false,
+        withdrawalCount: 0,
+      });
+    }
   };
 
   // Función para eliminar usuario
@@ -74,8 +104,27 @@ const UserManagement = () => {
     try {
       await deleteUser(id);
       setConfirmDelete(null);
-    } catch (error) {
-      // El error ya se maneja en el contexto
+    } catch (error: any) {
+      console.log("❌ Error capturado:", error);
+
+      if (
+        error.type === "USUARIO_CON_RETIROS" ||
+        error.message === "USUARIO_CON_RETIROS"
+      ) {
+        // Actualizar el modal para mostrar información de retiros
+        setConfirmDelete((prev) =>
+          prev
+            ? {
+                ...prev,
+                hasWithdrawals: true,
+                withdrawalCount: error.withdrawalCount || 0,
+              }
+            : null
+        );
+        return; // No cerrar el modal
+      }
+
+      setConfirmDelete(null);
     }
   };
 
@@ -94,6 +143,30 @@ const UserManagement = () => {
       await updateUser(selectedUser.id, userData);
     } else {
       await createUser(userData);
+    }
+  };
+
+  // Función para desactivar usuario
+  const handleDeactivate = async () => {
+    if (!confirmDelete?.id) return;
+
+    try {
+      console.log("🔄 Desactivando usuario:", confirmDelete.id);
+
+      // Obtener el usuario actual
+      const user = users.find((u) => u.id === confirmDelete.id);
+
+      // Si el usuario ya está inactivo, simplemente cerrar el modal
+      if (user && !user.is_active) {
+        setConfirmDelete(null);
+        return;
+      }
+
+      // Si está activo, desactivarlo
+      await toggleUserStatus(confirmDelete.id);
+      setConfirmDelete(null);
+    } catch (error) {
+      console.log("❌ Error desactivando usuario:", error);
     }
   };
 
@@ -447,27 +520,82 @@ const UserManagement = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-              <h3 className="text-lg font-medium text-neutral-dark mb-3">
-                Confirmar eliminación
-              </h3>
-              <p className="text-neutral-medium mb-6">
-                ¿Estás seguro de que deseas eliminar este usuario? Esta acción
-                no se puede deshacer.
-              </p>
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setConfirmDelete(null)}
-                  className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => handleDelete(confirmDelete)}
-                  className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
-                >
-                  Eliminar
-                </button>
-              </div>
+              {confirmDelete.hasWithdrawals ? (
+                <>
+                  <div className="flex items-center mb-4">
+                    <div className="text-amber-500 mr-2 text-2xl">⚠️</div>
+                    <h3 className="text-lg font-medium text-neutral-dark">
+                      No se puede eliminar el usuario
+                    </h3>
+                  </div>
+                  <p className="text-neutral-medium mb-4">
+                    El usuario <strong>{confirmDelete.userName}</strong> no
+                    puede ser eliminado porque tiene{" "}
+                    <strong className="text-amber-500">
+                      retiros registrados
+                    </strong>{" "}
+                    en el sistema.
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+                    <p className="text-blue-800 font-medium mb-1">
+                      ¿Por qué no se puede eliminar?
+                    </p>
+                    <p className="text-blue-700 text-sm">
+                      Eliminar este usuario afectaría la integridad de los datos
+                      históricos y los reportes del sistema de inventario.
+                    </p>
+                  </div>
+                  <p className="text-neutral-medium mb-6">
+                    <strong>Alternativa recomendada:</strong> Puedes desactivar
+                    el usuario para que no pueda acceder al sistema, pero
+                    manteniendo el historial de retiros intacto.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                      disabled={loading}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleDeactivate}
+                      className="px-4 py-2 bg-amber-500 text-neutral-white rounded-md hover:bg-amber-600"
+                      disabled={loading}
+                    >
+                      {loading ? "Procesando..." : "Desactivar Usuario"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-medium text-neutral-dark mb-3">
+                    Confirmar eliminación
+                  </h3>
+                  <p className="text-neutral-medium mb-6">
+                    ¿Estás seguro de que deseas eliminar este usuario? Esta
+                    acción no se puede deshacer.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                      disabled={loading}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() =>
+                        confirmDelete.id && handleDelete(confirmDelete.id)
+                      }
+                      className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
+                      disabled={loading}
+                    >
+                      {loading ? "Eliminando..." : "Eliminar"}
+                    </button>
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}

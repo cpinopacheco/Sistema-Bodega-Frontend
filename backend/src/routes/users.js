@@ -270,4 +270,37 @@ router.patch("/:id/toggle-status", authenticateToken, requireAdmin, async (req, 
     }
 })
 
+// Verificar si un usuario tiene retiros asociados
+router.get("/:id/check-withdrawals", authenticateToken, async (req, res) => {
+    try {
+        const userId = Number.parseInt(req.params.id)
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ error: "ID de usuario inválido" })
+        }
+
+        // Verificar si el usuario existe
+        const userResult = await pool.query("SELECT id, name FROM users WHERE id = $1", [userId])
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" })
+        }
+
+        // Contar retiros del usuario
+        const withdrawalsResult = await pool.query("SELECT COUNT(*) as count FROM withdrawals WHERE user_id = $1", [userId])
+
+        const withdrawalCount = Number.parseInt(withdrawalsResult.rows[0].count)
+        const hasWithdrawals = withdrawalCount > 0
+
+        res.json({
+            hasWithdrawals,
+            withdrawalCount,
+            userName: userResult.rows[0].name,
+        })
+    } catch (error) {
+        console.error("Error verificando retiros del usuario:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
 module.exports = router

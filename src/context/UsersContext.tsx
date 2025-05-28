@@ -51,6 +51,9 @@ interface UsersContextType {
   deleteUser: (id: number) => Promise<void>;
   toggleUserStatus: (id: number) => Promise<void>;
   getUserById: (id: number) => User | undefined;
+  checkUserWithdrawals: (
+    id: number
+  ) => Promise<{ hasWithdrawals: boolean; withdrawalCount: number }>;
 }
 
 const UsersContext = createContext<UsersContextType | undefined>(undefined);
@@ -58,7 +61,7 @@ const UsersContext = createContext<UsersContextType | undefined>(undefined);
 export const UsersProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user: currentUser, updateCurrentUser } = useAuth(); // ← Agregar updateCurrentUser
+  const { user: currentUser, updateCurrentUser } = useAuth();
 
   // Cargar usuarios desde el backend
   const loadUsers = useCallback(async () => {
@@ -132,7 +135,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
           prev.map((user) => (user.id === id ? updatedUser : user))
         );
 
-        // ✅ NUEVO: Si el usuario actualizado es el usuario actual, actualizar el contexto de auth
+        // Si el usuario actualizado es el usuario actual, actualizar el contexto de auth
         if (currentUser && currentUser.id === id) {
           updateCurrentUser({
             id: updatedUser.id,
@@ -153,7 +156,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [currentUser, updateCurrentUser] // ← Agregar dependencias
+    [currentUser, updateCurrentUser]
   );
 
   // Eliminar usuario
@@ -165,6 +168,15 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
       toast.success("Usuario eliminado correctamente");
     } catch (error: any) {
       console.error("Error eliminando usuario:", error);
+
+      // Si el error es porque el usuario tiene retiros, re-lanzar el error sin mostrar toast
+      if (
+        error.message === "USUARIO_CON_RETIROS" ||
+        error.type === "USUARIO_CON_RETIROS"
+      ) {
+        throw error;
+      }
+
       toast.error(error.message || "Error al eliminar el usuario");
       throw error;
     } finally {
@@ -198,6 +210,18 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
     [users]
   );
 
+  // Verificar si un usuario tiene retiros
+  const checkUserWithdrawals = useCallback(async (id: number) => {
+    try {
+      const result = await usersAPI.checkUserWithdrawals(id);
+      return result;
+    } catch (error: any) {
+      console.error("Error verificando retiros del usuario:", error);
+      // En caso de error, asumir que no tiene retiros para permitir continuar
+      return { hasWithdrawals: false, withdrawalCount: 0 };
+    }
+  }, []);
+
   return (
     <UsersContext.Provider
       value={{
@@ -209,6 +233,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
         deleteUser,
         toggleUserStatus,
         getUserById,
+        checkUserWithdrawals,
       }}
     >
       {children}

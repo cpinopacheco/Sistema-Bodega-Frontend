@@ -14,6 +14,20 @@ const handleResponse = async (response: Response) => {
     const error = await response
       .json()
       .catch(() => ({ error: "Error desconocido" }));
+
+    // Manejar específicamente el error de usuario con retiros
+    if (error.error === "USUARIO_CON_RETIROS") {
+      const customError = new Error("USUARIO_CON_RETIROS") as any;
+      customError.type = "USUARIO_CON_RETIROS";
+      customError.withdrawalCount = error.withdrawalCount || error.count || 0;
+      customError.userName =
+        error.userName || error.user || error.name || "Usuario";
+      customError.details = error;
+
+      console.log("🔍 Error personalizado creado:", customError);
+      throw customError;
+    }
+
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
   return response.json();
@@ -207,6 +221,17 @@ export const usersAPI = {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
+    return handleResponse(response);
+  },
+
+  // Verificar si un usuario tiene retiros asociados
+  checkUserWithdrawals: async (id: number) => {
+    const response = await fetch(
+      `${API_BASE_URL}/users/${id}/check-withdrawals`,
+      {
+        headers: createAuthHeaders(),
+      }
+    );
     return handleResponse(response);
   },
 
