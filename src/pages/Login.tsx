@@ -22,6 +22,15 @@ const Login = () => {
       return;
     }
 
+    // Validar el formato del código de funcionario
+    const employeeCodeRegex = /^\d{6}[a-z]$/;
+    if (!employeeCodeRegex.test(employeeCode)) {
+      setError(
+        "El código de funcionario debe tener 6 dígitos y una letra minúscula al final"
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
