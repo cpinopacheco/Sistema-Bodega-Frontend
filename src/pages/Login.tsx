@@ -6,6 +6,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaLock, FaUser } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
+import {
+  validateEmployeeCode,
+  formatEmployeeCodeInput,
+} from "../utils/employeeCodeValidation";
 
 const Login = () => {
   const { login } = useAuth();
@@ -13,6 +17,16 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleEmployeeCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatEmployeeCodeInput(e.target.value);
+    setEmployeeCode(formattedValue);
+
+    // Limpiar error cuando el usuario empiece a escribir
+    if (error) {
+      setError("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,12 +36,10 @@ const Login = () => {
       return;
     }
 
-    // Validar el formato del código de funcionario
-    const employeeCodeRegex = /^\d{6}[a-z]$/;
-    if (!employeeCodeRegex.test(employeeCode)) {
-      setError(
-        "El código de funcionario debe tener 6 dígitos y una letra minúscula al final"
-      );
+    // Validar el formato del código de funcionario usando la nueva validación
+    const validation = validateEmployeeCode(employeeCode);
+    if (!validation.isValid) {
+      setError(validation.error!);
       return;
     }
 
@@ -36,7 +48,8 @@ const Login = () => {
       setError("");
       await login(employeeCode, password);
     } catch (error) {
-      setError("Ocurrió un error al iniciar sesión");
+      // Mensaje unificado para todos los errores de autenticación
+      setError("Credenciales inválidas");
       console.error(error);
     } finally {
       setLoading(false);
@@ -96,8 +109,9 @@ const Login = () => {
                 id="employeeCode"
                 type="text"
                 value={employeeCode}
-                onChange={(e) => setEmployeeCode(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                onChange={handleEmployeeCodeChange}
+                maxLength={7}
+                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono"
                 placeholder="123456a"
                 required
               />
@@ -105,6 +119,9 @@ const Login = () => {
                 <FaUser className="text-neutral-medium" size={14} />
               </div>
             </div>
+            <p className="mt-1 text-xs text-neutral-medium">
+              6 dígitos seguidos de una letra (ej: 123456a)
+            </p>
           </div>
           <div className="mb-6">
             <label
@@ -118,7 +135,13 @@ const Login = () => {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  // Limpiar error cuando el usuario empiece a escribir
+                  if (error) {
+                    setError("");
+                  }
+                }}
                 className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
                 required
@@ -136,16 +159,6 @@ const Login = () => {
             {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-neutral-medium">
-          <p>Para propósitos de demo:</p>
-          <p>
-            Código de funcionario: <strong>123456a</strong>
-          </p>
-          <p>
-            Contraseña: <strong>password</strong>
-          </p>
-        </div>
       </motion.div>
     </div>
   );

@@ -100,7 +100,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("❌ Login error:", error);
-      toast.error(error.message || "Error al iniciar sesión");
+      // Removido el toast.error para evitar duplicación
+      // El componente Login manejará el mensaje de error
       throw error;
     } finally {
       setLoading(false);

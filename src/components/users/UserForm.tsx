@@ -6,6 +6,11 @@ import { motion } from "framer-motion";
 import { FaPlus, FaSave, FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import type { User } from "../../context/UsersContext";
 import { SECTIONS } from "../../constants/sections";
+import {
+  validateEmployeeCode,
+  normalizeEmployeeCode,
+  formatEmployeeCodeInput,
+} from "../../utils/employeeCodeValidation";
 
 interface UserFormProps {
   user?: User;
@@ -69,8 +74,10 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
       newErrors.email = "El email no es válido";
     }
 
-    if (!formData.employeeCode.trim()) {
-      newErrors.employeeCode = "El código de empleado es obligatorio";
+    // Validar código de empleado con el nuevo formato
+    const employeeCodeValidation = validateEmployeeCode(formData.employeeCode);
+    if (!employeeCodeValidation.isValid) {
+      newErrors.employeeCode = employeeCodeValidation.error!;
     }
 
     if (!user) {
@@ -99,10 +106,19 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
   ) => {
     const { name, value, type } = e.target;
 
+    let processedValue = value;
+
+    // Formatear código de empleado en tiempo real
+    if (name === "employeeCode") {
+      processedValue = formatEmployeeCodeInput(value);
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : processedValue,
     }));
 
     // Limpiar error del campo cuando el usuario empiece a escribir
@@ -121,12 +137,17 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
     try {
       setIsSubmitting(true);
 
+      // Normalizar código de empleado antes de enviar
+      const normalizedEmployeeCode = normalizeEmployeeCode(
+        formData.employeeCode
+      );
+
       if (user) {
         // Actualizar usuario existente (sin contraseña)
         await onSubmit({
           name: formData.name,
           email: formData.email,
-          employeeCode: formData.employeeCode,
+          employeeCode: normalizedEmployeeCode,
           role: formData.role,
           section: formData.section,
           isActive: formData.isActive,
@@ -136,7 +157,7 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
         await onSubmit({
           name: formData.name,
           email: formData.email,
-          employeeCode: formData.employeeCode,
+          employeeCode: normalizedEmployeeCode,
           password: formData.password,
           role: formData.role,
           section: formData.section,
@@ -276,11 +297,16 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
                 name="employeeCode"
                 value={formData.employeeCode}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm ${
+                placeholder="123456a"
+                maxLength={7}
+                className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm font-mono ${
                   errors.employeeCode ? "border-state-error" : ""
                 }`}
                 required
               />
+              <p className="mt-1 text-xs text-neutral-medium">
+                Formato: 6 dígitos seguidos de una letra (ej: 123456a)
+              </p>
               {errors.employeeCode && (
                 <p className="mt-1 text-sm text-state-error">
                   {errors.employeeCode}
