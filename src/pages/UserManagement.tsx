@@ -547,9 +547,23 @@ const UserManagement = () => {
                     </p>
                   </div>
                   <p className="text-neutral-medium mb-6">
-                    <strong>Alternativa recomendada:</strong> Puedes desactivar
-                    el usuario para que no pueda acceder al sistema, pero
-                    manteniendo el historial de retiros intacto.
+                    {(() => {
+                      const user = users.find((u) => u.id === confirmDelete.id);
+                      return user?.is_active ? (
+                        <>
+                          <strong>Alternativa recomendada:</strong> Puedes
+                          desactivar el usuario para que no pueda acceder al
+                          sistema, pero manteniendo el historial de retiros
+                          intacto.
+                        </>
+                      ) : (
+                        <>
+                          <strong>Estado actual:</strong> Este usuario ya está
+                          desactivado y no puede acceder al sistema. El
+                          historial de retiros se mantiene intacto.
+                        </>
+                      );
+                    })()}
                   </p>
                   <div className="flex justify-end space-x-3">
                     <button
@@ -559,13 +573,19 @@ const UserManagement = () => {
                     >
                       Cancelar
                     </button>
-                    <button
-                      onClick={handleDeactivate}
-                      className="px-4 py-2 bg-amber-500 text-neutral-white rounded-md hover:bg-amber-600"
-                      disabled={loading}
-                    >
-                      {loading ? "Procesando..." : "Desactivar Usuario"}
-                    </button>
+                    {/* Solo mostrar botón de desactivar si el usuario está activo */}
+                    {(() => {
+                      const user = users.find((u) => u.id === confirmDelete.id);
+                      return user?.is_active ? (
+                        <button
+                          onClick={handleDeactivate}
+                          className="px-4 py-2 bg-amber-500 text-neutral-white rounded-md hover:bg-amber-600"
+                          disabled={loading}
+                        >
+                          {loading ? "Procesando..." : "Desactivar Usuario"}
+                        </button>
+                      ) : null;
+                    })()}
                   </div>
                 </>
               ) : (
