@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaPlus, FaSave, FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import type { User } from "../../context/UsersContext";
+import { SECTIONS } from "../../constants/sections";
 
 interface UserFormProps {
   user?: User;
@@ -85,7 +86,7 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
       }
     }
 
-    if (!formData.section.trim()) {
+    if (!formData.section) {
       newErrors.section = "La sección es obligatoria";
     }
 
@@ -397,8 +398,7 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
               >
                 Sección <span className="text-state-error">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="section"
                 name="section"
                 value={formData.section}
@@ -407,7 +407,14 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
                   errors.section ? "border-state-error" : ""
                 }`}
                 required
-              />
+              >
+                <option value="">Seleccione una sección</option>
+                {SECTIONS.map((section) => (
+                  <option key={section} value={section}>
+                    {section}
+                  </option>
+                ))}
+              </select>
               {errors.section && (
                 <p className="mt-1 text-sm text-state-error">
                   {errors.section}
