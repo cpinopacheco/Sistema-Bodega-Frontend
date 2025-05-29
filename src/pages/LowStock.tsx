@@ -1,32 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { FaExclamationTriangle, FaSearch, FaFileExcel } from "react-icons/fa"
-import { useProducts } from "../context/ProductContext"
-import { ExportToExcel } from "../utils/ExcelExport"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { FaExclamationTriangle, FaSearch, FaFileExcel } from "react-icons/fa";
+import { useProducts } from "../context/ProductContext";
+import { ExportToExcel } from "../utils/ExcelExport";
 
 const LowStock = () => {
-  const { getLowStockProducts } = useProducts()
+  const { getLowStockProducts } = useProducts();
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Obtener productos con stock bajo
-  const lowStockProducts = getLowStockProducts()
+  const lowStockProducts = getLowStockProducts();
 
   // Categorías únicas de productos con stock bajo
-  const categories = ["all", ...new Set(lowStockProducts.map((product) => product.category))]
+  const categories = [
+    "all",
+    ...new Set(lowStockProducts.map((product) => product.category)),
+  ];
 
   // Filtrar productos
   const filteredProducts = lowStockProducts.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || product.category === selectedCategory;
 
-    return matchesSearch && matchesCategory
-  })
+    return matchesSearch && matchesCategory;
+  });
 
   // Exportar a Excel
   const exportToExcel = () => {
@@ -37,15 +41,17 @@ const LowStock = () => {
       "Stock Actual": product.stock,
       "Stock Mínimo": product.minStock,
       Déficit: product.minStock - product.stock,
-    }))
+    }));
 
-    ExportToExcel(data, "Productos_Stock_Bajo")
-  }
+    ExportToExcel(data, "Productos_Stock_Bajo");
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-neutral-dark">Productos con Stock Bajo</h1>
+        <h1 className="text-2xl font-bold text-neutral-dark">
+          Productos con Stock Bajo
+        </h1>
         <button
           onClick={exportToExcel}
           className="inline-flex items-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
@@ -85,7 +91,12 @@ const LowStock = () => {
         </div>
       </div>
 
-      <div className="bg-neutral-white rounded-lg shadow-md p-4">
+      <motion.div
+        className="bg-neutral-white rounded-lg shadow-md p-4"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         {filteredProducts.length > 0 && (
           <div className="mb-4 p-4 bg-state-error bg-opacity-10 border-l-4 border-state-error rounded-r-md">
             <div className="flex">
@@ -93,11 +104,14 @@ const LowStock = () => {
                 <FaExclamationTriangle className="h-5 w-5 text-state-error" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-state-error">Alerta de Stock Bajo</h3>
+                <h3 className="text-sm font-medium text-state-error">
+                  Alerta de Stock Bajo
+                </h3>
                 <div className="mt-2 text-sm text-state-error">
                   <p>
-                    Se han encontrado {filteredProducts.length} productos con stock por debajo del mínimo requerido.
-                    Estos productos necesitan reabastecimiento.
+                    Se han encontrado {filteredProducts.length} productos con
+                    stock por debajo del mínimo requerido. Estos productos
+                    necesitan reabastecimiento.
                   </p>
                 </div>
               </div>
@@ -129,10 +143,17 @@ const LowStock = () => {
               </thead>
               <tbody className="bg-neutral-white divide-y divide-neutral-light">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-primary-lightest hover:bg-opacity-30">
+                  <tr
+                    key={product.id}
+                    className="hover:bg-primary-lightest hover:bg-opacity-30"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-neutral-dark">{product.name}</div>
-                      <div className="text-xs text-neutral-medium max-w-xs truncate">{product.description}</div>
+                      <div className="text-sm font-medium text-neutral-dark">
+                        {product.name}
+                      </div>
+                      <div className="text-xs text-neutral-medium max-w-xs truncate">
+                        {product.description}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
@@ -140,13 +161,19 @@ const LowStock = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-state-error">{product.stock}</div>
+                      <div className="text-sm font-bold text-state-error">
+                        {product.stock}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-neutral-dark">{product.minStock}</div>
+                      <div className="text-sm text-neutral-dark">
+                        {product.minStock}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-state-error">{product.minStock - product.stock}</div>
+                      <div className="text-sm font-medium text-state-error">
+                        {product.minStock - product.stock}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -161,7 +188,9 @@ const LowStock = () => {
               transition={{ duration: 0.5 }}
             >
               <FaExclamationTriangle className="mx-auto text-neutral-medium text-5xl mb-4" />
-              <h3 className="text-lg font-medium text-neutral-dark mb-1">No se encontraron productos</h3>
+              <h3 className="text-lg font-medium text-neutral-dark mb-1">
+                No se encontraron productos
+              </h3>
               <p className="text-neutral-medium">
                 {searchTerm || selectedCategory !== "all"
                   ? "No hay productos que coincidan con los filtros seleccionados."
@@ -170,9 +199,9 @@ const LowStock = () => {
             </motion.div>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default LowStock
+export default LowStock;
