@@ -48,6 +48,7 @@ function App() {
                     style: {
                       background: "#013A1A",
                       color: "#fff",
+                      zIndex: 99999, // Valor muy alto para asegurar que esté por encima de todo
                     },
                     success: {
                       style: {
@@ -59,6 +60,9 @@ function App() {
                         background: "#D64045",
                       },
                     },
+                  }}
+                  containerStyle={{
+                    zIndex: 99999, // Aseguramos que el contenedor también tenga un z-index alto
                   }}
                 />
                 <Routes>

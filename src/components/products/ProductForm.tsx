@@ -49,8 +49,6 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
     }
   }, [product, categories]);
 
-  // Modificar la función validateForm para incluir validación de nombres duplicados
-
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
@@ -99,9 +97,6 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
           : value,
     }));
   };
-
-  // Modificar la función handleSubmit para mantener el modal abierto cuando hay errores
-  // Reemplazar la función handleSubmit actual con esta versión mejorada:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,7 +152,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9999]"
+      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
       style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
