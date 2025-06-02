@@ -57,11 +57,12 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[9000] flex items-center justify-center !mt-0"
+        initial={{ opacity: 0, marginTop: 0 }}
+        animate={{ opacity: 1, marginTop: 0 }}
+        exit={{ opacity: 0, marginTop: 0 }}
         transition={{ duration: 0.2 }}
+        style={{ marginTop: "0px !important" }}
       >
         {/* Backdrop */}
         <motion.div

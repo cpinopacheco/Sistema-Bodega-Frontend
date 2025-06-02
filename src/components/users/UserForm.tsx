@@ -203,7 +203,7 @@ const UserForm = ({ user, onClose, onSubmit, isVisible }: UserFormProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9999]"
+      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
       style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

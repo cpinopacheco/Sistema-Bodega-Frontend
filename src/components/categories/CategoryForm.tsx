@@ -1,83 +1,83 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { FaPlus, FaSave, FaTimes } from "react-icons/fa"
-import { useProducts, type Category } from "../../context/ProductContext"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { useProducts, type Category } from "../../context/ProductContext";
 
 interface CategoryFormProps {
-  category?: Category
-  onClose: () => void
-  isVisible: boolean
+  category?: Category;
+  onClose: () => void;
+  isVisible: boolean;
 }
 
 const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
-  const { addCategory, updateCategory } = useProducts()
-  const [name, setName] = useState("")
-  const [error, setError] = useState("")
+  const { addCategory, updateCategory } = useProducts();
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (category) {
-      setName(category.name)
+      setName(category.name);
     } else {
-      setName("")
+      setName("");
     }
-  }, [category])
+  }, [category]);
 
   const validateForm = () => {
     if (!name.trim()) {
-      setError("El nombre de la categoría es obligatorio")
-      return false
+      setError("El nombre de la categoría es obligatorio");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
     if (category) {
-      updateCategory(category.id, name)
+      updateCategory(category.id, name);
     } else {
-      addCategory(name)
+      addCategory(name);
     }
 
-    onClose()
-  }
+    onClose();
+  };
 
   // Manejar cierre con tecla Escape
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isVisible) {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isVisible) {
-      window.addEventListener("keydown", handleEscapeKey)
+      window.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
-      window.removeEventListener("keydown", handleEscapeKey)
-    }
-  }, [isVisible, onClose])
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isVisible, onClose]);
 
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
     exit: { opacity: 0, y: 50, transition: { duration: 0.2 } },
-  }
+  };
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   return (
     <motion.div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9999]"
+      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
       style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -85,7 +85,7 @@ const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
       onClick={(e) => {
         // Cerrar al hacer clic en el overlay
         if (e.target === e.currentTarget) {
-          onClose()
+          onClose();
         }
       }}
     >
@@ -98,7 +98,9 @@ const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b border-neutral-light">
-          <h2 className="text-xl font-semibold text-primary">{category ? "Editar Categoría" : "Nueva Categoría"}</h2>
+          <h2 className="text-xl font-semibold text-primary">
+            {category ? "Editar Categoría" : "Nueva Categoría"}
+          </h2>
           <button
             onClick={onClose}
             className="text-neutral-medium hover:text-neutral-dark focus:outline-none"
@@ -111,7 +113,10 @@ const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
         <form onSubmit={handleSubmit} className="p-4">
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-neutral-dark">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-neutral-dark"
+              >
                 Nombre <span className="text-state-error">*</span>
               </label>
               <input
@@ -120,15 +125,17 @@ const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
                 name="name"
                 value={name}
                 onChange={(e) => {
-                  setName(e.target.value)
-                  setError("")
+                  setName(e.target.value);
+                  setError("");
                 }}
                 className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm ${
                   error ? "border-state-error" : ""
                 }`}
                 required
               />
-              {error && <p className="mt-1 text-sm text-state-error">{error}</p>}
+              {error && (
+                <p className="mt-1 text-sm text-state-error">{error}</p>
+              )}
             </div>
           </div>
 
@@ -161,7 +168,7 @@ const CategoryForm = ({ category, onClose, isVisible }: CategoryFormProps) => {
         </form>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default CategoryForm
+export default CategoryForm;
