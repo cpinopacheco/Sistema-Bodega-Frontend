@@ -111,6 +111,12 @@ router.post("/", async (req, res) => {
             return res.status(400).json({ error: "El stock mínimo no puede ser negativo" })
         }
 
+        // Verificar si ya existe un producto con el mismo nombre
+        const nameCheck = await pool.query("SELECT id FROM products WHERE LOWER(name) = LOWER($1)", [name.trim()])
+        if (nameCheck.rows.length > 0) {
+            return res.status(409).json({ error: "Ya existe un producto con este nombre", code: "DUPLICATE_NAME" })
+        }
+
         // Verificar que la categoría existe
         const categoryCheck = await pool.query("SELECT id, name FROM categories WHERE id = $1", [categoryId])
         if (categoryCheck.rows.length === 0) {
@@ -139,6 +145,12 @@ router.post("/", async (req, res) => {
         res.status(201).json(newProduct)
     } catch (error) {
         console.error("Error creando producto:", error)
+
+        // Verificar si es un error de violación de restricción única
+        if (error.code === "23505" && error.constraint === "unique_product_name") {
+            return res.status(409).json({ error: "Ya existe un producto con este nombre", code: "DUPLICATE_NAME" })
+        }
+
         res.status(500).json({ error: "Error interno del servidor" })
     }
 })
@@ -164,6 +176,15 @@ router.put("/:id", async (req, res) => {
 
         if (minStock < 0) {
             return res.status(400).json({ error: "El stock mínimo no puede ser negativo" })
+        }
+
+        // Verificar si ya existe un producto con el mismo nombre (que no sea el mismo producto)
+        const nameCheck = await pool.query("SELECT id FROM products WHERE LOWER(name) = LOWER($1) AND id != $2", [
+            name.trim(),
+            id,
+        ])
+        if (nameCheck.rows.length > 0) {
+            return res.status(409).json({ error: "Ya existe un producto con este nombre", code: "DUPLICATE_NAME" })
         }
 
         // Verificar que la categoría existe
@@ -199,6 +220,12 @@ router.put("/:id", async (req, res) => {
         res.json(updatedProduct)
     } catch (error) {
         console.error("Error actualizando producto:", error)
+
+        // Verificar si es un error de violación de restricción única
+        if (error.code === "23505" && error.constraint === "unique_product_name") {
+            return res.status(409).json({ error: "Ya existe un producto con este nombre", code: "DUPLICATE_NAME" })
+        }
+
         res.status(500).json({ error: "Error interno del servidor" })
     }
 })

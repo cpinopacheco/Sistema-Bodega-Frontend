@@ -28,6 +28,13 @@ const handleResponse = async (response: Response) => {
       throw customError;
     }
 
+    // Manejar error de nombre duplicado
+    if (error.code === "DUPLICATE_NAME") {
+      const duplicateError = new Error(error.error) as any;
+      duplicateError.type = "DUPLICATE_NAME";
+      throw duplicateError;
+    }
+
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
   return response.json();

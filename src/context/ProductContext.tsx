@@ -190,8 +190,18 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Producto añadido correctamente");
       } catch (error: any) {
         console.error("Error añadiendo producto:", error);
-        toast.error(error.message || "Error al añadir el producto");
-        throw error;
+
+        // Manejar específicamente el error de nombre duplicado
+        if (
+          error.message &&
+          error.message.includes("Ya existe un producto con este nombre")
+        ) {
+          toast.error("Ya existe un producto con este nombre");
+          throw new Error("DUPLICATE_NAME");
+        } else {
+          toast.error(error.message || "Error al añadir el producto");
+          throw error;
+        }
       } finally {
         setLoading(false);
       }
@@ -243,8 +253,18 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Producto actualizado correctamente");
       } catch (error: any) {
         console.error("Error actualizando producto:", error);
-        toast.error(error.message || "Error al actualizar el producto");
-        throw error;
+
+        // Manejar específicamente el error de nombre duplicado
+        if (
+          error.message &&
+          error.message.includes("Ya existe un producto con este nombre")
+        ) {
+          toast.error("Ya existe un producto con este nombre");
+          throw new Error("DUPLICATE_NAME");
+        } else {
+          toast.error(error.message || "Error al actualizar el producto");
+          throw error;
+        }
       } finally {
         setLoading(false);
       }

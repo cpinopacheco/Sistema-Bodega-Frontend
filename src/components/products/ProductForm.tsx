@@ -19,7 +19,6 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
     name: "",
     description: "",
     category: "",
-    categoryId: 0,
     stock: 0,
     minStock: 0,
   });
@@ -32,13 +31,10 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
 
   useEffect(() => {
     if (product) {
-      // Encontrar la categoría por nombre para obtener el ID
-      const category = categories.find((cat) => cat.name === product.category);
       setFormData({
         name: product.name,
         description: product.description,
         category: product.category,
-        categoryId: category?.id || 0,
         stock: product.stock,
         minStock: product.minStock,
       });
@@ -48,11 +44,12 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
         setFormData((prev) => ({
           ...prev,
           category: categories[0].name,
-          categoryId: categories[0].id,
         }));
       }
     }
   }, [product, categories]);
+
+  // Modificar la función validateForm para incluir validación de nombres duplicados
 
   const validateForm = () => {
     let isValid = true;
@@ -68,7 +65,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
       isValid = false;
     }
 
-    if (!formData.categoryId) {
+    if (!formData.category) {
       newErrors.category = "La categoría es obligatoria";
       isValid = false;
     }
@@ -94,39 +91,43 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
   ) => {
     const { name, value } = e.target;
 
-    if (name === "category") {
-      // Encontrar la categoría seleccionada para obtener su ID
-      const selectedCategory = categories.find((cat) => cat.name === value);
-      setFormData((prev) => ({
-        ...prev,
-        category: value,
-        categoryId: selectedCategory?.id || 0,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]:
-          name === "stock" || name === "minStock"
-            ? Number.parseFloat(value) || 0
-            : value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "stock" || name === "minStock"
+          ? Number.parseFloat(value) || 0
+          : value,
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Modificar la función handleSubmit para mantener el modal abierto cuando hay errores
+  // Reemplazar la función handleSubmit actual con esta versión mejorada:
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    if (product) {
-      updateProduct(product.id, formData);
-    } else {
-      addProduct(formData);
-    }
+    try {
+      if (product) {
+        await updateProduct(product.id, formData);
+      } else {
+        await addProduct(formData);
+      }
 
-    onClose();
+      // Solo cerramos el modal si la operación fue exitosa
+      onClose();
+    } catch (error: any) {
+      if (error.message === "DUPLICATE_NAME") {
+        setErrors((prev) => ({
+          ...prev,
+          name: "Ya existe un producto con este nombre",
+        }));
+        // No cerramos el modal para que el usuario pueda corregir el error
+      }
+    }
   };
 
   // Manejar cierre con tecla Escape
