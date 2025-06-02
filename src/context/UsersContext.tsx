@@ -80,14 +80,14 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser]); // Fixed dependency
 
   // Cargar usuarios al inicializar el contexto (solo si es admin)
   useEffect(() => {
     if (currentUser?.role === "admin") {
       loadUsers();
     }
-  }, [loadUsers, currentUser]);
+  }, [loadUsers, currentUser]); // Fixed dependency
 
   // Crear nuevo usuario
   const createUser = useCallback(
@@ -135,16 +135,25 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
           prev.map((user) => (user.id === id ? updatedUser : user))
         );
 
-        // Si el usuario actualizado es el usuario actual, actualizar el contexto de auth
+        // Solo actualizar el contexto de auth si realmente cambió algo importante
         if (currentUser && currentUser.id === id) {
-          updateCurrentUser({
-            id: updatedUser.id,
-            name: updatedUser.name,
-            email: updatedUser.email,
-            employeeCode: updatedUser.employee_code,
-            role: updatedUser.role,
-            section: updatedUser.section,
-          });
+          const hasChanges =
+            currentUser.name !== updatedUser.name ||
+            currentUser.email !== updatedUser.email ||
+            currentUser.employeeCode !== updatedUser.employee_code ||
+            currentUser.role !== updatedUser.role ||
+            currentUser.section !== updatedUser.section;
+
+          if (hasChanges) {
+            updateCurrentUser({
+              id: updatedUser.id,
+              name: updatedUser.name,
+              email: updatedUser.email,
+              employeeCode: updatedUser.employee_code,
+              role: updatedUser.role,
+              section: updatedUser.section,
+            });
+          }
         }
 
         toast.success("Usuario actualizado correctamente");

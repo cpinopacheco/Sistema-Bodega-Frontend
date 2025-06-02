@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   FaPlus,
   FaSearch,
@@ -46,6 +46,15 @@ const UserManagement = () => {
     hasWithdrawals: boolean;
     withdrawalCount: number;
   } | null>(null);
+  // Estado para controlar si la animación ya se ejecutó
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  // Controlar cuándo debe ejecutarse la animación inicial
+  useEffect(() => {
+    if (!hasAnimated && users.length > 0) {
+      setHasAnimated(true);
+    }
+  }, [users.length, hasAnimated]);
 
   // Verificar que el usuario actual es admin
   if (!currentUser || currentUser.role !== "admin") {
@@ -317,7 +326,8 @@ const UserManagement = () => {
         </div>
       ) : filteredUsers.length > 0 ? (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          key={`users-${users.length}-${filteredUsers.length}`}
+          initial={hasAnimated ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="bg-neutral-white rounded-lg shadow-md overflow-hidden"
@@ -353,7 +363,7 @@ const UserManagement = () => {
                 {filteredUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
+                    className={`hover:bg-primary-lightest hover:bg-opacity-30 transition-colors duration-200 ${
                       !user.is_active ? "bg-neutral-light bg-opacity-50" : ""
                     }`}
                   >
@@ -385,7 +395,7 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
                           user.role === "admin"
                             ? "bg-accent bg-opacity-10 text-accent"
                             : "bg-primary-lightest text-primary"
@@ -401,7 +411,7 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
                           user.is_active
                             ? "bg-state-success bg-opacity-10 text-state-success"
                             : "bg-state-error bg-opacity-10 text-state-error"
@@ -428,12 +438,12 @@ const UserManagement = () => {
                           <button
                             onClick={() => handleToggleStatus(user.id)}
                             disabled={user.id === currentUser.id}
-                            className={`p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 ${
+                            className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
                               user.id === currentUser.id
                                 ? "text-neutral-light cursor-not-allowed"
                                 : user.is_active
-                                ? "text-state-warning hover:bg-state-warning hover:text-neutral-white"
-                                : "text-state-success hover:bg-state-success hover:text-neutral-white"
+                                ? "text-state-warning hover:bg-state-warning hover:text-neutral-white hover:scale-110"
+                                : "text-state-success hover:bg-state-success hover:text-neutral-white hover:scale-110"
                             }`}
                           >
                             {user.is_active ? (
@@ -447,7 +457,7 @@ const UserManagement = () => {
                         <Tooltip content="Editar usuario" position="top">
                           <button
                             onClick={() => handleEdit(user)}
-                            className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                            className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 hover:scale-110"
                           >
                             <FaEdit size={16} />
                           </button>
@@ -457,10 +467,10 @@ const UserManagement = () => {
                           <button
                             onClick={() => handleDeleteConfirm(user.id)}
                             disabled={user.id === currentUser.id}
-                            className={`p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 ${
+                            className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
                               user.id === currentUser.id
                                 ? "text-neutral-light cursor-not-allowed"
-                                : "text-state-error hover:bg-state-error hover:text-neutral-white"
+                                : "text-state-error hover:bg-state-error hover:text-neutral-white hover:scale-110"
                             }`}
                           >
                             <FaTrash size={16} />
@@ -489,138 +499,136 @@ const UserManagement = () => {
       )}
 
       {/* Modal de formulario */}
-      <AnimatePresence>
-        {showUserForm && (
-          <UserForm
-            user={selectedUser || undefined}
-            onClose={() => {
-              setShowUserForm(false);
-              setSelectedUser(null);
-            }}
-            onSubmit={handleFormSubmit}
-            isVisible={showUserForm}
-          />
-        )}
-      </AnimatePresence>
+
+      {showUserForm && (
+        <UserForm
+          user={selectedUser || undefined}
+          onClose={() => {
+            setShowUserForm(false);
+            setSelectedUser(null);
+          }}
+          onSubmit={handleFormSubmit}
+          isVisible={showUserForm}
+        />
+      )}
 
       {/* Modal de confirmación de eliminación */}
-      <AnimatePresence>
-        {confirmDelete !== null && (
+
+      {confirmDelete !== null && (
+        <motion.div
+          initial={{ opacity: 0, marginTop: 0 }}
+          animate={{ opacity: 1, marginTop: 0 }}
+          exit={{ opacity: 0, marginTop: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
+          style={{ marginTop: "0px !important" }}
+        >
           <motion.div
-            initial={{ opacity: 0, marginTop: 0 }}
-            animate={{ opacity: 1, marginTop: 0 }}
-            exit={{ opacity: 0, marginTop: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
-            style={{ marginTop: "0px !important" }}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
           >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
-            >
-              {confirmDelete.hasWithdrawals ? (
-                <>
-                  <div className="flex items-center mb-4">
-                    <div className="text-amber-500 mr-2 text-2xl">⚠️</div>
-                    <h3 className="text-lg font-medium text-neutral-dark">
-                      No se puede eliminar el usuario
-                    </h3>
-                  </div>
-                  <p className="text-neutral-medium mb-4">
-                    El usuario <strong>{confirmDelete.userName}</strong> no
-                    puede ser eliminado porque tiene{" "}
-                    <strong className="text-amber-500">
-                      retiros registrados
-                    </strong>{" "}
-                    en el sistema.
-                  </p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
-                    <p className="text-blue-800 font-medium mb-1">
-                      ¿Por qué no se puede eliminar?
-                    </p>
-                    <p className="text-blue-700 text-sm">
-                      Eliminar este usuario afectaría la integridad de los datos
-                      históricos y los reportes del sistema de inventario.
-                    </p>
-                  </div>
-                  <p className="text-neutral-medium mb-6">
-                    {(() => {
-                      const user = users.find((u) => u.id === confirmDelete.id);
-                      return user?.is_active ? (
-                        <>
-                          <strong>Alternativa recomendada:</strong> Puedes
-                          desactivar el usuario para que no pueda acceder al
-                          sistema, pero manteniendo el historial de retiros
-                          intacto.
-                        </>
-                      ) : (
-                        <>
-                          <strong>Estado actual:</strong> Este usuario ya está
-                          desactivado y no puede acceder al sistema. El
-                          historial de retiros se mantiene intacto.
-                        </>
-                      );
-                    })()}
-                  </p>
-                  <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={() => setConfirmDelete(null)}
-                      className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </button>
-                    {/* Solo mostrar botón de desactivar si el usuario está activo */}
-                    {(() => {
-                      const user = users.find((u) => u.id === confirmDelete.id);
-                      return user?.is_active ? (
-                        <button
-                          onClick={handleDeactivate}
-                          className="px-4 py-2 bg-amber-500 text-neutral-white rounded-md hover:bg-amber-600"
-                          disabled={loading}
-                        >
-                          {loading ? "Procesando..." : "Desactivar Usuario"}
-                        </button>
-                      ) : null;
-                    })()}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-lg font-medium text-neutral-dark mb-3">
-                    Confirmar eliminación
+            {confirmDelete.hasWithdrawals ? (
+              <>
+                <div className="flex items-center mb-4">
+                  <div className="text-amber-500 mr-2 text-2xl">⚠️</div>
+                  <h3 className="text-lg font-medium text-neutral-dark">
+                    No se puede eliminar el usuario
                   </h3>
-                  <p className="text-neutral-medium mb-6">
-                    ¿Estás seguro de que deseas eliminar este usuario? Esta
-                    acción no se puede deshacer.
+                </div>
+                <p className="text-neutral-medium mb-4">
+                  El usuario <strong>{confirmDelete.userName}</strong> no puede
+                  ser eliminado porque tiene{" "}
+                  <strong className="text-amber-500">
+                    retiros registrados
+                  </strong>{" "}
+                  en el sistema.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+                  <p className="text-blue-800 font-medium mb-1">
+                    ¿Por qué no se puede eliminar?
                   </p>
-                  <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={() => setConfirmDelete(null)}
-                      className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={() =>
-                        confirmDelete.id && handleDelete(confirmDelete.id)
-                      }
-                      className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
-                      disabled={loading}
-                    >
-                      {loading ? "Eliminando..." : "Eliminar"}
-                    </button>
-                  </div>
-                </>
-              )}
-            </motion.div>
+                  <p className="text-blue-700 text-sm">
+                    Eliminar este usuario afectaría la integridad de los datos
+                    históricos y los reportes del sistema de inventario.
+                  </p>
+                </div>
+                <p className="text-neutral-medium mb-6">
+                  {(() => {
+                    const user = users.find((u) => u.id === confirmDelete.id);
+                    return user?.is_active ? (
+                      <>
+                        <strong>Alternativa recomendada:</strong> Puedes
+                        desactivar el usuario para que no pueda acceder al
+                        sistema, pero manteniendo el historial de retiros
+                        intacto.
+                      </>
+                    ) : (
+                      <>
+                        <strong>Estado actual:</strong> Este usuario ya está
+                        desactivado y no puede acceder al sistema. El historial
+                        de retiros se mantiene intacto.
+                      </>
+                    );
+                  })()}
+                </p>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setConfirmDelete(null)}
+                    className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                  {/* Solo mostrar botón de desactivar si el usuario está activo */}
+                  {(() => {
+                    const user = users.find((u) => u.id === confirmDelete.id);
+                    return user?.is_active ? (
+                      <button
+                        onClick={handleDeactivate}
+                        className="px-4 py-2 bg-amber-500 text-neutral-white rounded-md hover:bg-amber-600"
+                        disabled={loading}
+                      >
+                        {loading ? "Procesando..." : "Desactivar Usuario"}
+                      </button>
+                    ) : null;
+                  })()}
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-medium text-neutral-dark mb-3">
+                  Confirmar eliminación
+                </h3>
+                <p className="text-neutral-medium mb-6">
+                  ¿Estás seguro de que deseas eliminar este usuario? Esta acción
+                  no se puede deshacer.
+                </p>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setConfirmDelete(null)}
+                    className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() =>
+                      confirmDelete.id && handleDelete(confirmDelete.id)
+                    }
+                    className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
+                    disabled={loading}
+                  >
+                    {loading ? "Eliminando..." : "Eliminar"}
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 };
