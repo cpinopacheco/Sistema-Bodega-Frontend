@@ -289,4 +289,120 @@ router.delete("/:id", async (req, res) => {
     }
 })
 
+// POST /api/products/bulk-import - Importación masiva de productos
+router.post("/bulk-import", async (req, res) => {
+    try {
+        const { products } = req.body
+
+        if (!Array.isArray(products) || products.length === 0) {
+            return res.status(400).json({ error: "Se requiere un array de productos" })
+        }
+
+        const results = {
+            success: [],
+            errors: [],
+            total: products.length,
+        }
+
+        // Procesar cada producto
+        for (let i = 0; i < products.length; i++) {
+            const product = products[i]
+
+            try {
+                const { name, description, categoryId, stock, minStock } = product
+
+                // Validaciones básicas
+                if (!name || !name.trim()) {
+                    results.errors.push({
+                        index: i + 1,
+                        product: product,
+                        error: "El nombre es requerido",
+                    })
+                    continue
+                }
+
+                if (!categoryId) {
+                    results.errors.push({
+                        index: i + 1,
+                        product: product,
+                        error: "La categoría es requerida",
+                    })
+                    continue
+                }
+
+                if (stock < 0 || minStock < 0) {
+                    results.errors.push({
+                        index: i + 1,
+                        product: product,
+                        error: "Stock y stock mínimo no pueden ser negativos",
+                    })
+                    continue
+                }
+
+                // Verificar si ya existe un producto con el mismo nombre
+                const nameCheck = await pool.query("SELECT id FROM products WHERE LOWER(name) = LOWER($1)", [name.trim()])
+                if (nameCheck.rows.length > 0) {
+                    results.errors.push({
+                        index: i + 1,
+                        product: product,
+                        error: "Ya existe un producto con este nombre",
+                    })
+                    continue
+                }
+
+                // Verificar que la categoría existe
+                const categoryCheck = await pool.query("SELECT id, name FROM categories WHERE id = $1", [categoryId])
+                if (categoryCheck.rows.length === 0) {
+                    results.errors.push({
+                        index: i + 1,
+                        product: product,
+                        error: "La categoría especificada no existe",
+                    })
+                    continue
+                }
+
+                // Insertar producto
+                const result = await pool.query(
+                    `INSERT INTO products (name, description, category_id, stock, min_stock) 
+           VALUES ($1, $2, $3, $4, $5) 
+           RETURNING id, name, description, stock, min_stock, created_at, updated_at`,
+                    [name.trim(), description || "", categoryId, stock || 0, minStock || 0],
+                )
+
+                const newProduct = {
+                    id: result.rows[0].id,
+                    name: result.rows[0].name,
+                    description: result.rows[0].description || "",
+                    category: categoryCheck.rows[0].name,
+                    categoryId: categoryId,
+                    stock: result.rows[0].stock,
+                    minStock: result.rows[0].min_stock,
+                    createdAt: result.rows[0].created_at,
+                    updatedAt: result.rows[0].updated_at,
+                }
+
+                results.success.push({
+                    index: i + 1,
+                    product: newProduct,
+                })
+            } catch (error) {
+                console.error(`Error procesando producto ${i + 1}:`, error)
+                results.errors.push({
+                    index: i + 1,
+                    product: product,
+                    error: error.message || "Error interno del servidor",
+                })
+            }
+        }
+
+        res.json({
+            message: "Importación completada",
+            results: results,
+        })
+    } catch (error) {
+        console.error("Error en importación masiva:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
 module.exports = router

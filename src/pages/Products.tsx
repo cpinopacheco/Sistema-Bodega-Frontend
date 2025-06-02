@@ -15,6 +15,7 @@ import {
   FaShoppingCart,
   FaArrowUp,
   FaArrowDown,
+  FaFileImport,
 } from "react-icons/fa";
 import { useProducts, type Product } from "../context/ProductContext";
 import { useWithdrawal } from "../context/WithdrawalContext";
@@ -22,6 +23,7 @@ import ProductForm from "../components/products/ProductForm";
 import CategoriesList from "../components/categories/CategoriesList";
 import { Tooltip } from "../components/ui/Tooltip";
 import StockManagementForm from "../components/products/StockManagementForm";
+import ProductImportModal from "../components/products/ProductImportModal";
 
 const Products = () => {
   const { products, categories, deleteProduct } = useProducts();
@@ -41,6 +43,7 @@ const Products = () => {
   );
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [showStockManagementForm, setShowStockManagementForm] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Inicializar cantidades
   useEffect(() => {
@@ -133,6 +136,13 @@ const Products = () => {
           Gestión de Productos
         </h1>
         <div className="flex space-x-2">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="inline-flex items-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
+          >
+            <FaFileImport className="mr-2" />
+            Cargar Productos
+          </button>
           <button
             onClick={() => setShowCategoriesList(true)}
             className="inline-flex items-center px-4 py-2 bg-accent text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
@@ -476,6 +486,15 @@ const Products = () => {
               setSelectedProduct(null);
             }}
             isVisible={showStockManagementForm}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showImportModal && (
+          <ProductImportModal
+            onClose={() => setShowImportModal(false)}
+            isVisible={showImportModal}
           />
         )}
       </AnimatePresence>

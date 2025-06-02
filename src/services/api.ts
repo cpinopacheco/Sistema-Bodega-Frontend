@@ -369,6 +369,24 @@ export const productsAPI = {
     });
     return handleResponse(response);
   },
+
+  // Importación masiva de productos
+  bulkImport: async (
+    products: Array<{
+      name: string;
+      description?: string;
+      categoryId: number;
+      stock: number;
+      minStock: number;
+    }>
+  ) => {
+    const response = await fetch(`${API_BASE_URL}/products/bulk-import`, {
+      method: "POST",
+      headers: createAuthHeaders(),
+      body: JSON.stringify({ products }),
+    });
+    return handleResponse(response);
+  },
 };
 
 // =====================================================
