@@ -1,38 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa"
-import { useProducts, type Category } from "../../context/ProductContext"
-import CategoryForm from "./CategoryForm"
-import { Tooltip } from "../ui/Tooltip"
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
+import { useProducts, type Category } from "../../context/ProductContext";
+import CategoryForm from "./CategoryForm";
+import { Tooltip } from "../ui/Tooltip";
 
 interface CategoriesListProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
 const CategoriesList = ({ onClose }: CategoriesListProps) => {
-  const { categories, deleteCategory } = useProducts()
-  const [showCategoryForm, setShowCategoryForm] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
+  const { categories, deleteCategory } = useProducts();
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   // Función para abrir modal de edición
   const handleEdit = (category: Category) => {
-    setSelectedCategory(category)
-    setShowCategoryForm(true)
-  }
+    setSelectedCategory(category);
+    setShowCategoryForm(true);
+  };
 
   // Función para confirmar eliminación
   const handleDeleteConfirm = (id: number) => {
-    setConfirmDelete(id)
-  }
+    setConfirmDelete(id);
+  };
 
   // Función para eliminar categoría
   const handleDelete = (id: number) => {
-    deleteCategory(id)
-    setConfirmDelete(null)
-  }
+    deleteCategory(id);
+    setConfirmDelete(null);
+  };
 
   return (
     <div
@@ -43,10 +45,12 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-neutral-white rounded-lg shadow-xl w-full max-w-2xl"
+        className="bg-neutral-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 border-b border-neutral-light">
-          <h2 className="text-xl font-semibold text-primary">Gestión de Categorías</h2>
+        <div className="flex justify-between items-center p-4 border-b border-neutral-light flex-shrink-0">
+          <h2 className="text-xl font-semibold text-primary">
+            Gestión de Categorías
+          </h2>
           <button
             onClick={onClose}
             className="text-neutral-medium hover:text-neutral-dark focus:outline-none"
@@ -56,15 +60,18 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
           </button>
         </div>
 
-        <div className="p-4">
+        <div className="p-4 flex-1 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <p className="text-neutral-medium">
-              Total: <span className="font-semibold">{categories.length} categorías</span>
+              Total:{" "}
+              <span className="font-semibold">
+                {categories.length} categorías
+              </span>
             </p>
             <button
               onClick={() => {
-                setSelectedCategory(null)
-                setShowCategoryForm(true)
+                setSelectedCategory(null);
+                setShowCategoryForm(true);
               }}
               className="inline-flex items-center px-3 py-1.5 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors text-sm"
             >
@@ -91,10 +98,17 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
                 </thead>
                 <tbody className="bg-neutral-white divide-y divide-neutral-light">
                   {categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-primary-lightest hover:bg-opacity-30">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">{category.id}</td>
+                    <tr
+                      key={category.id}
+                      className="hover:bg-primary-lightest hover:bg-opacity-30"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                        {category.id}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-neutral-dark">{category.name}</div>
+                        <div className="text-sm font-medium text-neutral-dark">
+                          {category.name}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
@@ -124,12 +138,14 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-neutral-medium">No hay categorías disponibles</p>
+              <p className="text-neutral-medium">
+                No hay categorías disponibles
+              </p>
             </div>
           )}
         </div>
 
-        <div className="p-4 border-t border-neutral-light flex justify-end">
+        <div className="p-4 border-t border-neutral-light flex justify-end flex-shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-neutral-light text-neutral-dark rounded-md hover:bg-neutral-medium hover:text-neutral-white transition-colors"
@@ -144,8 +160,8 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
           <CategoryForm
             category={selectedCategory || undefined}
             onClose={() => {
-              setShowCategoryForm(false)
-              setSelectedCategory(null)
+              setShowCategoryForm(false);
+              setSelectedCategory(null);
             }}
             isVisible={showCategoryForm}
           />
@@ -166,9 +182,12 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-              <h3 className="text-lg font-medium text-neutral-dark mb-3">Confirmar eliminación</h3>
+              <h3 className="text-lg font-medium text-neutral-dark mb-3">
+                Confirmar eliminación
+              </h3>
               <p className="text-neutral-medium mb-6">
-                ¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.
+                ¿Estás seguro de que deseas eliminar esta categoría? Esta acción
+                no se puede deshacer.
               </p>
               <div className="flex justify-end space-x-3">
                 <button
@@ -189,7 +208,7 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default CategoriesList
+export default CategoriesList;
