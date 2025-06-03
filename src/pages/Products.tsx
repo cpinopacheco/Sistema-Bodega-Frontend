@@ -130,7 +130,7 @@ const Products = () => {
     });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-neutral-dark">
           Gestión de Productos
@@ -194,6 +194,94 @@ const Products = () => {
         </div>
       </div>
 
+      <AnimatePresence>
+        {showProductForm && (
+          <ProductForm
+            product={selectedProduct || undefined}
+            onClose={() => {
+              setShowProductForm(false);
+              setSelectedProduct(null);
+            }}
+            isVisible={showProductForm}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showCategoriesList && (
+          <CategoriesList onClose={() => setShowCategoriesList(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {confirmDelete !== null && (
+          <motion.div
+            initial={{ opacity: 0, marginTop: 0 }}
+            animate={{ opacity: 1, marginTop: 0 }}
+            exit={{ opacity: 0, marginTop: 0 }}
+            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
+            style={{ marginTop: "0px !important" }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
+            >
+              <h3 className="text-lg font-medium text-neutral-dark mb-3">
+                Confirmar eliminación
+              </h3>
+              <p className="text-neutral-medium mb-6">
+                ¿Estás seguro de que deseas eliminar este producto? Esta acción
+                no se puede deshacer.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDelete(confirmDelete)}
+                  className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showStockManagementForm && selectedProduct && (
+          <StockManagementForm
+            product={selectedProduct}
+            onClose={() => {
+              setShowStockManagementForm(false);
+              setSelectedProduct(null);
+            }}
+            isVisible={showStockManagementForm}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showImportModal && (
+          <ProductImportModal
+            onClose={() => setShowImportModal(false)}
+            isVisible={showImportModal}
+          />
+        )}
+      </AnimatePresence>
+
+      <p
+        className="text-sm text-neutral-medium mb-1"
+        style={{ marginTop: "32px" }}
+      >
+        Haz clic en los encabezados de la tabla para ordenar los productos.
+      </p>
       {filteredProducts.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -201,12 +289,13 @@ const Products = () => {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
           className="bg-neutral-white rounded-lg shadow-md overflow-hidden max-h-[70vh] flex flex-col"
+          style={{ marginTop: "8px" }}
         >
           <div className="flex-1 overflow-y-auto">
             <table className="min-w-full divide-y divide-neutral-light">
               <thead className="bg-primary-lightest sticky top-0 z-10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("name")}
                       className="flex items-center focus:outline-none"
@@ -220,7 +309,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("category")}
                       className="flex items-center focus:outline-none"
@@ -234,7 +323,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("stock")}
                       className="flex items-center focus:outline-none"
@@ -248,7 +337,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
                     ACCIONES
                   </th>
                 </tr>
@@ -416,88 +505,6 @@ const Products = () => {
           </p>
         </div>
       )}
-
-      <AnimatePresence>
-        {showProductForm && (
-          <ProductForm
-            product={selectedProduct || undefined}
-            onClose={() => {
-              setShowProductForm(false);
-              setSelectedProduct(null);
-            }}
-            isVisible={showProductForm}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showCategoriesList && (
-          <CategoriesList onClose={() => setShowCategoriesList(false)} />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {confirmDelete !== null && (
-          <motion.div
-            initial={{ opacity: 0, marginTop: 0 }}
-            animate={{ opacity: 1, marginTop: 0 }}
-            exit={{ opacity: 0, marginTop: 0 }}
-            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
-            style={{ marginTop: "0px !important" }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
-            >
-              <h3 className="text-lg font-medium text-neutral-dark mb-3">
-                Confirmar eliminación
-              </h3>
-              <p className="text-neutral-medium mb-6">
-                ¿Estás seguro de que deseas eliminar este producto? Esta acción
-                no se puede deshacer.
-              </p>
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setConfirmDelete(null)}
-                  className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => handleDelete(confirmDelete)}
-                  className="px-4 py-2 bg-state-error text-neutral-white rounded-md hover:bg-opacity-90"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showStockManagementForm && selectedProduct && (
-          <StockManagementForm
-            product={selectedProduct}
-            onClose={() => {
-              setShowStockManagementForm(false);
-              setSelectedProduct(null);
-            }}
-            isVisible={showStockManagementForm}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showImportModal && (
-          <ProductImportModal
-            onClose={() => setShowImportModal(false)}
-            isVisible={showImportModal}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };

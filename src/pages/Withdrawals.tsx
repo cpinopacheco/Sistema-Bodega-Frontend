@@ -13,6 +13,8 @@ import {
   FaBuilding,
   FaSortAmountDown,
   FaSortAmountUp,
+  FaSearch,
+  FaFilter,
 } from "react-icons/fa";
 import { useWithdrawal } from "../context/WithdrawalContext";
 import { Tooltip } from "../components/ui/Tooltip";
@@ -37,7 +39,7 @@ const Withdrawals = () => {
   );
   const navigate = useNavigate();
 
-  // Agregar estos estados al inicio del componente (después de los estados existentes)
+  // Estados para filtros
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -45,7 +47,7 @@ const Withdrawals = () => {
 
   // Estados para ordenamiento
   const [sortField, setSortField] = useState<
-    "date" | "id" | "items" | "section"
+    "date" | "id" | "items" | "section" | "withdrawer" | "registeredBy"
   >("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc"); // desc = más recientes primero por defecto
 
@@ -89,6 +91,18 @@ const Withdrawals = () => {
         withdrawal.createdAt
       ).toLocaleDateString()}`
     );
+  };
+
+  // Manejar ordenamiento
+  const handleSort = (
+    field: "date" | "id" | "items" | "section" | "withdrawer" | "registeredBy"
+  ) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc"); // Por defecto, ordenar descendente al cambiar de campo
+    }
   };
 
   // Filtrar y ordenar retiros
@@ -144,6 +158,12 @@ const Withdrawals = () => {
         case "section":
           comparison = a.withdrawerSection.localeCompare(b.withdrawerSection);
           break;
+        case "withdrawer":
+          comparison = a.withdrawerName.localeCompare(b.withdrawerName);
+          break;
+        case "registeredBy":
+          comparison = a.userName.localeCompare(b.userName);
+          break;
         default:
           comparison =
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -166,9 +186,9 @@ const Withdrawals = () => {
     if (sortField !== field) return null;
 
     return sortDirection === "asc" ? (
-      <FaSortAmountUp className="ml-1 text-primary" />
+      <FaSortAmountUp className="ml-1 inline-block" />
     ) : (
-      <FaSortAmountDown className="ml-1 text-primary" />
+      <FaSortAmountDown className="ml-1 inline-block" />
     );
   };
 
@@ -418,347 +438,326 @@ const Withdrawals = () => {
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <div className="bg-neutral-white rounded-lg shadow-md overflow-hidden">
-              <div className="bg-primary-lightest px-6 py-4 border-b border-primary-lightest">
-                <h2 className="text-xl font-semibold text-primary">
-                  Historial de Retiros
-                </h2>
+            {/* Sección de título */}
+            <div className="bg-neutral-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold text-primary">
+                Historial de Retiros
+              </h2>
+            </div>
+
+            {/* Sección de filtros - Separada de la tabla */}
+            <div className="bg-neutral-white rounded-lg shadow-md p-6">
+              <div className="flex items-center mb-4">
+                <FaFilter className="text-primary mr-2" />
+                <h3 className="text-lg font-medium text-neutral-dark">
+                  Filtros
+                </h3>
               </div>
 
-              {/* Panel de Filtros */}
-              <div className="bg-primary-lightest p-4 rounded-lg mb-4 space-y-4">
-                <div className="flex flex-wrap gap-4">
-                  {/* Búsqueda por texto */}
-                  <div className="flex-1 min-w-[250px]">
-                    <label
-                      htmlFor="search"
-                      className="block text-sm font-medium text-neutral-dark mb-1"
-                    >
-                      Buscar retiros
-                    </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Búsqueda por texto */}
+                <div>
+                  <label
+                    htmlFor="search"
+                    className="block text-sm font-medium text-neutral-dark mb-2"
+                  >
+                    Buscar retiros
+                  </label>
+                  <div className="relative">
                     <input
                       id="search"
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Buscar por nombre, sección, ID o notas..."
-                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary pl-10"
                     />
-                  </div>
-
-                  {/* Filtro por sección */}
-                  <div className="min-w-[200px]">
-                    <label
-                      htmlFor="sectionFilter"
-                      className="block text-sm font-medium text-neutral-dark mb-1"
-                    >
-                      Sección
-                    </label>
-                    <select
-                      id="sectionFilter"
-                      value={selectedSection}
-                      onChange={(e) => setSelectedSection(e.target.value)}
-                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
-                    >
-                      <option value="">Todas las secciones</option>
-                      {SECTIONS.map((section) => (
-                        <option key={section} value={section}>
-                          {section}
-                        </option>
-                      ))}
-                    </select>
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-medium" />
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 items-end">
-                  {/* Fecha desde */}
-                  <div className="min-w-[150px]">
-                    <label
-                      htmlFor="startDate"
-                      className="block text-sm font-medium text-neutral-dark mb-1"
-                    >
-                      Desde
-                    </label>
-                    <input
-                      id="startDate"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
-                    />
-                  </div>
-
-                  {/* Fecha hasta */}
-                  <div className="min-w-[150px]">
-                    <label
-                      htmlFor="endDate"
-                      className="block text-sm font-medium text-neutral-dark mb-1"
-                    >
-                      Hasta
-                    </label>
-                    <input
-                      id="endDate"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
-                    />
-                  </div>
-
-                  {/* Botón limpiar filtros */}
-                  <div>
-                    <button
-                      onClick={clearFilters}
-                      className="px-4 py-2 bg-neutral-medium text-neutral-white rounded-md hover:bg-neutral-dark transition-colors"
-                    >
-                      Limpiar Filtros
-                    </button>
-                  </div>
+                {/* Filtro por sección */}
+                <div>
+                  <label
+                    htmlFor="sectionFilter"
+                    className="block text-sm font-medium text-neutral-dark mb-2"
+                  >
+                    Sección
+                  </label>
+                  <select
+                    id="sectionFilter"
+                    value={selectedSection}
+                    onChange={(e) => setSelectedSection(e.target.value)}
+                    className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                  >
+                    <option value="">Todas las secciones</option>
+                    {SECTIONS.map((section) => (
+                      <option key={section} value={section}>
+                        {section}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Contador de resultados */}
+                {/* Fecha desde */}
+                <div>
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium text-neutral-dark mb-2"
+                  >
+                    Desde
+                  </label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                  />
+                </div>
+
+                {/* Fecha hasta */}
+                <div>
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium text-neutral-dark mb-2"
+                  >
+                    Hasta
+                  </label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mt-4">
                 <div className="text-sm text-neutral-medium">
                   Mostrando {filteredAndSortedWithdrawals.length} de{" "}
                   {withdrawals.length} retiros
                 </div>
-
-                {/* Ordenamiento */}
-                <div className="flex flex-wrap gap-4 items-center border-t border-neutral-light pt-3">
-                  <div className="text-sm font-medium text-neutral-dark">
-                    Ordenar por:
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => {
-                        setSortField("date");
-                        setSortDirection(
-                          sortField === "date" && sortDirection === "desc"
-                            ? "asc"
-                            : "desc"
-                        );
-                      }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
-                        sortField === "date"
-                          ? "bg-primary text-neutral-white"
-                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
-                      }`}
-                    >
-                      Fecha
-                      {sortField === "date" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1" />
-                        ))}
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSortField("id");
-                        setSortDirection(
-                          sortField === "id" && sortDirection === "desc"
-                            ? "asc"
-                            : "desc"
-                        );
-                      }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
-                        sortField === "id"
-                          ? "bg-primary text-neutral-white"
-                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
-                      }`}
-                    >
-                      ID
-                      {sortField === "id" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1" />
-                        ))}
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSortField("items");
-                        setSortDirection(
-                          sortField === "items" && sortDirection === "desc"
-                            ? "asc"
-                            : "desc"
-                        );
-                      }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
-                        sortField === "items"
-                          ? "bg-primary text-neutral-white"
-                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
-                      }`}
-                    >
-                      Cantidad
-                      {sortField === "items" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1" />
-                        ))}
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSortField("section");
-                        setSortDirection(
-                          sortField === "section" && sortDirection === "desc"
-                            ? "asc"
-                            : "desc"
-                        );
-                      }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
-                        sortField === "section"
-                          ? "bg-primary text-neutral-white"
-                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
-                      }`}
-                    >
-                      Sección
-                      {sortField === "section" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1" />
-                        ))}
-                    </button>
-                  </div>
-                </div>
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-neutral-medium text-neutral-white rounded-md hover:bg-neutral-dark transition-colors"
+                >
+                  Limpiar Filtros
+                </button>
               </div>
+            </div>
 
+            {/* Sección de tabla - Separada de los filtros */}
+            <div className="bg-neutral-white rounded-lg shadow-md overflow-hidden">
               {filteredAndSortedWithdrawals.length > 0 ? (
-                <div className="divide-y divide-neutral-light">
-                  {filteredAndSortedWithdrawals.map((withdrawal) => (
-                    <div key={withdrawal.id} className="p-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-lg font-medium text-neutral-dark">
-                          Retiro #{withdrawal.id} - {withdrawal.withdrawerName}
-                        </h3>
-                        <div className="flex items-center space-x-3">
-                          <Tooltip content="Exportar a Excel" position="top">
-                            <button
-                              onClick={() => handleExportToExcel(withdrawal.id)}
-                              className="flex items-center justify-center w-9 h-9 text-state-success hover:bg-state-success hover:text-neutral-white rounded-full transition-colors p-2"
-                              aria-label="Exportar a Excel"
-                            >
-                              <FaFileExcel size={18} />
-                            </button>
-                          </Tooltip>
-                          <Tooltip
-                            content={
+                <div className="overflow-x-auto max-h-[32rem] overflow-y-auto">
+                  <table className="min-w-full divide-y divide-neutral-light">
+                    <thead className="bg-primary-lightest sticky top-0 z-10">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("id")}
+                        >
+                          ID {renderSortIndicator("id")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("date")}
+                        >
+                          Fecha {renderSortIndicator("date")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("withdrawer")}
+                        >
+                          Retirado por {renderSortIndicator("withdrawer")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("section")}
+                        >
+                          Sección {renderSortIndicator("section")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("registeredBy")}
+                        >
+                          Registrado por {renderSortIndicator("registeredBy")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          onClick={() => handleSort("items")}
+                        >
+                          Items {renderSortIndicator("items")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider"
+                        >
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                      {filteredAndSortedWithdrawals.map((withdrawal) => (
+                        <>
+                          <tr
+                            key={withdrawal.id}
+                            className={`hover:bg-primary-lightest hover:bg-opacity-30 cursor-pointer ${
                               selectedWithdrawal === withdrawal.id
-                                ? "Ocultar detalles"
-                                : "Ver detalles"
-                            }
-                            position="top"
-                          >
-                            <button
-                              onClick={() =>
-                                setSelectedWithdrawal(
-                                  selectedWithdrawal === withdrawal.id
-                                    ? null
-                                    : withdrawal.id
-                                )
-                              }
-                              className="flex items-center justify-center w-9 h-9 text-primary hover:bg-primary hover:text-neutral-white rounded-full transition-colors p-2"
-                              aria-label={
+                                ? "bg-primary-lightest"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              setSelectedWithdrawal(
                                 selectedWithdrawal === withdrawal.id
-                                  ? "Ocultar detalles"
-                                  : "Ver detalles"
-                              }
-                            >
-                              {selectedWithdrawal === withdrawal.id ? (
-                                <FaTimes size={18} />
-                              ) : (
-                                <FaClipboardList size={18} />
-                              )}
-                            </button>
-                          </Tooltip>
-                        </div>
-                      </div>
-                      <div className="text-sm text-neutral-medium mb-2">
-                        <div>
-                          <strong>Fecha:</strong>{" "}
-                          {new Date(withdrawal.createdAt).toLocaleDateString()}{" "}
-                          {new Date(withdrawal.createdAt).toLocaleTimeString()}
-                        </div>
-                        <div>
-                          <strong>Retirado por:</strong>{" "}
-                          {withdrawal.withdrawerName} -{" "}
-                          <strong>Sección:</strong>{" "}
-                          {withdrawal.withdrawerSection}
-                        </div>
-                        <div>
-                          <strong>Registrado por:</strong> {withdrawal.userName}{" "}
-                          - <strong>Items:</strong> {withdrawal.totalItems}
-                        </div>
-                      </div>
-
-                      {withdrawal.notes && (
-                        <div className="text-sm text-neutral-medium mb-2 italic">
-                          "{withdrawal.notes}"
-                        </div>
-                      )}
-
-                      <AnimatePresence>
-                        {selectedWithdrawal === withdrawal.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="mt-4 overflow-hidden"
+                                  ? null
+                                  : withdrawal.id
+                              )
+                            }
                           >
-                            <h4 className="text-sm font-medium text-primary mb-2">
-                              Detalle de productos:
-                            </h4>
-                            <div className="bg-primary-lightest rounded-md overflow-x-auto">
-                              <table className="min-w-full divide-y divide-neutral-light">
-                                <colgroup>
-                                  <col className="w-[75%]" />
-                                  <col className="w-[15%]" />
-                                  <col className="w-[10%]" />
-                                </colgroup>
-                                <thead className="bg-primary-lightest">
-                                  <tr>
-                                    <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                                      Producto
-                                    </th>
-                                    <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
-                                      Categoría
-                                    </th>
-                                    <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
-                                      Cantidad
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                                  {withdrawal.items.map((item) => (
-                                    <tr
-                                      key={item.productId}
-                                      className="hover:bg-primary-lightest"
-                                    >
-                                      <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
-                                        {item.product.name}
-                                      </td>
-                                      <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-center">
-                                        {item.product.category}
-                                      </td>
-                                      <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-center">
-                                        {item.quantity}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-dark">
+                              #{withdrawal.id}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                              {new Date(
+                                withdrawal.createdAt
+                              ).toLocaleDateString()}{" "}
+                              {new Date(
+                                withdrawal.createdAt
+                              ).toLocaleTimeString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark">
+                              {withdrawal.withdrawerName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                              {withdrawal.withdrawerSection}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                              {withdrawal.userName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark text-center">
+                              {withdrawal.totalItems}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <div className="flex justify-center space-x-2">
+                                <Tooltip
+                                  content="Exportar a Excel"
+                                  position="top"
+                                >
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleExportToExcel(withdrawal.id);
+                                    }}
+                                    className="flex items-center justify-center w-8 h-8 text-state-success hover:bg-state-success hover:text-neutral-white rounded-full transition-colors p-2"
+                                    aria-label="Exportar a Excel"
+                                  >
+                                    <FaFileExcel size={16} />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip
+                                  content={
+                                    selectedWithdrawal === withdrawal.id
+                                      ? "Ocultar detalles"
+                                      : "Ver detalles"
+                                  }
+                                  position="top"
+                                >
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedWithdrawal(
+                                        selectedWithdrawal === withdrawal.id
+                                          ? null
+                                          : withdrawal.id
+                                      );
+                                    }}
+                                    className="flex items-center justify-center w-8 h-8 text-primary hover:bg-primary hover:text-neutral-white rounded-full transition-colors p-2"
+                                    aria-label={
+                                      selectedWithdrawal === withdrawal.id
+                                        ? "Ocultar detalles"
+                                        : "Ver detalles"
+                                    }
+                                  >
+                                    {selectedWithdrawal === withdrawal.id ? (
+                                      <FaTimes size={16} />
+                                    ) : (
+                                      <FaClipboardList size={16} />
+                                    )}
+                                  </button>
+                                </Tooltip>
+                              </div>
+                            </td>
+                          </tr>
+                          {selectedWithdrawal === withdrawal.id && (
+                            <tr>
+                              <td colSpan={7} className="px-0 py-0 border-t-0">
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="bg-primary-lightest bg-opacity-30 px-6 py-4"
+                                >
+                                  {withdrawal.notes && (
+                                    <div className="text-sm text-neutral-medium mb-4 p-3 bg-neutral-white rounded-md italic">
+                                      <strong>Notas:</strong> {withdrawal.notes}
+                                    </div>
+                                  )}
+                                  <h4 className="text-sm font-medium text-primary mb-2">
+                                    Detalle de productos:
+                                  </h4>
+                                  <div className="bg-neutral-white rounded-md overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-neutral-light">
+                                      <thead className="bg-primary-lightest">
+                                        <tr>
+                                          <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                            Producto
+                                          </th>
+                                          <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                                            Categoría
+                                          </th>
+                                          <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                                            Cantidad
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                                        {withdrawal.items.map((item) => (
+                                          <tr
+                                            key={item.productId}
+                                            className="hover:bg-primary-lightest hover:bg-opacity-30"
+                                          >
+                                            <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
+                                              {item.product.name}
+                                            </td>
+                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-center">
+                                              {item.product.category}
+                                            </td>
+                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-center">
+                                              {item.quantity}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </motion.div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ) : (
                 <div className="text-center py-8">

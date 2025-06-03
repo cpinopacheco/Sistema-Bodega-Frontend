@@ -322,105 +322,110 @@ const Reports = () => {
 
               <div className="overflow-hidden rounded-lg border border-neutral-light">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-neutral-light">
-                    <thead className="bg-primary-lightest sticky top-0 z-10">
-                      <tr>
-                        <th
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
-                          onClick={() => handleSort("name")}
-                        >
-                          <button className="flex items-center focus:outline-none uppercase">
-                            PRODUCTO
-                            {renderSortIndicator("name")}
-                          </button>
-                        </th>
-                        <th
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
-                          onClick={() => handleSort("category")}
-                        >
-                          <button className="flex items-center focus:outline-none uppercase">
-                            CATEGORÍA
-                            {renderSortIndicator("category")}
-                          </button>
-                        </th>
-                        <th
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
-                          onClick={() => handleSort("stock")}
-                        >
-                          <button className="flex items-center focus:outline-none uppercase">
-                            STOCK
-                            {renderSortIndicator("stock")}
-                          </button>
-                        </th>
-                        <th
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
-                          onClick={() => handleSort("minStock")}
-                        >
-                          <button className="flex items-center focus:outline-none uppercase">
-                            STOCK MÍNIMO
-                            {renderSortIndicator("minStock")}
-                          </button>
-                        </th>
-                        <th
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
-                          onClick={() => handleSort("updatedAt")}
-                        >
-                          <button className="flex items-center focus:outline-none uppercase">
-                            ÚLTIMA ACTUALIZACIÓN
-                            {renderSortIndicator("updatedAt")}
-                          </button>
-                        </th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  <table className="min-w-full divide-y divide-neutral-light">
-                    <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                      {sortedProducts.map((product) => (
-                        <tr
-                          key={product.id}
-                          className={`hover:bg-primary-lightest ${
-                            product.stock <= product.minStock
-                              ? "bg-state-error bg-opacity-10"
-                              : ""
-                          }`}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-neutral-dark">
-                              {product.name}
+                  <div className="max-h-96 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-neutral-light table-fixed">
+                      <thead className="bg-primary-lightest sticky top-0 z-10">
+                        <tr>
+                          <th
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#A2C4B1] transition-colors duration-200"
+                            onClick={() => handleSort("name")}
+                          >
+                            <div className="flex items-center">
+                              PRODUCTO
+                              {renderSortIndicator("name")}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-neutral-medium">
-                              {product.category}
+                          </th>
+                          <th
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#A2C4B1] transition-colors duration-200"
+                            onClick={() => handleSort("category")}
+                          >
+                            <div className="flex items-center">
+                              CATEGORÍA
+                              {renderSortIndicator("category")}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div
-                              className={`text-sm font-medium ${
-                                product.stock <= product.minStock
-                                  ? "text-state-error"
-                                  : "text-state-success"
-                              }`}
-                            >
-                              {product.stock}
+                          </th>
+                          <th
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#A2C4B1] transition-colors duration-200"
+                            onClick={() => handleSort("stock")}
+                          >
+                            <div className="flex items-center">
+                              STOCK
+                              {renderSortIndicator("stock")}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-neutral-medium">
-                              {product.minStock}
+                          </th>
+                          <th
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#A2C4B1] transition-colors duration-200"
+                            onClick={() => handleSort("minStock")}
+                          >
+                            <div className="flex items-center">
+                              STOCK MÍNIMO
+                              {renderSortIndicator("minStock")}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-neutral-medium">
-                              {formatDate(product.updatedAt)}
+                          </th>
+                          <th
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#A2C4B1] transition-colors duration-200"
+                            onClick={() => handleSort("updatedAt")}
+                          >
+                            <div className="flex items-center">
+                              ÚLTIMA ACTUALIZACIÓN
+                              {renderSortIndicator("updatedAt")}
                             </div>
-                          </td>
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                        {sortedProducts.map((product) => (
+                          <tr
+                            key={product.id}
+                            className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
+                              product.stock <= product.minStock
+                                ? "bg-state-error bg-opacity-10"
+                                : ""
+                            }`}
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap w-[25%]">
+                              <div className="text-sm font-medium text-neutral-dark">
+                                {product.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap w-[25%]">
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
+                                {product.category}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                              <div
+                                className={`text-sm font-medium ${
+                                  product.stock <= product.minStock
+                                    ? "text-state-error"
+                                    : product.stock <= product.minStock * 2
+                                    ? "text-state-warning"
+                                    : "text-state-success"
+                                }`}
+                              >
+                                {product.stock} unidades
+                              </div>
+                              {product.stock <= product.minStock && (
+                                <div className="text-xs text-state-error">
+                                  Stock bajo
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                              <div className="text-sm text-neutral-medium">
+                                {product.minStock}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap w-[20%]">
+                              <div className="text-sm text-neutral-medium">
+                                {formatDate(product.updatedAt)}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -519,90 +524,86 @@ const Reports = () => {
               </p>
 
               {filteredWithdrawals.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="overflow-hidden rounded-lg border border-neutral-light">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-neutral-light">
+                <div className="overflow-hidden rounded-lg border border-neutral-light">
+                  <div className="overflow-x-auto">
+                    <div className="max-h-96 overflow-y-auto">
+                      <table className="min-w-full divide-y divide-neutral-light table-fixed">
                         <thead className="bg-primary-lightest sticky top-0 z-10">
                           <tr>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[10%] hover:bg-[#A2C4B1] transition-colors duration-200"
                               onClick={() => handleSort("id")}
                             >
-                              <button className="flex items-center focus:outline-none uppercase">
+                              <div className="flex items-center">
                                 ID
                                 {renderSortIndicator("id")}
-                              </button>
+                              </div>
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#A2C4B1] transition-colors duration-200"
                               onClick={() => handleSort("createdAt")}
                             >
-                              <button className="flex items-center focus:outline-none uppercase">
+                              <div className="flex items-center">
                                 FECHA
                                 {renderSortIndicator("createdAt")}
-                              </button>
+                              </div>
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[30%] hover:bg-[#A2C4B1] transition-colors duration-200"
                               onClick={() => handleSort("withdrawerName")}
                             >
-                              <button className="flex items-center focus:outline-none uppercase">
+                              <div className="flex items-center">
                                 PERSONA QUE RETIRA
                                 {renderSortIndicator("withdrawerName")}
-                              </button>
+                              </div>
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[30%] hover:bg-[#A2C4B1] transition-colors duration-200"
                               onClick={() => handleSort("withdrawerSection")}
                             >
-                              <button className="flex items-center focus:outline-none uppercase">
+                              <div className="flex items-center">
                                 SECCIÓN
                                 {renderSortIndicator("withdrawerSection")}
-                              </button>
+                              </div>
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[10%] hover:bg-[#A2C4B1] transition-colors duration-200"
                               onClick={() => handleSort("totalItems")}
                             >
-                              <button className="flex items-center focus:outline-none uppercase">
+                              <div className="flex items-center">
                                 ITEMS
                                 {renderSortIndicator("totalItems")}
-                              </button>
+                              </div>
                             </th>
                           </tr>
                         </thead>
-                      </table>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      <table className="min-w-full divide-y divide-neutral-light">
                         <tbody className="bg-neutral-white divide-y divide-neutral-light">
                           {sortedWithdrawals.map((withdrawal) => (
                             <tr
                               key={withdrawal.id}
-                              className="hover:bg-primary-lightest"
+                              className="hover:bg-primary-lightest hover:bg-opacity-30"
                             >
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap w-[10%]">
                                 <div className="text-sm font-medium text-neutral-dark">
                                   #{withdrawal.id}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap w-[20%]">
                                 <div className="text-sm text-neutral-medium">
                                   {formatDate(withdrawal.createdAt)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap w-[30%]">
                                 <div className="text-sm text-neutral-dark">
                                   {withdrawal.withdrawerName}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap w-[30%]">
                                 <div className="text-sm text-neutral-medium">
                                   {withdrawal.withdrawerSection}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-6 py-4 whitespace-nowrap w-[10%]">
                                 <div className="text-sm text-neutral-dark">
                                   {withdrawal.totalItems}
                                 </div>
