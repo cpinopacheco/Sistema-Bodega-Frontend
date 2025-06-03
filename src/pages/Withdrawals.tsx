@@ -35,6 +35,12 @@ const Withdrawals = () => {
   );
   const navigate = useNavigate();
 
+  // Agregar estos estados al inicio del componente (después de los estados existentes)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
+
   // Calcular el total de items en el carrito
   const cartTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -75,6 +81,48 @@ const Withdrawals = () => {
         withdrawal.createdAt
       ).toLocaleDateString()}`
     );
+  };
+
+  // Agregar esta función para filtrar retiros
+  const filteredWithdrawals = withdrawals.filter((withdrawal) => {
+    // Filtro por término de búsqueda
+    const matchesSearch =
+      searchTerm === "" ||
+      withdrawal.withdrawerName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      withdrawal.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      withdrawal.withdrawerSection
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      withdrawal.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      withdrawal.id.toString().includes(searchTerm);
+
+    // Filtro por fecha de inicio
+    const matchesStartDate =
+      startDate === "" || new Date(withdrawal.createdAt) >= new Date(startDate);
+
+    // Filtro por fecha de fin
+    const matchesEndDate =
+      endDate === "" ||
+      new Date(withdrawal.createdAt) <= new Date(endDate + "T23:59:59");
+
+    // Filtro por sección
+    const matchesSection =
+      selectedSection === "" ||
+      withdrawal.withdrawerSection === selectedSection;
+
+    return (
+      matchesSearch && matchesStartDate && matchesEndDate && matchesSection
+    );
+  });
+
+  // Función para limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStartDate("");
+    setEndDate("");
+    setSelectedSection("");
   };
 
   return (
@@ -330,9 +378,107 @@ const Withdrawals = () => {
                 </h2>
               </div>
 
-              {withdrawals.length > 0 ? (
+              {/* Panel de Filtros */}
+              <div className="bg-primary-lightest p-4 rounded-lg mb-4 space-y-4">
+                <div className="flex flex-wrap gap-4">
+                  {/* Búsqueda por texto */}
+                  <div className="flex-1 min-w-[250px]">
+                    <label
+                      htmlFor="search"
+                      className="block text-sm font-medium text-neutral-dark mb-1"
+                    >
+                      Buscar retiros
+                    </label>
+                    <input
+                      id="search"
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Buscar por nombre, sección, ID o notas..."
+                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                    />
+                  </div>
+
+                  {/* Filtro por sección */}
+                  <div className="min-w-[200px]">
+                    <label
+                      htmlFor="sectionFilter"
+                      className="block text-sm font-medium text-neutral-dark mb-1"
+                    >
+                      Sección
+                    </label>
+                    <select
+                      id="sectionFilter"
+                      value={selectedSection}
+                      onChange={(e) => setSelectedSection(e.target.value)}
+                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                    >
+                      <option value="">Todas las secciones</option>
+                      {SECTIONS.map((section) => (
+                        <option key={section} value={section}>
+                          {section}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 items-end">
+                  {/* Fecha desde */}
+                  <div className="min-w-[150px]">
+                    <label
+                      htmlFor="startDate"
+                      className="block text-sm font-medium text-neutral-dark mb-1"
+                    >
+                      Desde
+                    </label>
+                    <input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                    />
+                  </div>
+
+                  {/* Fecha hasta */}
+                  <div className="min-w-[150px]">
+                    <label
+                      htmlFor="endDate"
+                      className="block text-sm font-medium text-neutral-dark mb-1"
+                    >
+                      Hasta
+                    </label>
+                    <input
+                      id="endDate"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary"
+                    />
+                  </div>
+
+                  {/* Botón limpiar filtros */}
+                  <div>
+                    <button
+                      onClick={clearFilters}
+                      className="px-4 py-2 bg-neutral-medium text-neutral-white rounded-md hover:bg-neutral-dark transition-colors"
+                    >
+                      Limpiar Filtros
+                    </button>
+                  </div>
+                </div>
+
+                {/* Contador de resultados */}
+                <div className="text-sm text-neutral-medium">
+                  Mostrando {filteredWithdrawals.length} de {withdrawals.length}{" "}
+                  retiros
+                </div>
+              </div>
+
+              {filteredWithdrawals.length > 0 ? (
                 <div className="divide-y divide-neutral-light">
-                  {withdrawals.map((withdrawal) => (
+                  {filteredWithdrawals.map((withdrawal) => (
                     <div key={withdrawal.id} className="p-6">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-lg font-medium text-neutral-dark">
