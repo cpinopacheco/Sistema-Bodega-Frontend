@@ -204,14 +204,14 @@ const Products = () => {
         >
           <div className="flex-1 overflow-y-auto">
             <table className="min-w-full divide-y divide-neutral-light">
-              <thead className="bg-primary-lightest">
+              <thead className="bg-primary-lightest sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     <button
                       onClick={() => handleSort("name")}
                       className="flex items-center focus:outline-none"
                     >
-                      Producto
+                      PRODUCTO
                       {sortField === "name" &&
                         (sortDirection === "asc" ? (
                           <FaSortAmountUp className="ml-1 text-primary" />
@@ -225,7 +225,7 @@ const Products = () => {
                       onClick={() => handleSort("category")}
                       className="flex items-center focus:outline-none"
                     >
-                      Categoría
+                      CATEGORÍA
                       {sortField === "category" &&
                         (sortDirection === "asc" ? (
                           <FaSortAmountUp className="ml-1 text-primary" />
@@ -239,7 +239,7 @@ const Products = () => {
                       onClick={() => handleSort("stock")}
                       className="flex items-center focus:outline-none"
                     >
-                      Stock
+                      STOCK
                       {sortField === "stock" &&
                         (sortDirection === "asc" ? (
                           <FaSortAmountUp className="ml-1 text-primary" />
@@ -249,7 +249,7 @@ const Products = () => {
                     </button>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
-                    Acciones
+                    ACCIONES
                   </th>
                 </tr>
               </thead>

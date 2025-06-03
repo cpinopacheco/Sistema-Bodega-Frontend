@@ -11,6 +11,8 @@ import {
   FaClipboardList,
   FaUser,
   FaBuilding,
+  FaSortAmountDown,
+  FaSortAmountUp,
 } from "react-icons/fa";
 import { useWithdrawal } from "../context/WithdrawalContext";
 import { Tooltip } from "../components/ui/Tooltip";
@@ -157,6 +159,17 @@ const Withdrawals = () => {
     setStartDate("");
     setEndDate("");
     setSelectedSection("");
+  };
+
+  // Función para renderizar el indicador de ordenamiento
+  const renderSortIndicator = (field: string) => {
+    if (sortField !== field) return null;
+
+    return sortDirection === "asc" ? (
+      <FaSortAmountUp className="ml-1 text-primary" />
+    ) : (
+      <FaSortAmountDown className="ml-1 text-primary" />
+    );
   };
 
   return (
@@ -525,15 +538,19 @@ const Withdrawals = () => {
                             : "desc"
                         );
                       }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
                         sortField === "date"
                           ? "bg-primary text-neutral-white"
                           : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
                       }`}
                     >
-                      Fecha{" "}
+                      Fecha
                       {sortField === "date" &&
-                        (sortDirection === "desc" ? "↓" : "↑")}
+                        (sortDirection === "asc" ? (
+                          <FaSortAmountUp className="ml-1" />
+                        ) : (
+                          <FaSortAmountDown className="ml-1" />
+                        ))}
                     </button>
 
                     <button
@@ -545,15 +562,19 @@ const Withdrawals = () => {
                             : "desc"
                         );
                       }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
                         sortField === "id"
                           ? "bg-primary text-neutral-white"
                           : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
                       }`}
                     >
-                      ID{" "}
+                      ID
                       {sortField === "id" &&
-                        (sortDirection === "desc" ? "↓" : "↑")}
+                        (sortDirection === "asc" ? (
+                          <FaSortAmountUp className="ml-1" />
+                        ) : (
+                          <FaSortAmountDown className="ml-1" />
+                        ))}
                     </button>
 
                     <button
@@ -565,15 +586,19 @@ const Withdrawals = () => {
                             : "desc"
                         );
                       }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
                         sortField === "items"
                           ? "bg-primary text-neutral-white"
                           : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
                       }`}
                     >
-                      Cantidad{" "}
+                      Cantidad
                       {sortField === "items" &&
-                        (sortDirection === "desc" ? "↓" : "↑")}
+                        (sortDirection === "asc" ? (
+                          <FaSortAmountUp className="ml-1" />
+                        ) : (
+                          <FaSortAmountDown className="ml-1" />
+                        ))}
                     </button>
 
                     <button
@@ -585,15 +610,19 @@ const Withdrawals = () => {
                             : "desc"
                         );
                       }}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center ${
                         sortField === "section"
                           ? "bg-primary text-neutral-white"
                           : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
                       }`}
                     >
-                      Sección{" "}
+                      Sección
                       {sortField === "section" &&
-                        (sortDirection === "desc" ? "↓" : "↑")}
+                        (sortDirection === "asc" ? (
+                          <FaSortAmountUp className="ml-1" />
+                        ) : (
+                          <FaSortAmountDown className="ml-1" />
+                        ))}
                     </button>
                   </div>
                 </div>
