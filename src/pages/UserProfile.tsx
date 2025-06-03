@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import UserAvatar from "../components/ui/UserAvatar";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import { SECTIONS } from "../constants/sections";
 
 const UserProfile = () => {
   const {
@@ -86,7 +87,9 @@ const UserProfile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -397,8 +400,7 @@ const UserProfile = () => {
                 <FaBuilding className="inline mr-2 text-primary" />
                 Sección/Departamento <span className="text-state-error">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="section"
                 name="section"
                 value={formData.section}
@@ -406,9 +408,15 @@ const UserProfile = () => {
                 className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
                   errors.section ? "border-state-error" : "border-neutral-light"
                 }`}
-                placeholder="Ingrese su sección o departamento"
                 required
-              />
+              >
+                <option value="">Seleccione una sección</option>
+                {SECTIONS.map((section) => (
+                  <option key={section} value={section}>
+                    {section}
+                  </option>
+                ))}
+              </select>
               {errors.section && (
                 <p className="mt-1 text-sm text-state-error">
                   {errors.section}
