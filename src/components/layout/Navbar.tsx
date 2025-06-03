@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaSignOutAlt, FaKey, FaUserEdit } from "react-icons/fa";
 import { HiOutlineShoppingCart } from "react-icons/hi";
@@ -20,8 +20,15 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
   const { cartTotalItems } = useWithdrawal();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useOnClickOutside(userMenuRef, () => setUserMenuOpen(false));
+
+  // Función para manejar el clic en el icono del carrito
+  const handleCartClick = () => {
+    // Navegar a la página de retiros y pasar un parámetro de estado para mostrar el carrito
+    navigate("/withdrawals", { state: { showCart: true } });
+  };
 
   return (
     <header className="bg-neutral-white border-b border-neutral-light shadow-sm">
@@ -66,8 +73,8 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link
-            to="/withdrawals"
+          <button
+            onClick={handleCartClick}
             className="relative p-2 text-primary hover:text-primary-light"
             aria-label="Carrito de retiros"
           >
@@ -81,7 +88,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }: NavbarProps) => {
                 {cartTotalItems}
               </motion.span>
             )}
-          </Link>
+          </button>
 
           <div className="relative" ref={userMenuRef}>
             <button

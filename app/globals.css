@@ -56,6 +56,52 @@ select {
   @apply transition-all duration-200;
 }
 
+/* Aplicar focus personalizado solo a elementos de formulario */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(11, 122, 64, 0.6) !important; /* primary-light con más opacidad */
+  border-color: #0b7a40 !important; /* primary-light */
+}
+
+/* Focus para botones de formulario específicos */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-success:focus,
+.btn-danger:focus,
+.btn-warning:focus,
+button[type="submit"]:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(11, 122, 64, 0.6) !important;
+}
+
+/* EXCLUIR COMPLETAMENTE todos los botones de navegación y UI del focus personalizado */
+nav *:focus,
+header *:focus,
+.navbar *:focus,
+.sidebar *:focus,
+button:focus:not([type="submit"]):not(.btn-primary):not(.btn-secondary):not(
+    .btn-success
+  ):not(.btn-danger):not(.btn-warning),
+[role="tab"]:focus,
+[role="button"]:focus:not([type="submit"]),
+.tab-button:focus,
+.nav-button:focus,
+.hamburger-button:focus,
+button[aria-label*="menú"]:focus,
+button[aria-label*="menu"]:focus,
+button[aria-label*="toggle"]:focus,
+button[aria-label*="Toggle"]:focus {
+  box-shadow: none !important;
+  border-color: initial !important;
+  outline: none !important;
+}
+
 /* Estilos para botones */
 button {
   @apply transition-all duration-200;

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import {
   FaShoppingCart,
   FaTrash,
@@ -33,11 +34,12 @@ const Withdrawals = () => {
   const [notes, setNotes] = useState("");
   const [withdrawerName, setWithdrawerName] = useState("");
   const [withdrawerSection, setWithdrawerSection] = useState("");
-  const [showWithdrawalHistory, setShowWithdrawalHistory] = useState(false);
+  const [showWithdrawalHistory, setShowWithdrawalHistory] = useState(true);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<number | null>(
     null
   );
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +52,16 @@ const Withdrawals = () => {
     "date" | "id" | "items" | "section" | "withdrawer" | "registeredBy"
   >("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc"); // desc = más recientes primero por defecto
+
+  // Efecto para verificar si se debe mostrar el carrito basado en el estado de navegación
+  useEffect(() => {
+    // Verificar si hay un estado en la navegación que indique mostrar el carrito
+    if (location.state && location.state.showCart) {
+      setShowWithdrawalHistory(false);
+      // Limpiar el estado para evitar comportamientos inesperados en futuras navegaciones
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   // Calcular el total de items en el carrito
   const cartTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -203,7 +215,7 @@ const Withdrawals = () => {
           className="px-4 py-2 rounded-md bg-primary text-neutral-white hover:bg-primary-light transition-colors"
         >
           {showWithdrawalHistory
-            ? "Volver a Retiros"
+            ? "Ver Carrito de Retiro"
             : "Ver Historial de Retiros"}
         </button>
       </div>
