@@ -41,6 +41,12 @@ const Withdrawals = () => {
   const [endDate, setEndDate] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
 
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<
+    "date" | "id" | "items" | "section"
+  >("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc"); // desc = más recientes primero por defecto
+
   // Calcular el total de items en el carrito
   const cartTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -83,39 +89,67 @@ const Withdrawals = () => {
     );
   };
 
-  // Agregar esta función para filtrar retiros
-  const filteredWithdrawals = withdrawals.filter((withdrawal) => {
-    // Filtro por término de búsqueda
-    const matchesSearch =
-      searchTerm === "" ||
-      withdrawal.withdrawerName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      withdrawal.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      withdrawal.withdrawerSection
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      withdrawal.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      withdrawal.id.toString().includes(searchTerm);
+  // Filtrar y ordenar retiros
+  const filteredAndSortedWithdrawals = withdrawals
+    .filter((withdrawal) => {
+      // Filtro por término de búsqueda
+      const matchesSearch =
+        searchTerm === "" ||
+        withdrawal.withdrawerName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        withdrawal.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.withdrawerSection
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        withdrawal.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.id.toString().includes(searchTerm);
 
-    // Filtro por fecha de inicio
-    const matchesStartDate =
-      startDate === "" || new Date(withdrawal.createdAt) >= new Date(startDate);
+      // Filtro por fecha de inicio
+      const matchesStartDate =
+        startDate === "" ||
+        new Date(withdrawal.createdAt) >= new Date(startDate);
 
-    // Filtro por fecha de fin
-    const matchesEndDate =
-      endDate === "" ||
-      new Date(withdrawal.createdAt) <= new Date(endDate + "T23:59:59");
+      // Filtro por fecha de fin
+      const matchesEndDate =
+        endDate === "" ||
+        new Date(withdrawal.createdAt) <= new Date(endDate + "T23:59:59");
 
-    // Filtro por sección
-    const matchesSection =
-      selectedSection === "" ||
-      withdrawal.withdrawerSection === selectedSection;
+      // Filtro por sección
+      const matchesSection =
+        selectedSection === "" ||
+        withdrawal.withdrawerSection === selectedSection;
 
-    return (
-      matchesSearch && matchesStartDate && matchesEndDate && matchesSection
-    );
-  });
+      return (
+        matchesSearch && matchesStartDate && matchesEndDate && matchesSection
+      );
+    })
+    .sort((a, b) => {
+      // Ordenamiento según el campo seleccionado
+      let comparison = 0;
+
+      switch (sortField) {
+        case "date":
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case "id":
+          comparison = a.id - b.id;
+          break;
+        case "items":
+          comparison = a.totalItems - b.totalItems;
+          break;
+        case "section":
+          comparison = a.withdrawerSection.localeCompare(b.withdrawerSection);
+          break;
+        default:
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+
+      // Aplicar dirección del ordenamiento
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
 
   // Función para limpiar filtros
   const clearFilters = () => {
@@ -471,14 +505,103 @@ const Withdrawals = () => {
 
                 {/* Contador de resultados */}
                 <div className="text-sm text-neutral-medium">
-                  Mostrando {filteredWithdrawals.length} de {withdrawals.length}{" "}
-                  retiros
+                  Mostrando {filteredAndSortedWithdrawals.length} de{" "}
+                  {withdrawals.length} retiros
+                </div>
+
+                {/* Ordenamiento */}
+                <div className="flex flex-wrap gap-4 items-center border-t border-neutral-light pt-3">
+                  <div className="text-sm font-medium text-neutral-dark">
+                    Ordenar por:
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                        setSortField("date");
+                        setSortDirection(
+                          sortField === "date" && sortDirection === "desc"
+                            ? "asc"
+                            : "desc"
+                        );
+                      }}
+                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                        sortField === "date"
+                          ? "bg-primary text-neutral-white"
+                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
+                      }`}
+                    >
+                      Fecha{" "}
+                      {sortField === "date" &&
+                        (sortDirection === "desc" ? "↓" : "↑")}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSortField("id");
+                        setSortDirection(
+                          sortField === "id" && sortDirection === "desc"
+                            ? "asc"
+                            : "desc"
+                        );
+                      }}
+                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                        sortField === "id"
+                          ? "bg-primary text-neutral-white"
+                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
+                      }`}
+                    >
+                      ID{" "}
+                      {sortField === "id" &&
+                        (sortDirection === "desc" ? "↓" : "↑")}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSortField("items");
+                        setSortDirection(
+                          sortField === "items" && sortDirection === "desc"
+                            ? "asc"
+                            : "desc"
+                        );
+                      }}
+                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                        sortField === "items"
+                          ? "bg-primary text-neutral-white"
+                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
+                      }`}
+                    >
+                      Cantidad{" "}
+                      {sortField === "items" &&
+                        (sortDirection === "desc" ? "↓" : "↑")}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSortField("section");
+                        setSortDirection(
+                          sortField === "section" && sortDirection === "desc"
+                            ? "asc"
+                            : "desc"
+                        );
+                      }}
+                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                        sortField === "section"
+                          ? "bg-primary text-neutral-white"
+                          : "bg-neutral-light text-neutral-dark hover:bg-primary-lightest"
+                      }`}
+                    >
+                      Sección{" "}
+                      {sortField === "section" &&
+                        (sortDirection === "desc" ? "↓" : "↑")}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {filteredWithdrawals.length > 0 ? (
+              {filteredAndSortedWithdrawals.length > 0 ? (
                 <div className="divide-y divide-neutral-light">
-                  {filteredWithdrawals.map((withdrawal) => (
+                  {filteredAndSortedWithdrawals.map((withdrawal) => (
                     <div key={withdrawal.id} className="p-6">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-lg font-medium text-neutral-dark">
