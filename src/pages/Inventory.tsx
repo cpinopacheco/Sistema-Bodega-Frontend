@@ -7,7 +7,7 @@ import { useProducts } from "../context/ProductContext";
 import { ExportToExcel } from "../utils/ExcelExport";
 import { formatDate } from "../utils/DateUtils";
 
-const Reports = () => {
+const Inventory = () => {
   const { products } = useProducts();
 
   const [category, setCategory] = useState("all");
@@ -298,4 +298,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default Inventory;

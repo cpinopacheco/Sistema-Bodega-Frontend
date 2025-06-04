@@ -13,7 +13,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Withdrawals from "./pages/Withdrawals";
-import Reports from "./pages/Reports";
+import Inventory from "./pages/Inventory";
 import LowStock from "./pages/LowStock";
 import Statistics from "./pages/Statistics";
 import ChangePassword from "./pages/ChangePassword";
@@ -82,7 +82,7 @@ function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="products" element={<Products />} />
                     <Route path="withdrawals" element={<Withdrawals />} />
-                    <Route path="reports" element={<Reports />} />
+                    <Route path="inventory" element={<Inventory />} />
                     <Route path="low-stock" element={<LowStock />} />
                     <Route path="statistics" element={<Statistics />} />
                     <Route

@@ -603,7 +603,7 @@ const Withdrawals = () => {
                   className="inline-flex items-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
                 >
                   <FaFileExcel className="mr-2" />
-                  Exportar Todo a Excel
+                  Exportar a Excel
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
