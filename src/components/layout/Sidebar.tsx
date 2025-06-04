@@ -6,7 +6,7 @@ import {
   FaHome,
   FaBoxes,
   FaClipboardList,
-  FaFileAlt,
+  FaWarehouse,
   FaExclamationTriangle,
   FaChartBar,
   FaUsers,
@@ -20,7 +20,7 @@ const Sidebar = () => {
     { to: "/dashboard", icon: <FaHome />, label: "Dashboard" },
     { to: "/products", icon: <FaBoxes />, label: "Productos" },
     { to: "/withdrawals", icon: <FaClipboardList />, label: "Retiros" },
-    { to: "/reports", icon: <FaFileAlt />, label: "Reportes" },
+    { to: "/reports", icon: <FaWarehouse />, label: "Inventario" },
     { to: "/low-stock", icon: <FaExclamationTriangle />, label: "Stock Bajo" },
     { to: "/statistics", icon: <FaChartBar />, label: "Estadísticas" },
   ];

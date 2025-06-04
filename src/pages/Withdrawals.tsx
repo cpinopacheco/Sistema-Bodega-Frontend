@@ -105,6 +105,44 @@ const Withdrawals = () => {
     );
   };
 
+  // Manejar exportación masiva a Excel
+  const handleMassExportToExcel = () => {
+    let allWithdrawalItems: any[] = [];
+
+    filteredAndSortedWithdrawals.forEach((withdrawal) => {
+      const items = withdrawal.items.map((item) => ({
+        "ID Retiro": withdrawal.id,
+        Fecha: new Date(withdrawal.createdAt).toLocaleDateString(),
+        Hora: new Date(withdrawal.createdAt).toLocaleTimeString(),
+        "Usuario que registra": withdrawal.userName,
+        "Sección que registra": withdrawal.userSection,
+        "Persona que retira": withdrawal.withdrawerName,
+        "Sección que retira": withdrawal.withdrawerSection,
+        Producto: item.product.name,
+        Categoría: item.product.category,
+        Cantidad: item.quantity,
+        Notas: withdrawal.notes || "N/A",
+      }));
+
+      allWithdrawalItems = [...allWithdrawalItems, ...items];
+    });
+
+    const dateRange =
+      startDate && endDate
+        ? `_${startDate}_${endDate}`
+        : startDate
+        ? `_desde_${startDate}`
+        : endDate
+        ? `_hasta_${endDate}`
+        : "";
+    ExportToExcel(
+      allWithdrawalItems,
+      `Reporte_Retiros${dateRange}_${new Date()
+        .toLocaleDateString()
+        .replace(/\//g, "-")}`
+    );
+  };
+
   // Manejar ordenamiento
   const handleSort = (
     field: "date" | "id" | "items" | "section" | "withdrawer" | "registeredBy"
@@ -207,8 +245,15 @@ const Withdrawals = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-neutral-dark">
-          Gestión de Retiros
+        <h1 className="text-2xl font-bold text-neutral-dark flex items-center">
+          {showWithdrawalHistory ? (
+            "Historial de Retiros"
+          ) : (
+            <>
+              <FaShoppingCart className="mr-2 text-primary" />
+              Carrito de Retiro
+            </>
+          )}
         </h1>
         <button
           onClick={() => setShowWithdrawalHistory(!showWithdrawalHistory)}
@@ -231,11 +276,7 @@ const Withdrawals = () => {
             className="space-y-6"
           >
             <div className="bg-neutral-white rounded-lg shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-primary flex items-center">
-                  <FaShoppingCart className="mr-2 text-primary" />
-                  Carrito de Retiro
-                </h2>
+              <div className="flex items-center justify-end mb-6">
                 <span className="px-3 py-1 bg-primary-lightest text-primary rounded-full text-sm font-medium">
                   {cartTotalItems} {cartTotalItems === 1 ? "ítem" : "ítems"}
                 </span>
@@ -450,13 +491,6 @@ const Withdrawals = () => {
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            {/* Sección de título */}
-            <div className="bg-neutral-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-primary">
-                Historial de Retiros
-              </h2>
-            </div>
-
             {/* Sección de filtros - Separada de la tabla */}
             <div className="bg-neutral-white rounded-lg shadow-md p-6">
               <div className="flex items-center mb-4">
@@ -557,6 +591,53 @@ const Withdrawals = () => {
                 >
                   Limpiar Filtros
                 </button>
+              </div>
+            </div>
+
+            {/* Sección de resumen */}
+            <div className="bg-primary-lightest p-4 rounded-md mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-primary">Resumen</h3>
+                <button
+                  onClick={handleMassExportToExcel}
+                  className="inline-flex items-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
+                >
+                  <FaFileExcel className="mr-2" />
+                  Exportar Todo a Excel
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">Total retiros</p>
+                  <p className="text-2xl font-bold text-neutral-dark">
+                    {filteredAndSortedWithdrawals.length}
+                  </p>
+                </div>
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">
+                    Total items retirados
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {filteredAndSortedWithdrawals.reduce(
+                      (sum, w) => sum + w.totalItems,
+                      0
+                    )}
+                  </p>
+                </div>
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">
+                    Usuarios distintos
+                  </p>
+                  <p className="text-2xl font-bold text-accent">
+                    {
+                      new Set(
+                        filteredAndSortedWithdrawals.map(
+                          (w) => w.withdrawerName
+                        )
+                      ).size
+                    }
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -716,7 +797,15 @@ const Withdrawals = () => {
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: "auto" }}
                                   exit={{ opacity: 0, height: 0 }}
-                                  transition={{ duration: 0.3 }}
+                                  transition={{
+                                    duration: 0.3,
+                                    ease: [0.25, 0.46, 0.45, 0.94],
+                                    opacity: { duration: 0.6 },
+                                    height: {
+                                      duration: 0.3,
+                                      ease: [0.25, 0.46, 0.45, 0.94],
+                                    },
+                                  }}
                                   className="bg-primary-lightest bg-opacity-30 px-6 py-4"
                                 >
                                   {withdrawal.notes && (
@@ -734,10 +823,10 @@ const Withdrawals = () => {
                                           <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
                                             Producto
                                           </th>
-                                          <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                                          <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
                                             Categoría
                                           </th>
-                                          <th className="px-2 py-2 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                                          <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
                                             Cantidad
                                           </th>
                                         </tr>
@@ -751,10 +840,10 @@ const Withdrawals = () => {
                                             <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
                                               {item.product.name}
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-center">
+                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-left">
                                               {item.product.category}
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-center">
+                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-left">
                                               {item.quantity}
                                             </td>
                                           </tr>
