@@ -63,6 +63,8 @@ const Login = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-neutral-white p-8 rounded-lg shadow-lg max-w-md w-full"
+        role="main"
+        aria-labelledby="login-title"
       >
         <div className="text-center mb-8">
           <motion.div
@@ -73,13 +75,13 @@ const Login = () => {
           >
             <img
               src="/cenpecar-logo.png"
-              alt="CENPECAR Logo"
+              alt="Logo de CENPECAR - Centro de Perfeccionamiento de Carabineros"
               className="h-24 w-auto mx-auto"
             />
           </motion.div>
-          <h2 className="text-2xl font-bold text-primary">
+          <h1 id="login-title" className="text-2xl font-bold text-primary">
             Sistema de Inventario
-          </h2>
+          </h1>
           <p className="text-neutral-medium mt-1">
             Gestión de bódega y control de inventario
           </p>
@@ -91,18 +93,26 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-state-error bg-opacity-10 border border-state-error text-state-error px-4 py-3 rounded mb-4"
             role="alert"
+            aria-live="polite"
+            aria-atomic="true"
           >
             <span className="block sm:inline">{error}</span>
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
             <label
               htmlFor="employeeCode"
               className="block text-sm font-medium text-neutral-dark mb-1"
             >
               Código de Funcionario
+              <span
+                className="text-state-error ml-1"
+                aria-label="campo requerido"
+              >
+                *
+              </span>
             </label>
             <div className="relative">
               <input
@@ -111,24 +121,50 @@ const Login = () => {
                 value={employeeCode}
                 onChange={handleEmployeeCodeChange}
                 maxLength={7}
-                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-mono"
                 placeholder="123456a"
                 required
+                aria-required="true"
+                aria-describedby="employeeCode-help employeeCode-error"
+                aria-invalid={error ? "true" : "false"}
+                autoComplete="username"
               />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <div
+                className="absolute inset-y-0 left-0 flex items-center pl-3"
+                aria-hidden="true"
+              >
                 <FaUser className="text-neutral-medium" size={14} />
               </div>
             </div>
-            <p className="mt-1 text-xs text-neutral-medium">
-              6 dígitos seguidos de una letra (ej: 123456a)
+            <p
+              id="employeeCode-help"
+              className="mt-1 text-xs text-neutral-medium"
+            >
+              6 dígitos seguidos de una letra (ejemplo: 123456a)
             </p>
+            {error && error.includes("código") && (
+              <p
+                id="employeeCode-error"
+                className="mt-1 text-xs text-state-error"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
           </div>
+
           <div className="mb-6">
             <label
               htmlFor="password"
               className="block text-sm font-medium text-neutral-dark mb-1"
             >
               Contraseña
+              <span
+                className="text-state-error ml-1"
+                aria-label="campo requerido"
+              >
+                *
+              </span>
             </label>
             <div className="relative">
               <input
@@ -142,22 +178,46 @@ const Login = () => {
                     setError("");
                   }
                 }}
-                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="••••••••"
                 required
+                aria-required="true"
+                aria-describedby="password-error"
+                aria-invalid={error ? "true" : "false"}
+                autoComplete="current-password"
               />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <div
+                className="absolute inset-y-0 left-0 flex items-center pl-3"
+                aria-hidden="true"
+              >
                 <FaLock className="text-neutral-medium" size={14} />
               </div>
             </div>
+            {error && error.includes("Credenciales") && (
+              <p
+                id="password-error"
+                className="mt-1 text-xs text-state-error"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
           </div>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-light text-neutral-white font-semibold py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
+            className="w-full bg-primary hover:bg-primary-light text-neutral-white font-semibold py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-describedby={loading ? "loading-status" : undefined}
           >
             {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
+
+          {loading && (
+            <div id="loading-status" className="sr-only" aria-live="polite">
+              Procesando inicio de sesión, por favor espere
+            </div>
+          )}
         </form>
       </motion.div>
     </div>

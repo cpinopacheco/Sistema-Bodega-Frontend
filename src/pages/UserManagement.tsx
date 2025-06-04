@@ -56,6 +56,25 @@ const UserManagement = () => {
     }
   }, [users.length, hasAnimated]);
 
+  // Manejar cierre con tecla Escape para modales
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (confirmDelete !== null) {
+          setConfirmDelete(null);
+        }
+      }
+    };
+
+    if (confirmDelete !== null) {
+      window.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [confirmDelete]);
+
   // Verificar que el usuario actual es admin
   if (!currentUser || currentUser.role !== "admin") {
     return (
@@ -522,6 +541,12 @@ const UserManagement = () => {
           transition={{ duration: 0.3 }}
           className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 pb-4 !mt-0"
           style={{ marginTop: "0px !important" }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setConfirmDelete(null);
+            }
+          }}
+          tabIndex={-1}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -529,6 +554,7 @@ const UserManagement = () => {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
           >
             {confirmDelete.hasWithdrawals ? (
               <>

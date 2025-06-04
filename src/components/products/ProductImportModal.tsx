@@ -43,6 +43,23 @@ const ProductImportModal = ({
     []
   );
 
+  // Manejar cierre con tecla Escape
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isVisible) {
+        onClose();
+      }
+    };
+
+    if (isVisible) {
+      window.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isVisible, onClose]);
+
   // Cargar nombres de productos existentes
   useEffect(() => {
     if (products && products.length > 0) {
@@ -377,8 +394,8 @@ const ProductImportModal = ({
 
   return (
     <motion.div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000] p-4"
-      style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
+      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
+      style={{ width: "100vw", height: "100vh" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

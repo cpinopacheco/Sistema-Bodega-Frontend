@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import { useProducts, type Category } from "../../context/ProductContext";
@@ -18,6 +18,20 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
     null
   );
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+
+  // Manejar cierre con tecla Escape
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [onClose]);
 
   // Función para abrir modal de edición
   const handleEdit = (category: Category) => {
@@ -175,12 +189,19 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setConfirmDelete(null);
+              }
+            }}
+            tabIndex={-1}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-neutral-white rounded-lg shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-medium text-neutral-dark mb-3">
                 Confirmar eliminación
