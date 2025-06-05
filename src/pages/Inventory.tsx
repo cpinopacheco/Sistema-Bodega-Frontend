@@ -13,7 +13,7 @@ const Inventory = () => {
   const [category, setCategory] = useState("all");
 
   // Añadir estos estados para el ordenamiento justo después de los estados existentes
-  const [productSortField, setProductSortField] = useState<string>("name");
+  const [productSortField, setProductSortField] = useState<string>("code");
   const [productSortDirection, setProductSortDirection] = useState<
     "asc" | "desc"
   >("asc");
@@ -30,9 +30,10 @@ const Inventory = () => {
     ...new Set(products.map((product) => product.category)),
   ];
 
-  // Exportar reporte de stock a Excel
+  // Modificar la función exportStockReport para usar sortedProducts en lugar de filteredProducts
   const exportStockReport = () => {
-    const stockData = filteredProducts.map((product) => ({
+    const stockData = sortedProducts.map((product) => ({
+      Código: product.code || "---",
       Nombre: product.name,
       Descripción: product.description,
       Categoría: product.category,
@@ -79,6 +80,10 @@ const Inventory = () => {
       return productSortDirection === "asc"
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
+    } else if (productSortField === "code") {
+      return productSortDirection === "asc"
+        ? (a.code || "").localeCompare(b.code || "")
+        : (b.code || "").localeCompare(a.code || "");
     } else if (productSortField === "category") {
       return productSortDirection === "asc"
         ? a.category.localeCompare(b.category)
@@ -191,6 +196,15 @@ const Inventory = () => {
                   <thead className="bg-primary-lightest sticky top-0 z-10">
                     <tr>
                       <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        onClick={() => handleSort("code")}
+                      >
+                        <div className="flex items-center">
+                          CÓDIGO
+                          {renderSortIndicator("code")}
+                        </div>
+                      </th>
+                      <th
                         className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
                         onClick={() => handleSort("name")}
                       >
@@ -247,6 +261,11 @@ const Inventory = () => {
                             : ""
                         }`}
                       >
+                        <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                          <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                            {product.code || "---"}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap w-[25%]">
                           <div className="text-sm font-medium text-neutral-dark">
                             {product.name}

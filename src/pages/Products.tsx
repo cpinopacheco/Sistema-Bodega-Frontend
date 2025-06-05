@@ -34,9 +34,9 @@ const Products = () => {
   const [showProductForm, setShowProductForm] = useState(false);
   const [showCategoriesList, setShowCategoriesList] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [sortField, setSortField] = useState<"name" | "stock" | "category">(
-    "name"
-  );
+  const [sortField, setSortField] = useState<
+    "name" | "stock" | "category" | "code"
+  >("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [quantityInputs, setQuantityInputs] = useState<Record<number, number>>(
     {}
@@ -105,7 +105,7 @@ const Products = () => {
   };
 
   // Función para cambiar el ordenamiento
-  const handleSort = (field: "name" | "stock" | "category") => {
+  const handleSort = (field: "name" | "stock" | "category" | "code") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -123,11 +123,10 @@ const Products = () => {
   // Filtrar y ordenar productos
   const filteredProducts = products
     .filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      // Remover esta línea que busca en la descripción:
-      // || product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.code &&
+          product.code.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory =
         selectedCategory === "all" || product.category === selectedCategory;
 
@@ -144,6 +143,12 @@ const Products = () => {
         return sortDirection === "asc"
           ? a.category.localeCompare(b.category)
           : b.category.localeCompare(a.category);
+      } else if (sortField === "code") {
+        const aCode = a.code || "";
+        const bCode = b.code || "";
+        return sortDirection === "asc"
+          ? aCode.localeCompare(bCode)
+          : bCode.localeCompare(aCode);
       }
       return 0;
     });
@@ -323,6 +328,20 @@ const Products = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
                     <button
+                      onClick={() => handleSort("code")}
+                      className="flex items-center focus:outline-none"
+                    >
+                      CÓDIGO
+                      {sortField === "code" &&
+                        (sortDirection === "asc" ? (
+                          <FaSortAmountUp className="ml-1 text-primary" />
+                        ) : (
+                          <FaSortAmountDown className="ml-1 text-primary" />
+                        ))}
+                    </button>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                    <button
                       onClick={() => handleSort("name")}
                       className="flex items-center focus:outline-none"
                     >
@@ -378,6 +397,11 @@ const Products = () => {
                         : ""
                     }`}
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                        {product.code || "---"}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-0">

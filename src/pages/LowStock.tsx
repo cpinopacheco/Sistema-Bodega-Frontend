@@ -35,6 +35,7 @@ const LowStock = () => {
   // Exportar a Excel
   const exportToExcel = () => {
     const data = filteredProducts.map((product) => ({
+      Código: product.code,
       Nombre: product.name,
       Descripción: product.description,
       Categoría: product.category,
@@ -125,6 +126,9 @@ const LowStock = () => {
               <thead className="bg-primary-lightest">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                    Código
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Producto
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
@@ -147,6 +151,11 @@ const LowStock = () => {
                     key={product.id}
                     className="hover:bg-primary-lightest hover:bg-opacity-30"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                        {product.code}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-neutral-dark">
                         {product.name}

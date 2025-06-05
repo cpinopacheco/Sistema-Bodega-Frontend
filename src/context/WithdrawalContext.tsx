@@ -115,7 +115,10 @@ export const WithdrawalProvider = ({ children }: { children: ReactNode }) => {
         );
       } else {
         // Si no está en el carrito, añadirlo
-        return [...prevCart, { productId: product.id, quantity, product }];
+        return [
+          ...prevCart,
+          { productId: product.id, quantity, product: { ...product } },
+        ];
       }
     });
 
@@ -152,7 +155,9 @@ export const WithdrawalProvider = ({ children }: { children: ReactNode }) => {
 
       setCart((prevCart) =>
         prevCart.map((item) =>
-          item.productId === productId ? { ...item, quantity } : item
+          item.productId === productId
+            ? { ...item, quantity, product: { ...product } }
+            : item
         )
       );
     },
@@ -205,7 +210,7 @@ export const WithdrawalProvider = ({ children }: { children: ReactNode }) => {
           items: cart.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
-            product: item.product,
+            product: { ...item.product }, // Incluir toda la información del producto
           })),
         };
 

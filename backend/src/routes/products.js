@@ -2,6 +2,35 @@ const express = require("express")
 const { pool } = require("../config/database")
 const router = express.Router()
 
+// Función para generar código de producto correlativo con 4 dígitos
+async function generateProductCode() {
+    try {
+        // Obtener el último código de producto creado
+        const lastCodeResult = await pool.query(
+            "SELECT code FROM products WHERE code LIKE 'PROD-%' ORDER BY CAST(SUBSTRING(code FROM 6) AS INTEGER) DESC LIMIT 1",
+        )
+
+        let nextNumber = 1
+        if (lastCodeResult.rows.length > 0) {
+            // Extraer el número del último código
+            const lastCode = lastCodeResult.rows[0].code
+            const lastNumber = Number.parseInt(lastCode.split("-")[1], 10)
+            if (!isNaN(lastNumber)) {
+                nextNumber = lastNumber + 1
+            }
+        }
+
+        // Formatear el número con ceros a la izquierda (4 dígitos)
+        const formattedNumber = nextNumber.toString().padStart(4, "0")
+
+        return `PROD-${formattedNumber}`
+    } catch (error) {
+        console.error("Error generando código de producto:", error)
+        // Código de respaldo en caso de error
+        return `PROD-${Date.now().toString().substring(9).padStart(4, "0")}`
+    }
+}
+
 // GET /api/products - Obtener todos los productos con información de categoría
 router.get("/", async (req, res) => {
     try {
@@ -12,6 +41,7 @@ router.get("/", async (req, res) => {
         p.description,
         p.stock,
         p.min_stock,
+        p.code,
         p.created_at,
         p.updated_at,
         c.name as category_name,
@@ -30,6 +60,7 @@ router.get("/", async (req, res) => {
             categoryId: row.category_id,
             stock: row.stock,
             minStock: row.min_stock,
+            code: row.code,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
         }))
@@ -54,6 +85,7 @@ router.get("/:id", async (req, res) => {
         p.description,
         p.stock,
         p.min_stock,
+        p.code,
         p.created_at,
         p.updated_at,
         c.name as category_name,
@@ -78,6 +110,7 @@ router.get("/:id", async (req, res) => {
             categoryId: row.category_id,
             stock: row.stock,
             minStock: row.min_stock,
+            code: row.code,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
         }
@@ -123,11 +156,14 @@ router.post("/", async (req, res) => {
             return res.status(400).json({ error: "La categoría especificada no existe" })
         }
 
+        // Generar código único para el producto
+        const productCode = await generateProductCode()
+
         const result = await pool.query(
-            `INSERT INTO products (name, description, category_id, stock, min_stock) 
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, name, description, stock, min_stock, created_at, updated_at`,
-            [name.trim(), description || "", categoryId, stock || 0, minStock || 0],
+            `INSERT INTO products (name, description, category_id, stock, min_stock, code) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING id, name, description, stock, min_stock, code, created_at, updated_at`,
+            [name.trim(), description || "", categoryId, stock || 0, minStock || 0, productCode],
         )
 
         const newProduct = {
@@ -138,6 +174,7 @@ router.post("/", async (req, res) => {
             categoryId: categoryId,
             stock: result.rows[0].stock,
             minStock: result.rows[0].min_stock,
+            code: result.rows[0].code,
             createdAt: result.rows[0].created_at,
             updatedAt: result.rows[0].updated_at,
         }

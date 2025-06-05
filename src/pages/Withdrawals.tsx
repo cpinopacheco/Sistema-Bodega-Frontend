@@ -85,6 +85,7 @@ const Withdrawals = () => {
     if (!withdrawal) return;
 
     const withdrawalData = withdrawal.items.map((item) => ({
+      Código: item.product.code,
       Producto: item.product.name,
       Categoría: item.product.category,
       Cantidad: item.quantity,
@@ -118,6 +119,7 @@ const Withdrawals = () => {
         "Sección que registra": withdrawal.userSection,
         "Persona que retira": withdrawal.withdrawerName,
         "Sección que retira": withdrawal.withdrawerSection,
+        Código: item.product.code,
         Producto: item.product.name,
         Categoría: item.product.category,
         Cantidad: item.quantity,
@@ -294,6 +296,9 @@ const Withdrawals = () => {
                       <thead className="bg-primary-lightest">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                            Código
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                             Producto
                           </th>
                           <th className="px-2 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider">
@@ -310,6 +315,11 @@ const Withdrawals = () => {
                             key={item.productId}
                             className="hover:bg-primary-lightest hover:bg-opacity-30"
                           >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                                {item.product.code || "Sin código"}
+                              </span>
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="ml-0">
@@ -821,6 +831,9 @@ const Withdrawals = () => {
                                       <thead className="bg-primary-lightest">
                                         <tr>
                                           <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                            Código
+                                          </th>
+                                          <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
                                             Producto
                                           </th>
                                           <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
@@ -837,6 +850,12 @@ const Withdrawals = () => {
                                             key={item.productId}
                                             className="hover:bg-primary-lightest hover:bg-opacity-30"
                                           >
+                                            <td className="px-6 py-2 whitespace-nowrap text-sm">
+                                              <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                                                {item.product.code ||
+                                                  "Sin código"}
+                                              </span>
+                                            </td>
                                             <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
                                               {item.product.name}
                                             </td>

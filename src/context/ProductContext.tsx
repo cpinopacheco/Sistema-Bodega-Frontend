@@ -19,6 +19,7 @@ export interface Product {
   category: string;
   stock: number;
   minStock: number;
+  code: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -183,6 +184,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
           categoryId: category.id,
           stock: product.stock,
           minStock: product.minStock,
+          code: product.code,
         };
 
         const newProduct = await productsAPI.create(productData);
@@ -244,6 +246,10 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
             productData.minStock !== undefined
               ? productData.minStock
               : currentProduct.minStock,
+          code:
+            productData.code !== undefined
+              ? productData.code
+              : currentProduct.code,
         };
 
         const updatedProduct = await productsAPI.update(id, updateData);
