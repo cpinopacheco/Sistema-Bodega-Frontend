@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaExclamationTriangle, FaSearch, FaFileExcel } from "react-icons/fa";
+import {
+  FaExclamationTriangle,
+  FaSearch,
+  FaFileExcel,
+  FaSortAmountDown,
+  FaSortAmountUp,
+} from "react-icons/fa";
 import { useProducts } from "../context/ProductContext";
 import { ExportToExcel } from "../utils/ExcelExport";
 
@@ -11,6 +17,10 @@ const LowStock = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortField, setSortField] = useState<
+    "code" | "name" | "category" | "stock" | "minStock" | "deficit"
+  >("deficit");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Obtener productos con stock bajo
   const lowStockProducts = getLowStockProducts();
@@ -34,7 +44,7 @@ const LowStock = () => {
 
   // Exportar a Excel
   const exportToExcel = () => {
-    const data = filteredProducts.map((product) => ({
+    const data = sortedProducts.map((product) => ({
       Código: product.code,
       Nombre: product.name,
       Descripción: product.description,
@@ -46,6 +56,62 @@ const LowStock = () => {
 
     ExportToExcel(data, "Productos_Stock_Bajo");
   };
+
+  // Función para manejar el ordenamiento
+  const handleSort = (
+    field: "code" | "name" | "category" | "stock" | "minStock" | "deficit"
+  ) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  // Ordenar productos
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortField) {
+      case "code":
+        aValue = a.code || "";
+        bValue = b.code || "";
+        break;
+      case "name":
+        aValue = a.name;
+        bValue = b.name;
+        break;
+      case "category":
+        aValue = a.category;
+        bValue = b.category;
+        break;
+      case "stock":
+        aValue = a.stock;
+        bValue = b.stock;
+        break;
+      case "minStock":
+        aValue = a.minStock;
+        bValue = b.minStock;
+        break;
+      case "deficit":
+        aValue = a.minStock - a.stock;
+        bValue = b.minStock - b.stock;
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      const comparison = aValue.localeCompare(bValue);
+      return sortDirection === "asc" ? comparison : -comparison;
+    }
+
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div className="space-y-6">
@@ -98,7 +164,7 @@ const LowStock = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {filteredProducts.length > 0 && (
+        {sortedProducts.length > 0 && (
           <div className="mb-4 p-4 bg-state-error bg-opacity-10 border-l-4 border-state-error rounded-r-md">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -110,7 +176,7 @@ const LowStock = () => {
                 </h3>
                 <div className="mt-2 text-sm text-state-error">
                   <p>
-                    Se han encontrado {filteredProducts.length} productos con
+                    Se han encontrado {sortedProducts.length} productos con
                     stock por debajo del mínimo requerido. Estos productos
                     necesitan reabastecimiento.
                   </p>
@@ -120,33 +186,117 @@ const LowStock = () => {
           </div>
         )}
 
-        {filteredProducts.length > 0 ? (
+        {sortedProducts.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-neutral-light">
               <thead className="bg-primary-lightest">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Código
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("code")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Código</span>
+                      {sortField === "code" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Producto
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("name")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Producto</span>
+                      {sortField === "name" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Categoría
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("category")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Categoría</span>
+                      {sortField === "category" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Stock Actual
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("stock")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Stock Actual</span>
+                      {sortField === "stock" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Stock Mínimo
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("minStock")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Stock Mínimo</span>
+                      {sortField === "minStock" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Déficit
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("deficit")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Déficit</span>
+                      {sortField === "deficit" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                {filteredProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <tr
                     key={product.id}
                     className="hover:bg-primary-lightest hover:bg-opacity-30"

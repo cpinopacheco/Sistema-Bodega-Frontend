@@ -13,6 +13,8 @@ import {
   FaUser,
   FaToggleOn,
   FaToggleOff,
+  FaSortAmountDown,
+  FaSortAmountUp,
 } from "react-icons/fa";
 import { useUsers, type User } from "../context/UsersContext";
 import { useAuth } from "../context/AuthContext";
@@ -48,49 +50,10 @@ const UserManagement = () => {
   } | null>(null);
   // Estado para controlar si la animación ya se ejecutó
   const [hasAnimated, setHasAnimated] = useState(false);
-
-  // Controlar cuándo debe ejecutarse la animación inicial
-  useEffect(() => {
-    if (!hasAnimated && users.length > 0) {
-      setHasAnimated(true);
-    }
-  }, [users.length, hasAnimated]);
-
-  // Manejar cierre con tecla Escape para modales
-  useEffect(() => {
-    const handleEscapeKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (confirmDelete !== null) {
-          setConfirmDelete(null);
-        }
-      }
-    };
-
-    if (confirmDelete !== null) {
-      window.addEventListener("keydown", handleEscapeKey);
-    }
-
-    return () => {
-      window.removeEventListener("keydown", handleEscapeKey);
-    };
-  }, [confirmDelete]);
-
-  // Verificar que el usuario actual es admin
-  if (!currentUser || currentUser.role !== "admin") {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <FaShieldAlt className="mx-auto text-neutral-medium text-5xl mb-4" />
-          <h3 className="text-lg font-medium text-neutral-dark mb-1">
-            Acceso Denegado
-          </h3>
-          <p className="text-neutral-medium">
-            No tienes permisos para acceder a esta sección
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const [sortField, setSortField] = useState<
+    "name" | "employee_code" | "role" | "section" | "is_active" | "created_at"
+  >("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Función para abrir modal de edición
   const handleEdit = (user: User) => {
@@ -198,22 +161,134 @@ const UserManagement = () => {
     }
   };
 
-  // Filtrar usuarios
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.employee_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.section.toLowerCase().includes(searchTerm.toLowerCase());
+  // Función para manejar el ordenamiento
+  const handleSort = (
+    field:
+      | "name"
+      | "employee_code"
+      | "role"
+      | "section"
+      | "is_active"
+      | "created_at"
+  ) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
-    const matchesRole = selectedRole === "all" || user.role === selectedRole;
-    const matchesStatus =
-      selectedStatus === "all" ||
-      (selectedStatus === "active" && user.is_active) ||
-      (selectedStatus === "inactive" && !user.is_active);
+  // Ordenar usuarios
+  let sortedUsers: User[];
+  let filteredUsers: User[];
 
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  if (users) {
+    filteredUsers = users.filter((user) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.employee_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.section.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesRole = selectedRole === "all" || user.role === selectedRole;
+      const matchesStatus =
+        selectedStatus === "all" ||
+        (selectedStatus === "active" && user.is_active) ||
+        (selectedStatus === "inactive" && !user.is_active);
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    sortedUsers = [...filteredUsers].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case "name":
+          aValue = a.name;
+          bValue = b.name;
+          break;
+        case "employee_code":
+          aValue = a.employee_code;
+          bValue = b.employee_code;
+          break;
+        case "role":
+          aValue = a.role;
+          bValue = b.role;
+          break;
+        case "section":
+          aValue = a.section;
+          bValue = b.section;
+          break;
+        case "is_active":
+          aValue = a.is_active ? 1 : 0;
+          bValue = b.is_active ? 1 : 0;
+          break;
+        case "created_at":
+          aValue = new Date(a.created_at);
+          bValue = new Date(b.created_at);
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        const comparison = aValue.localeCompare(bValue);
+        return sortDirection === "asc" ? comparison : -comparison;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  } else {
+    filteredUsers = [];
+    sortedUsers = [];
+  }
+
+  // Controlar cuándo debe ejecutarse la animación inicial
+  useEffect(() => {
+    if (!hasAnimated && users.length > 0) {
+      setHasAnimated(true);
+    }
+  }, [users.length, hasAnimated]);
+
+  // Manejar cierre con tecla Escape para modales
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (confirmDelete !== null) {
+          setConfirmDelete(null);
+        }
+      }
+    };
+
+    if (confirmDelete !== null) {
+      window.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [confirmDelete]);
+
+  // Verificar que el usuario actual es admin
+  if (!currentUser || currentUser.role !== "admin") {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <FaShieldAlt className="mx-auto text-neutral-medium text-5xl mb-4" />
+          <h3 className="text-lg font-medium text-neutral-dark mb-1">
+            Acceso Denegado
+          </h3>
+          <p className="text-neutral-medium">
+            No tienes permisos para acceder a esta sección
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Estadísticas
   const totalUsers = users.length;
@@ -343,7 +418,7 @@ const UserManagement = () => {
         <div className="flex justify-center items-center py-8">
           <div className="text-neutral-medium">Cargando usuarios...</div>
         </div>
-      ) : filteredUsers.length > 0 ? (
+      ) : sortedUsers.length > 0 ? (
         <motion.div
           key={`users-${users.length}-${filteredUsers.length}`}
           initial={hasAnimated ? false : { opacity: 0, y: 20 }}
@@ -355,23 +430,107 @@ const UserManagement = () => {
             <table className="min-w-full divide-y divide-neutral-light">
               <thead className="bg-primary-lightest">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Usuario
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("name")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Usuario</span>
+                      {sortField === "name" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Código
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("employee_code")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Código</span>
+                      {sortField === "employee_code" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Rol
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("role")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Rol</span>
+                      {sortField === "role" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Sección
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("section")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Sección</span>
+                      {sortField === "section" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Estado
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("is_active")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Estado</span>
+                      {sortField === "is_active" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                    Creado
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                    onClick={() => handleSort("created_at")}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Creado</span>
+                      {sortField === "created_at" && (
+                        <span className="text-primary">
+                          {sortDirection === "asc" ? (
+                            <FaSortAmountUp className="w-3 h-3" />
+                          ) : (
+                            <FaSortAmountDown className="w-3 h-3" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
                     Acciones
@@ -379,7 +538,7 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                {filteredUsers.map((user) => (
+                {sortedUsers.map((user) => (
                   <tr
                     key={user.id}
                     className={`hover:bg-primary-lightest hover:bg-opacity-30 transition-colors duration-200 ${

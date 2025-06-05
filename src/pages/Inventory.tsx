@@ -196,7 +196,8 @@ const Inventory = () => {
                   <thead className="bg-primary-lightest sticky top-0 z-10">
                     <tr>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("code")}
                       >
                         <div className="flex items-center">
@@ -205,7 +206,8 @@ const Inventory = () => {
                         </div>
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("name")}
                       >
                         <div className="flex items-center">
@@ -214,7 +216,8 @@ const Inventory = () => {
                         </div>
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("category")}
                       >
                         <div className="flex items-center">
@@ -223,7 +226,8 @@ const Inventory = () => {
                         </div>
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("stock")}
                       >
                         <div className="flex items-center">
@@ -232,7 +236,8 @@ const Inventory = () => {
                         </div>
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("minStock")}
                       >
                         <div className="flex items-center">
@@ -241,7 +246,8 @@ const Inventory = () => {
                         </div>
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                        style={{ height: "40.5px" }}
                         onClick={() => handleSort("updatedAt")}
                       >
                         <div className="flex items-center">
