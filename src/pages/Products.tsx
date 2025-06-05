@@ -321,7 +321,7 @@ const Products = () => {
             <table className="min-w-full divide-y divide-neutral-light">
               <thead className="bg-primary-lightest sticky top-0 z-10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("name")}
                       className="flex items-center focus:outline-none"
@@ -335,7 +335,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("category")}
                       className="flex items-center focus:outline-none"
@@ -349,7 +349,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
                     <button
                       onClick={() => handleSort("stock")}
                       className="flex items-center focus:outline-none"
@@ -363,7 +363,7 @@ const Products = () => {
                         ))}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#A2C4B1] transition-colors duration-200">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
                     ACCIONES
                   </th>
                 </tr>

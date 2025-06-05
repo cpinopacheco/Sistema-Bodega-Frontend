@@ -650,42 +650,42 @@ const Withdrawals = () => {
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("id")}
                         >
                           ID {renderSortIndicator("id")}
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("date")}
                         >
                           Fecha {renderSortIndicator("date")}
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("withdrawer")}
                         >
                           Retirado por {renderSortIndicator("withdrawer")}
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("section")}
                         >
                           Sección {renderSortIndicator("section")}
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("registeredBy")}
                         >
                           Registrado por {renderSortIndicator("registeredBy")}
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-30"
+                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
                           onClick={() => handleSort("items")}
                         >
                           Items {renderSortIndicator("items")}
