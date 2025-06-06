@@ -10,6 +10,7 @@ import {
   FaExclamationTriangle,
   FaChartBar,
   FaUsers,
+  FaEyeSlash,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
@@ -52,6 +53,12 @@ const Sidebar = () => {
       icon: <FaChartBar />,
       label: "Estadísticas",
       description: "Estadísticas del sistema",
+    },
+    {
+      to: "/inactive-products",
+      icon: <FaEyeSlash />,
+      label: "Productos Inactivos",
+      description: "Productos desactivados",
     },
   ];
 

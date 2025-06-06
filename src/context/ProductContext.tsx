@@ -20,6 +20,8 @@ export interface Product {
   stock: number;
   minStock: number;
   code: string;
+  isActive?: boolean;
+  withdrawalCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +34,7 @@ export interface Category {
 
 interface ProductContextType {
   products: Product[];
+  inactiveProducts: Product[];
   categories: Category[];
   loading: boolean;
   addProduct: (
@@ -39,6 +42,8 @@ interface ProductContextType {
   ) => Promise<void>;
   updateProduct: (id: number, productData: Partial<Product>) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
+  deactivateProduct: (id: number) => Promise<void>;
+  activateProduct: (id: number) => Promise<void>;
   getProduct: (id: number) => Product | undefined;
   searchProducts: (query: string) => Product[];
   filterByCategory: (category: string) => Product[];
@@ -52,12 +57,14 @@ interface ProductContextType {
   loadCategories: () => Promise<void>;
   // Función para productos conectada al backend
   loadProducts: () => Promise<void>;
+  loadInactiveProducts: () => Promise<void>;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [inactiveProducts, setInactiveProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -79,7 +86,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Cargar productos desde el backend
+  // Cargar productos activos desde el backend
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -88,6 +95,20 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Error cargando productos:", error);
       toast.error("Error al cargar los productos");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Cargar productos inactivos desde el backend
+  const loadInactiveProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const inactiveProductsData = await productsAPI.getInactive();
+      setInactiveProducts(inactiveProductsData);
+    } catch (error) {
+      console.error("Error cargando productos inactivos:", error);
+      toast.error("Error al cargar los productos inactivos");
     } finally {
       setLoading(false);
     }
@@ -160,7 +181,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // =====================================================
-  // FUNCIONES DE PRODUCTOS (TEMPORALES - SIN CAMBIOS)
+  // FUNCIONES DE PRODUCTOS (CONECTADAS AL BACKEND)
   // =====================================================
 
   // Añadir un nuevo producto
@@ -278,21 +299,117 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     [products, categories]
   );
 
-  // Eliminar un producto
-  const deleteProduct = useCallback(async (id: number) => {
-    try {
-      setLoading(true);
-      await productsAPI.delete(id);
-      setProducts((prev) => prev.filter((product) => product.id !== id));
-      toast.success("Producto eliminado correctamente");
-    } catch (error: any) {
-      console.error("Error eliminando producto:", error);
-      toast.error(error.message || "Error al eliminar el producto");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Eliminar/Desactivar un producto
+  const deleteProduct = useCallback(
+    async (id: number) => {
+      try {
+        setLoading(true);
+        const result = await productsAPI.delete(id);
+
+        if (result.action === "deactivated") {
+          // El producto fue desactivado, moverlo a la lista de inactivos
+          const deactivatedProduct = products.find((p) => p.id === id);
+          if (deactivatedProduct) {
+            setProducts((prev) => prev.filter((product) => product.id !== id));
+            setInactiveProducts((prev) => [
+              ...prev,
+              {
+                ...deactivatedProduct,
+                isActive: false,
+                withdrawalCount: result.withdrawalCount,
+              },
+            ]);
+          }
+          toast.success(result.message);
+        } else if (result.action === "deleted") {
+          // El producto fue eliminado físicamente
+          setProducts((prev) => prev.filter((product) => product.id !== id));
+          toast.success(result.message);
+        } else if (result.action === "already_inactive") {
+          toast(result.message);
+        }
+      } catch (error: any) {
+        console.error("Error eliminando producto:", error);
+        // Extraer información del error si contiene datos de retiros
+        let errorMessage = error.message || "Error al eliminar el producto";
+        if (error.message && error.message.includes("retiros asociados")) {
+          // Extraer el número de retiros del mensaje de error
+          const match = error.message.match(/(\d+) retiros? asociados?/);
+          if (match) {
+            const withdrawalCount = Number.parseInt(match[1]);
+            const withdrawalText =
+              withdrawalCount === 1 ? "retiro asociado" : "retiros asociados";
+            errorMessage = `No se puede eliminar el producto. Tiene ${withdrawalCount} ${withdrawalText}.`;
+          }
+        }
+        toast.error(errorMessage);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [products]
+  );
+
+  // Desactivar un producto específicamente
+  const deactivateProduct = useCallback(
+    async (id: number) => {
+      try {
+        setLoading(true);
+        const result = await productsAPI.deactivate(id);
+
+        // Mover el producto de activos a inactivos
+        const deactivatedProduct = products.find((p) => p.id === id);
+        if (deactivatedProduct) {
+          setProducts((prev) => prev.filter((product) => product.id !== id));
+          setInactiveProducts((prev) => [
+            ...prev,
+            { ...deactivatedProduct, isActive: false },
+          ]);
+        }
+
+        toast.success(result.message);
+      } catch (error: any) {
+        console.error("Error desactivando producto:", error);
+        toast.error(error.message || "Error al desactivar el producto");
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [products]
+  );
+
+  // Reactivar un producto
+  const activateProduct = useCallback(
+    async (id: number) => {
+      try {
+        setLoading(true);
+        const result = await productsAPI.activate(id);
+
+        // Mover el producto de inactivos a activos
+        const activatedProduct = inactiveProducts.find((p) => p.id === id);
+        if (activatedProduct) {
+          setInactiveProducts((prev) =>
+            prev.filter((product) => product.id !== id)
+          );
+          setProducts((prev) => [
+            ...prev,
+            { ...activatedProduct, isActive: true },
+          ]);
+        }
+
+        toast.success(result.message);
+      } catch (error: any) {
+        console.error("Error reactivando producto:", error);
+        toast.error(error.message || "Error al reactivar el producto");
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [inactiveProducts]
+  );
 
   // Obtener un producto por su ID
   const getProduct = useCallback(
@@ -357,11 +474,14 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     <ProductContext.Provider
       value={{
         products,
+        inactiveProducts,
         categories,
         loading,
         addProduct,
         updateProduct,
         deleteProduct,
+        deactivateProduct,
+        activateProduct,
         getProduct,
         searchProducts,
         filterByCategory,
@@ -375,6 +495,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         loadCategories,
         // Función de productos conectada al backend
         loadProducts,
+        loadInactiveProducts,
       }}
     >
       {children}

@@ -387,6 +387,32 @@ export const productsAPI = {
     });
     return handleResponse(response);
   },
+
+  // Obtener productos inactivos (desactivados)
+  getInactive: async () => {
+    const response = await fetch(`${API_BASE_URL}/products/inactive`, {
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Desactivar producto (soft delete)
+  deactivate: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}/deactivate`, {
+      method: "PATCH",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Reactivar producto
+  activate: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}/activate`, {
+      method: "PATCH",
+      headers: createAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
 };
 
 // =====================================================

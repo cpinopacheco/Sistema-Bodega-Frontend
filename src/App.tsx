@@ -19,6 +19,7 @@ import Statistics from "./pages/Statistics";
 import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
 import UserProfile from "./pages/UserProfile";
+import InactiveProducts from "./pages/InactiveProducts";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -85,6 +86,10 @@ function App() {
                     <Route path="inventory" element={<Inventory />} />
                     <Route path="low-stock" element={<LowStock />} />
                     <Route path="statistics" element={<Statistics />} />
+                    <Route
+                      path="inactive-products"
+                      element={<InactiveProducts />}
+                    />
                     <Route
                       path="change-password"
                       element={<ChangePassword />}
