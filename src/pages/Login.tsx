@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaLock, FaUser } from "react-icons/fa";
+import { FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import {
   validateEmployeeCode,
@@ -17,6 +17,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleEmployeeCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatEmployeeCodeInput(e.target.value);
@@ -169,7 +170,7 @@ const Login = () => {
             <div className="relative">
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -178,7 +179,7 @@ const Login = () => {
                     setError("");
                   }
                 }}
-                className="w-full pl-10 pr-3 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full pl-10 pr-10 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="••••••••"
                 required
                 aria-required="true"
@@ -192,6 +193,20 @@ const Login = () => {
               >
                 <FaLock className="text-neutral-medium" size={14} />
               </div>
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="text-neutral-medium" size={16} />
+                ) : (
+                  <FaEye className="text-neutral-medium" size={16} />
+                )}
+              </button>
             </div>
             {error && error.includes("Credenciales") && (
               <p
