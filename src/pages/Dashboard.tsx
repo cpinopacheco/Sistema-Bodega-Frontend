@@ -332,7 +332,7 @@ const Dashboard = () => {
                                 ? `${(count / totalProducts) * 100}%`
                                 : "0%",
                               transition: `width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
-                              transitionDelay: `${index * 100}ms`,
+                              transitionDelay: `${index * 150}ms`,
                             }}
                           />
                         </div>
@@ -355,9 +355,9 @@ const Dashboard = () => {
                       {product.name}
                     </p>
                     <div className="flex items-center">
-                      <span className="text-xs px-2 py-1 rounded-full bg-accent bg-opacity-10 text-accent flex items-center">
-                        <FaArrowUp className="mr-1" />
-                        {product.quantity} unidades
+                      <span className="px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-accent bg-opacity-10 text-accent">
+                        <FaArrowUp className="mr-1 flex-shrink-0" />
+                        <span>{product.quantity} unidades</span>
                       </span>
                     </div>
                   </div>
