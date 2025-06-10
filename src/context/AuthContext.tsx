@@ -20,6 +20,7 @@ interface User {
   role: "admin" | "user";
   section: string;
   profilePhoto?: string | null;
+  isTempPassword?: boolean;
 }
 
 // Define los tipos para el contexto
@@ -41,6 +42,14 @@ interface AuthContextType {
   updateCurrentUser: (updatedUser: User) => void;
   isAuthenticated: boolean;
   loading: boolean;
+  forgotPassword: (employeeCode: string) => Promise<string>;
+  getPasswordRecoveryRequests: () => Promise<any[]>;
+  generateTempPassword: (requestId: number) => Promise<{
+    tempPassword: string;
+    userName: string;
+    employeeCode: string;
+  }>;
+  archiveRequest: (requestId: number) => Promise<void>;
 }
 
 // Crear el contexto
@@ -96,8 +105,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Establecer usuario en el estado
       setUser(response.user);
 
-      toast.success("Inicio de sesión exitoso");
-      navigate("/dashboard");
+      // Si el usuario tiene contraseña temporal, redirigir a cambio de contraseña
+      if (response.user.isTempPassword) {
+        toast.success(
+          "Inicio de sesión exitoso. Debes cambiar tu contraseña temporal."
+        );
+        navigate("/change-password");
+      } else {
+        toast.success("Inicio de sesión exitoso");
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       console.error("❌ Login error:", error);
       // Removido el toast.error para evitar duplicación
@@ -209,6 +226,154 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(updatedUser);
   };
 
+  // Función para solicitar recuperación de contraseña
+  const forgotPassword = async (employeeCode: string): Promise<string> => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `${
+          process.env.VITE_API_URL || "http://localhost:3001"
+        }/api/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ employeeCode }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Error al solicitar recuperación de contraseña"
+        );
+      }
+
+      const data = await response.json();
+      return data.userName;
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      toast.error(
+        error.message || "Error al solicitar recuperación de contraseña"
+      );
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para obtener solicitudes de recuperación de contraseña (solo admin)
+  const getPasswordRecoveryRequests = async (): Promise<any[]> => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No hay token de autenticación");
+
+      console.log("🔍 Obteniendo solicitudes de recuperación...");
+      const apiUrl = process.env.VITE_API_URL || "http://localhost:3001";
+      console.log("🌐 API URL:", apiUrl);
+
+      const response = await fetch(
+        `${apiUrl}/api/auth/password-recovery-requests`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("📡 Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Error response:", errorData);
+        throw new Error(
+          errorData.error || "Error al obtener solicitudes de recuperación"
+        );
+      }
+
+      const data = await response.json();
+      console.log("✅ Solicitudes obtenidas:", data);
+      return data;
+    } catch (error: any) {
+      console.error("❌ Get password recovery requests error:", error);
+      throw error;
+    }
+  };
+
+  // Función para generar contraseña temporal (solo admin)
+  const generateTempPassword = async (
+    requestId: number
+  ): Promise<{
+    tempPassword: string;
+    userName: string;
+    employeeCode: string;
+  }> => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No hay token de autenticación");
+
+      const response = await fetch(
+        `${
+          process.env.VITE_API_URL || "http://localhost:3001"
+        }/api/auth/generate-temp-password/${requestId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Error al generar contraseña temporal"
+        );
+      }
+
+      const data = await response.json();
+      return {
+        tempPassword: data.tempPassword,
+        userName: data.userName,
+        employeeCode: data.employeeCode,
+      };
+    } catch (error: any) {
+      console.error("Generate temp password error:", error);
+      throw error;
+    }
+  };
+
+  // Función para archivar solicitud procesada (solo admin)
+  const archiveRequest = async (requestId: number): Promise<void> => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No hay token de autenticación");
+
+      const response = await fetch(
+        `${
+          process.env.VITE_API_URL || "http://localhost:3001"
+        }/api/auth/archive-request/${requestId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al archivar solicitud");
+      }
+    } catch (error: any) {
+      console.error("Archive request error:", error);
+      throw error;
+    }
+  };
+
   const isAuthenticated = !!user;
 
   return (
@@ -224,6 +389,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         updateCurrentUser,
         isAuthenticated,
         loading,
+        forgotPassword,
+        getPasswordRecoveryRequests,
+        generateTempPassword,
+        archiveRequest,
       }}
     >
       {children}

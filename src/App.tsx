@@ -20,6 +20,8 @@ import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
 import UserProfile from "./pages/UserProfile";
 import InactiveProducts from "./pages/InactiveProducts";
+import ForgotPassword from "./pages/ForgotPassword";
+import PasswordRecoveryRequests from "./pages/PasswordRecoveryRequests";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -68,6 +70,7 @@ function App() {
                 />
                 <Routes>
                   <Route path="/login" element={<Login />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route
                     path="/"
                     element={
@@ -99,6 +102,14 @@ function App() {
                       element={<UserManagement />}
                     />
                     <Route path="user-profile" element={<UserProfile />} />
+                    <Route
+                      path="/password-recovery-requests"
+                      element={
+                        <ProtectedRoute requiredRole="admin">
+                          <PasswordRecoveryRequests />
+                        </ProtectedRoute>
+                      }
+                    />
                   </Route>
                 </Routes>
               </WithdrawalProvider>

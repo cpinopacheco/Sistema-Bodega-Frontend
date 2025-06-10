@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -227,6 +227,15 @@ const Login = () => {
           >
             {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
+
+          <div className="mt-4 text-center">
+            <Link
+              to="/forgot-password"
+              className="text-primary hover:text-primary-light text-sm"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
 
           {loading && (
             <div id="loading-status" className="sr-only" aria-live="polite">

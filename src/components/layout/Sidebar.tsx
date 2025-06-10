@@ -11,6 +11,7 @@ import {
   FaChartBar,
   FaUsers,
   FaEyeSlash,
+  FaKey,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
@@ -64,6 +65,13 @@ const Sidebar = () => {
 
   // Agregar gestión de usuarios solo para admins
   if (user?.role === "admin") {
+    navLinks.push({
+      to: "/password-recovery-requests",
+      icon: <FaKey />,
+      label: "Recuperación de Contraseñas",
+      description: "Gestión de solicitudes de recuperación de contraseñas",
+    });
+
     navLinks.push({
       to: "/user-management",
       icon: <FaUsers />,
