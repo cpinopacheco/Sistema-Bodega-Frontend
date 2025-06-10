@@ -1,22 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion"; // Importamos motion para las animaciones
-import { FaFileExcel, FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  FaFileExcel,
+  FaSortAmountDown,
+  FaSortAmountUp,
+  FaInfoCircle,
+} from "react-icons/fa";
 import { useProducts } from "../context/ProductContext";
 import { ExportToExcel } from "../utils/ExcelExport";
 import { formatDate } from "../utils/DateUtils";
 
 const Inventory = () => {
   const { products } = useProducts();
-
   const [category, setCategory] = useState("all");
-
-  // Añadir estos estados para el ordenamiento justo después de los estados existentes
   const [productSortField, setProductSortField] = useState<string>("code");
   const [productSortDirection, setProductSortDirection] = useState<
     "asc" | "desc"
   >("asc");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkIfMobile);
+    };
+  }, []);
 
   // Filtrar productos por categoría
   const filteredProducts =
@@ -30,7 +47,7 @@ const Inventory = () => {
     ...new Set(products.map((product) => product.category)),
   ];
 
-  // Modificar la función exportStockReport para usar sortedProducts en lugar de filteredProducts
+  // Exportar a Excel
   const exportStockReport = () => {
     const stockData = sortedProducts.map((product) => ({
       Código: product.code || "---",
@@ -49,7 +66,6 @@ const Inventory = () => {
     );
   };
 
-  // Añadir esta función de ordenamiento justo antes del return
   // Función para manejar el ordenamiento
   const handleSort = (field: string) => {
     if (productSortField === field) {
@@ -103,6 +119,13 @@ const Inventory = () => {
     }
     return 0;
   });
+
+  // Función para determinar el color del stock
+  const getStockColor = (stock: number, minStock: number) => {
+    if (stock <= minStock) return "text-state-error";
+    if (stock <= minStock * 2) return "text-state-warning";
+    return "text-state-success";
+  };
 
   return (
     <motion.div
@@ -186,137 +209,233 @@ const Inventory = () => {
           </div>
 
           <p className="text-sm text-neutral-medium mb-2">
-            Haz clic en los encabezados de la tabla para ordenar los productos.
+            {isMobile
+              ? "Desliza para ver más información"
+              : "Haz clic en los encabezados de la tabla para ordenar los productos."}
           </p>
 
           <div className="overflow-hidden rounded-lg border border-neutral-light">
-            <div className="overflow-x-auto">
-              <div className="max-h-96 overflow-y-auto">
-                <table className="min-w-full divide-y divide-neutral-light table-fixed">
-                  <thead className="bg-primary-lightest sticky top-0 z-10">
-                    <tr>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("code")}
-                      >
-                        <div className="flex items-center">
-                          CÓDIGO
-                          {renderSortIndicator("code")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("name")}
-                      >
-                        <div className="flex items-center">
-                          PRODUCTO
-                          {renderSortIndicator("name")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("category")}
-                      >
-                        <div className="flex items-center">
-                          CATEGORÍA
-                          {renderSortIndicator("category")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("stock")}
-                      >
-                        <div className="flex items-center">
-                          STOCK
-                          {renderSortIndicator("stock")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("minStock")}
-                      >
-                        <div className="flex items-center">
-                          STOCK MÍNIMO
-                          {renderSortIndicator("minStock")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#e9e9e9] transition-colors duration-200"
-                        style={{ height: "40.5px" }}
-                        onClick={() => handleSort("updatedAt")}
-                      >
-                        <div className="flex items-center">
-                          ÚLTIMA ACTUALIZACIÓN
-                          {renderSortIndicator("updatedAt")}
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                    {sortedProducts.map((product) => (
-                      <tr
-                        key={product.id}
-                        className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
-                          product.stock <= product.minStock
-                            ? "bg-state-error bg-opacity-10"
-                            : ""
-                        }`}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap w-[15%]">
-                          <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
-                            {product.code || "---"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap w-[25%]">
-                          <div className="text-sm font-medium text-neutral-dark">
-                            {product.name}
+            {!isMobile ? (
+              // Vista de escritorio - Tabla con scroll
+              <div className="overflow-x-auto">
+                <div className="max-h-96 overflow-y-auto">
+                  <table className="min-w-full divide-y divide-neutral-light table-fixed">
+                    <thead className="bg-primary-lightest sticky top-0 z-10">
+                      <tr>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("code")}
+                        >
+                          <div className="flex items-center">
+                            CÓDIGO
+                            {renderSortIndicator("code")}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap w-[25%]">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
-                            {product.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap w-[15%]">
-                          <div
-                            className={`text-sm font-medium ${
-                              product.stock <= product.minStock
-                                ? "text-state-error"
-                                : product.stock <= product.minStock * 2
-                                ? "text-state-warning"
-                                : "text-state-success"
-                            }`}
-                          >
-                            {product.stock} unidades
+                        </th>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("name")}
+                        >
+                          <div className="flex items-center">
+                            PRODUCTO
+                            {renderSortIndicator("name")}
                           </div>
+                        </th>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[25%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("category")}
+                        >
+                          <div className="flex items-center">
+                            CATEGORÍA
+                            {renderSortIndicator("category")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("stock")}
+                        >
+                          <div className="flex items-center">
+                            STOCK
+                            {renderSortIndicator("stock")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[15%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("minStock")}
+                        >
+                          <div className="flex items-center">
+                            STOCK MÍNIMO
+                            {renderSortIndicator("minStock")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-6 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer w-[20%] hover:bg-[#e9e9e9] transition-colors duration-200"
+                          style={{ height: "40.5px" }}
+                          onClick={() => handleSort("updatedAt")}
+                        >
+                          <div className="flex items-center">
+                            ÚLTIMA ACTUALIZACIÓN
+                            {renderSortIndicator("updatedAt")}
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                      {sortedProducts.map((product) => (
+                        <tr
+                          key={product.id}
+                          className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
+                            product.stock <= product.minStock
+                              ? "bg-state-error bg-opacity-10"
+                              : ""
+                          }`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                            <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                              {product.code || "---"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap w-[25%]">
+                            <div className="text-sm font-medium text-neutral-dark">
+                              {product.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap w-[25%]">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
+                              {product.category}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                            <div
+                              className={`text-sm font-medium ${getStockColor(
+                                product.stock,
+                                product.minStock
+                              )}`}
+                            >
+                              {product.stock} unidades
+                            </div>
+                            {product.stock <= product.minStock && (
+                              <div className="text-xs text-state-error">
+                                Stock bajo
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+                            <div className="text-sm text-neutral-medium">
+                              {product.minStock}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap w-[20%]">
+                            <div className="text-sm text-neutral-medium">
+                              {formatDate(product.updatedAt)}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              // Vista móvil - Tarjetas sin scroll interno
+              <div className="p-4 space-y-4">
+                {sortedProducts.map((product) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`bg-neutral-white rounded-lg shadow p-4 border-l-4 ${
+                      product.stock <= product.minStock
+                        ? "border-state-error"
+                        : product.stock <= product.minStock * 2
+                        ? "border-state-warning"
+                        : "border-state-success"
+                    }`}
+                  >
+                    <div className="mb-3">
+                      {/* Nombre del producto y código en la misma línea */}
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-medium text-neutral-dark flex-1 pr-2">
+                          {product.name}
+                        </h3>
+                        <span className="text-xs font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded whitespace-nowrap">
+                          {product.code || "---"}
+                        </span>
+                      </div>
+
+                      {/* Badge de categoría en su propia línea */}
+                      <div>
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-primary-lightest text-primary">
+                          {product.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      <div className="bg-neutral-lightest p-2 rounded">
+                        <p className="text-xs text-neutral-medium">
+                          Stock Actual
+                        </p>
+                        <div
+                          className={`text-sm font-bold ${getStockColor(
+                            product.stock,
+                            product.minStock
+                          )}`}
+                        >
+                          <div>{product.stock} unidades</div>
                           {product.stock <= product.minStock && (
-                            <div className="text-xs text-state-error">
-                              Stock bajo
+                            <div className="mt-1">
+                              <span className="text-xs bg-state-error bg-opacity-20 text-state-error px-2 py-1 rounded whitespace-nowrap">
+                                ¡Stock bajo!
+                              </span>
                             </div>
                           )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap w-[15%]">
-                          <div className="text-sm text-neutral-medium">
-                            {product.minStock}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap w-[20%]">
-                          <div className="text-sm text-neutral-medium">
-                            {formatDate(product.updatedAt)}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </div>
+                      <div className="bg-neutral-lightest p-2 rounded">
+                        <p className="text-xs text-neutral-medium">
+                          Stock Mínimo
+                        </p>
+                        <p className="text-sm font-medium text-neutral-dark">
+                          {product.minStock} unidades
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 text-xs text-neutral-medium flex items-center">
+                      <FaInfoCircle className="mr-1" />
+                      Actualizado: {formatDate(product.updatedAt)}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
+
+          {sortedProducts.length === 0 && (
+            <div className="text-center py-8">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <FaInfoCircle className="mx-auto text-neutral-medium text-5xl mb-4" />
+                <h3 className="text-lg font-medium text-neutral-dark mb-1">
+                  No se encontraron productos
+                </h3>
+                <p className="text-neutral-medium">
+                  {category !== "all"
+                    ? "No hay productos en la categoría seleccionada."
+                    : "No hay productos registrados en el sistema."}
+                </p>
+              </motion.div>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

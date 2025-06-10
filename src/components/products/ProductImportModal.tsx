@@ -394,8 +394,7 @@ const ProductImportModal = ({
 
   return (
     <motion.div
-      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
-      style={{ width: "100vw", height: "100vh" }}
+      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000] !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -408,7 +407,7 @@ const ProductImportModal = ({
       <motion.div
         className={`bg-neutral-white rounded-lg shadow-xl w-full ${
           showPreview ? "max-w-6xl" : "max-w-4xl"
-        } max-h-[90vh] overflow-hidden`}
+        } max-h-[90vh] overflow-hidden mx-4`}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}

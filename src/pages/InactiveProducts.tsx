@@ -33,8 +33,9 @@ const InactiveProducts = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
+      {/* Header - Responsive layout */}
+      <div className="lg:flex lg:justify-between lg:items-start">
+        <div className="lg:flex-1">
           <h1 className="text-2xl font-bold text-neutral-dark">
             Productos Desactivados
           </h1>
@@ -43,10 +44,16 @@ const InactiveProducts = () => {
             historial de retiros
           </p>
         </div>
-        <div className="bg-state-warning bg-opacity-10 px-4 py-2 rounded-lg">
-          <span className="text-state-warning font-medium">
-            {inactiveProducts.length} productos desactivados
-          </span>
+        {/* Contador - Solo visible en desktop */}
+        <div className="hidden lg:block lg:ml-4">
+          <div className="bg-state-warning bg-opacity-10 px-4 py-2 rounded-lg">
+            <span className="text-state-warning font-medium">
+              {inactiveProducts.length}{" "}
+              {inactiveProducts.length === 1
+                ? "producto desactivado"
+                : "productos desactivados"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -68,6 +75,18 @@ const InactiveProducts = () => {
         </div>
       </div>
 
+      {/* Contador de productos desactivados - Solo visible en móvil */}
+      <div className="flex justify-end lg:hidden">
+        <div className="bg-state-warning bg-opacity-10 px-4 py-2 rounded-lg">
+          <span className="text-state-warning font-medium">
+            {inactiveProducts.length}{" "}
+            {inactiveProducts.length === 1
+              ? "producto desactivado"
+              : "productos desactivados"}
+          </span>
+        </div>
+      </div>
+
       {inactiveProducts.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -75,7 +94,74 @@ const InactiveProducts = () => {
           transition={{ duration: 0.3 }}
           className="bg-neutral-white rounded-lg shadow-md overflow-hidden"
         >
-          <div className="overflow-x-auto">
+          {/* Vista móvil - Tarjetas */}
+          <div className="block lg:hidden divide-y divide-neutral-light">
+            {inactiveProducts.map((product) => (
+              <div
+                key={product.id}
+                className="p-4 hover:bg-neutral-lightest hover:bg-opacity-50"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                        {product.code || "---"}
+                      </span>
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-neutral-light text-neutral-dark">
+                        {product.category}
+                      </span>
+                    </div>
+                    <h3 className="font-medium text-neutral-dark">
+                      {product.name}
+                    </h3>
+                    {product.description && (
+                      <p className="text-sm text-neutral-medium mt-1 line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+                  </div>
+                  <Tooltip content="Reactivar producto" position="top">
+                    <button
+                      onClick={() => handleActivateConfirm(product.id)}
+                      className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 ml-2"
+                    >
+                      <FaCheck size={16} />
+                    </button>
+                  </Tooltip>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-neutral-medium">Stock:</span>
+                    <div className="font-medium text-neutral-dark">
+                      {product.stock} unidades
+                    </div>
+                    <div className="text-xs text-neutral-medium">
+                      Mín: {product.minStock}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-neutral-medium">Retiros:</span>
+                    <div className="flex items-center mt-1">
+                      <FaExclamationTriangle
+                        className="text-state-warning mr-1"
+                        size={12}
+                      />
+                      <span className="font-medium text-state-warning">
+                        {product.withdrawalCount || 0}{" "}
+                        {(product.withdrawalCount || 0) === 1
+                          ? "retiro"
+                          : "retiros"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Vista desktop - Tabla */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-neutral-light">
               <thead className="bg-neutral-lightest">
                 <tr>

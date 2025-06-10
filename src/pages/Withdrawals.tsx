@@ -40,6 +40,7 @@ const Withdrawals = () => {
   );
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +53,17 @@ const Withdrawals = () => {
     "date" | "id" | "items" | "section" | "withdrawer" | "registeredBy"
   >("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc"); // desc = más recientes primero por defecto
+
+  // Detectar tamaño de pantalla
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Efecto para verificar si se debe mostrar el carrito basado en el estado de navegación
   useEffect(() => {
@@ -286,116 +298,202 @@ const Withdrawals = () => {
 
               {cart.length > 0 ? (
                 <div className="space-y-6">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-neutral-light">
-                      <colgroup>
-                        <col className="w-[75%]" />
-                        <col className="w-[15%]" />
-                        <col className="w-[10%]" />
-                      </colgroup>
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                            Código
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                            Producto
-                          </th>
-                          <th className="px-2 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider">
-                            Cantidad
-                          </th>
-                          <th className="px-2 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider">
-                            Acciones
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                        {cart.map((item) => (
-                          <tr
-                            key={item.productId}
-                            className="hover:bg-primary-lightest hover:bg-opacity-30"
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
-                                {item.product.code || "Sin código"}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="ml-0">
-                                  <div className="text-sm font-medium text-neutral-dark">
-                                    {item.product.name}
-                                  </div>
-                                  <div className="text-sm text-neutral-medium">
-                                    {item.product.category}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-2 py-4 whitespace-nowrap">
-                              <div className="flex justify-center">
-                                <div className="inline-flex items-center">
-                                  <button
-                                    onClick={() =>
-                                      handleQuantityChange(
-                                        item.productId,
-                                        Math.max(1, item.quantity - 1)
-                                      )
-                                    }
-                                    className="w-7 h-7 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
-                                    aria-label="Disminuir cantidad"
-                                  >
-                                    -
-                                  </button>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    value={item.quantity}
-                                    onChange={(e) =>
-                                      handleQuantityChange(
-                                        item.productId,
-                                        Number.parseInt(e.target.value) || 1
-                                      )
-                                    }
-                                    className="w-10 h-7 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
-                                  />
-                                  <button
-                                    onClick={() =>
-                                      handleQuantityChange(
-                                        item.productId,
-                                        item.quantity + 1
-                                      )
-                                    }
-                                    className="w-7 h-7 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
-                                    aria-label="Aumentar cantidad"
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-2 py-4 whitespace-nowrap">
-                              <div className="flex justify-center">
-                                <Tooltip
-                                  content="Eliminar del carrito"
-                                  position="top"
-                                >
-                                  <button
-                                    onClick={() =>
-                                      removeFromCart(item.productId)
-                                    }
-                                    className="text-state-error hover:bg-state-error hover:text-neutral-white p-1.5 rounded-full transition-colors flex items-center justify-center w-7 h-7"
-                                  >
-                                    <FaTrash size={14} />
-                                  </button>
-                                </Tooltip>
-                              </div>
-                            </td>
+                  {!isMobile ? (
+                    /* Vista de escritorio - Tabla */
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-neutral-light">
+                        <colgroup>
+                          <col className="w-[75%]" />
+                          <col className="w-[15%]" />
+                          <col className="w-[10%]" />
+                        </colgroup>
+                        <thead className="bg-primary-lightest">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                              Código
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                              Producto
+                            </th>
+                            <th className="px-2 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                              Cantidad
+                            </th>
+                            <th className="px-2 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider">
+                              Acciones
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                          {cart.map((item) => (
+                            <tr
+                              key={item.productId}
+                              className="hover:bg-primary-lightest hover:bg-opacity-30"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                                  {item.product.code || "Sin código"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="ml-0">
+                                    <div className="text-sm font-medium text-neutral-dark">
+                                      {item.product.name}
+                                    </div>
+                                    <div className="text-sm text-neutral-medium">
+                                      {item.product.category}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-2 py-4 whitespace-nowrap">
+                                <div className="flex justify-center">
+                                  <div className="inline-flex items-center">
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.productId,
+                                          Math.max(1, item.quantity - 1)
+                                        )
+                                      }
+                                      className="w-7 h-7 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
+                                      aria-label="Disminuir cantidad"
+                                    >
+                                      -
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={item.quantity}
+                                      onChange={(e) =>
+                                        handleQuantityChange(
+                                          item.productId,
+                                          Number.parseInt(e.target.value) || 1
+                                        )
+                                      }
+                                      className="w-10 h-7 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.productId,
+                                          item.quantity + 1
+                                        )
+                                      }
+                                      className="w-7 h-7 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
+                                      aria-label="Aumentar cantidad"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-2 py-4 whitespace-nowrap">
+                                <div className="flex justify-center">
+                                  <Tooltip
+                                    content="Eliminar del carrito"
+                                    position="top"
+                                  >
+                                    <button
+                                      onClick={() =>
+                                        removeFromCart(item.productId)
+                                      }
+                                      className="text-state-error hover:bg-state-error hover:text-neutral-white p-1.5 rounded-full transition-colors flex items-center justify-center w-7 h-7"
+                                    >
+                                      <FaTrash size={14} />
+                                    </button>
+                                  </Tooltip>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    /* Vista móvil - Tarjetas sin scroll interno */
+                    <div className="space-y-4">
+                      {cart.map((item) => (
+                        <motion.div
+                          key={item.productId}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-neutral-white border border-neutral-light rounded-lg p-4 shadow-sm"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                                  {item.product.code || "Sin código"}
+                                </span>
+                              </div>
+                              <h3 className="font-medium text-neutral-dark">
+                                {item.product.name}
+                              </h3>
+                              <p className="text-sm text-neutral-medium">
+                                {item.product.category}
+                              </p>
+                            </div>
+                            <Tooltip
+                              content="Eliminar del carrito"
+                              position="top"
+                            >
+                              <button
+                                onClick={() => removeFromCart(item.productId)}
+                                className="text-state-error hover:bg-state-error hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              >
+                                <FaTrash size={14} />
+                              </button>
+                            </Tooltip>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-neutral-medium">
+                              Cantidad:
+                            </span>
+                            <div className="inline-flex items-center">
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.productId,
+                                    Math.max(1, item.quantity - 1)
+                                  )
+                                }
+                                className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
+                                aria-label="Disminuir cantidad"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                  handleQuantityChange(
+                                    item.productId,
+                                    Number.parseInt(e.target.value) || 1
+                                  )
+                                }
+                                className="w-12 h-8 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
+                              />
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.productId,
+                                    item.quantity + 1
+                                  )
+                                }
+                                className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
+                                aria-label="Aumentar cantidad"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-neutral-light pt-4">
                     <div>
@@ -654,231 +752,382 @@ const Withdrawals = () => {
             {/* Sección de tabla - Separada de los filtros */}
             <div className="bg-neutral-white rounded-lg shadow-md overflow-hidden">
               {filteredAndSortedWithdrawals.length > 0 ? (
-                <div className="overflow-x-auto max-h-[32rem] overflow-y-auto">
-                  <table className="min-w-full divide-y divide-neutral-light">
-                    <thead className="bg-primary-lightest sticky top-0 z-10">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("id")}
-                        >
-                          ID {renderSortIndicator("id")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("date")}
-                        >
-                          Fecha {renderSortIndicator("date")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("withdrawer")}
-                        >
-                          Retirado por {renderSortIndicator("withdrawer")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("section")}
-                        >
-                          Sección {renderSortIndicator("section")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("registeredBy")}
-                        >
-                          Registrado por {renderSortIndicator("registeredBy")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
-                          onClick={() => handleSort("items")}
-                        >
-                          Items {renderSortIndicator("items")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider"
-                        >
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                      {filteredAndSortedWithdrawals.map((withdrawal) => (
-                        <>
-                          <tr
-                            key={withdrawal.id}
-                            className={`hover:bg-primary-lightest hover:bg-opacity-30 cursor-pointer ${
-                              selectedWithdrawal === withdrawal.id
-                                ? "bg-primary-lightest"
-                                : ""
-                            }`}
-                            onClick={() =>
-                              setSelectedWithdrawal(
-                                selectedWithdrawal === withdrawal.id
-                                  ? null
-                                  : withdrawal.id
-                              )
-                            }
+                !isMobile ? (
+                  /* Vista de escritorio - Tabla con scroll */
+                  <div className="overflow-x-auto max-h-[32rem] overflow-y-auto">
+                    <table className="min-w-full divide-y divide-neutral-light">
+                      <thead className="bg-primary-lightest sticky top-0 z-10">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("id")}
                           >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-dark">
-                              #{withdrawal.id}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
-                              {new Date(
-                                withdrawal.createdAt
-                              ).toLocaleDateString()}{" "}
-                              {new Date(
-                                withdrawal.createdAt
-                              ).toLocaleTimeString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark">
-                              {withdrawal.withdrawerName}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
-                              {withdrawal.withdrawerSection}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
-                              {withdrawal.userName}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark text-center">
-                              {withdrawal.totalItems}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <div className="flex justify-center space-x-2">
-                                <Tooltip
-                                  content="Exportar a Excel"
-                                  position="top"
-                                >
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleExportToExcel(withdrawal.id);
-                                    }}
-                                    className="flex items-center justify-center w-8 h-8 text-state-success hover:bg-state-success hover:text-neutral-white rounded-full transition-colors p-2"
-                                    aria-label="Exportar a Excel"
+                            ID {renderSortIndicator("id")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("date")}
+                          >
+                            Fecha {renderSortIndicator("date")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("withdrawer")}
+                          >
+                            Retirado por {renderSortIndicator("withdrawer")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("section")}
+                          >
+                            Sección {renderSortIndicator("section")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("registeredBy")}
+                          >
+                            Registrado por {renderSortIndicator("registeredBy")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-[#e9e9e9]"
+                            onClick={() => handleSort("items")}
+                          >
+                            Items {renderSortIndicator("items")}
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-center text-xs font-medium text-primary uppercase tracking-wider"
+                          >
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                        {filteredAndSortedWithdrawals.map((withdrawal) => (
+                          <>
+                            <tr
+                              key={withdrawal.id}
+                              className={`hover:bg-primary-lightest hover:bg-opacity-30 cursor-pointer ${
+                                selectedWithdrawal === withdrawal.id
+                                  ? "bg-primary-lightest"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                setSelectedWithdrawal(
+                                  selectedWithdrawal === withdrawal.id
+                                    ? null
+                                    : withdrawal.id
+                                )
+                              }
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-dark">
+                                #{withdrawal.id}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                                {new Date(
+                                  withdrawal.createdAt
+                                ).toLocaleDateString()}{" "}
+                                {new Date(
+                                  withdrawal.createdAt
+                                ).toLocaleTimeString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark">
+                                {withdrawal.withdrawerName}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                                {withdrawal.withdrawerSection}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                                {withdrawal.userName}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark text-center">
+                                {withdrawal.totalItems}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div className="flex justify-center space-x-2">
+                                  <Tooltip
+                                    content="Exportar a Excel"
+                                    position="top"
                                   >
-                                    <FaFileExcel size={16} />
-                                  </button>
-                                </Tooltip>
-                                <Tooltip
-                                  content={
-                                    selectedWithdrawal === withdrawal.id
-                                      ? "Ocultar detalles"
-                                      : "Ver detalles"
-                                  }
-                                  position="top"
-                                >
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedWithdrawal(
-                                        selectedWithdrawal === withdrawal.id
-                                          ? null
-                                          : withdrawal.id
-                                      );
-                                    }}
-                                    className="flex items-center justify-center w-8 h-8 text-primary hover:bg-primary hover:text-neutral-white rounded-full transition-colors p-2"
-                                    aria-label={
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleExportToExcel(withdrawal.id);
+                                      }}
+                                      className="flex items-center justify-center w-8 h-8 text-state-success hover:bg-state-success hover:text-neutral-white rounded-full transition-colors p-2"
+                                      aria-label="Exportar a Excel"
+                                    >
+                                      <FaFileExcel size={16} />
+                                    </button>
+                                  </Tooltip>
+                                  <Tooltip
+                                    content={
                                       selectedWithdrawal === withdrawal.id
                                         ? "Ocultar detalles"
                                         : "Ver detalles"
                                     }
+                                    position="top"
                                   >
-                                    {selectedWithdrawal === withdrawal.id ? (
-                                      <FaTimes size={16} />
-                                    ) : (
-                                      <FaClipboardList size={16} />
-                                    )}
-                                  </button>
-                                </Tooltip>
-                              </div>
-                            </td>
-                          </tr>
-                          {selectedWithdrawal === withdrawal.id && (
-                            <tr>
-                              <td colSpan={7} className="px-0 py-0 border-t-0">
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  transition={{
-                                    duration: 0.3,
-                                    ease: [0.25, 0.46, 0.45, 0.94],
-                                    opacity: { duration: 0.6 },
-                                    height: {
-                                      duration: 0.3,
-                                      ease: [0.25, 0.46, 0.45, 0.94],
-                                    },
-                                  }}
-                                  className="bg-primary-lightest bg-opacity-30 px-6 py-4"
-                                >
-                                  {withdrawal.notes && (
-                                    <div className="text-sm text-neutral-medium mb-4 p-3 bg-neutral-white rounded-md italic">
-                                      <strong>Notas:</strong> {withdrawal.notes}
-                                    </div>
-                                  )}
-                                  <h4 className="text-sm font-medium text-primary mb-2">
-                                    Detalle de productos:
-                                  </h4>
-                                  <div className="bg-neutral-white rounded-md overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-neutral-light">
-                                      <thead className="bg-primary-lightest">
-                                        <tr>
-                                          <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                                            Código
-                                          </th>
-                                          <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                                            Producto
-                                          </th>
-                                          <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                                            Categoría
-                                          </th>
-                                          <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
-                                            Cantidad
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                                        {withdrawal.items.map((item) => (
-                                          <tr
-                                            key={item.productId}
-                                            className="hover:bg-primary-lightest hover:bg-opacity-30"
-                                          >
-                                            <td className="px-6 py-2 whitespace-nowrap text-sm">
-                                              <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
-                                                {item.product.code ||
-                                                  "Sin código"}
-                                              </span>
-                                            </td>
-                                            <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
-                                              {item.product.name}
-                                            </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-left">
-                                              {item.product.category}
-                                            </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-left">
-                                              {item.quantity}
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </motion.div>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedWithdrawal(
+                                          selectedWithdrawal === withdrawal.id
+                                            ? null
+                                            : withdrawal.id
+                                        );
+                                      }}
+                                      className="flex items-center justify-center w-8 h-8 text-primary hover:bg-primary hover:text-neutral-white rounded-full transition-colors p-2"
+                                      aria-label={
+                                        selectedWithdrawal === withdrawal.id
+                                          ? "Ocultar detalles"
+                                          : "Ver detalles"
+                                      }
+                                    >
+                                      {selectedWithdrawal === withdrawal.id ? (
+                                        <FaTimes size={16} />
+                                      ) : (
+                                        <FaClipboardList size={16} />
+                                      )}
+                                    </button>
+                                  </Tooltip>
+                                </div>
                               </td>
                             </tr>
+                            {selectedWithdrawal === withdrawal.id && (
+                              <tr>
+                                <td
+                                  colSpan={7}
+                                  className="px-0 py-0 border-t-0"
+                                >
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{
+                                      duration: 0.3,
+                                      ease: [0.25, 0.46, 0.45, 0.94],
+                                      opacity: { duration: 0.6 },
+                                      height: {
+                                        duration: 0.3,
+                                        ease: [0.25, 0.46, 0.45, 0.94],
+                                      },
+                                    }}
+                                    className="bg-primary-lightest bg-opacity-30 px-6 py-4"
+                                  >
+                                    {withdrawal.notes && (
+                                      <div className="text-sm text-neutral-medium mb-4 p-3 bg-neutral-white rounded-md italic">
+                                        <strong>Notas:</strong>{" "}
+                                        {withdrawal.notes}
+                                      </div>
+                                    )}
+                                    <h4 className="text-sm font-medium text-primary mb-2">
+                                      Detalle de productos:
+                                    </h4>
+                                    <div className="bg-neutral-white rounded-md overflow-x-auto">
+                                      <table className="min-w-full divide-y divide-neutral-light">
+                                        <thead className="bg-primary-lightest">
+                                          <tr>
+                                            <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                              Código
+                                            </th>
+                                            <th className="px-6 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                              Producto
+                                            </th>
+                                            <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                              Categoría
+                                            </th>
+                                            <th className="px-2 py-2 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                                              Cantidad
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                                          {withdrawal.items.map((item) => (
+                                            <tr
+                                              key={item.productId}
+                                              className="hover:bg-primary-lightest hover:bg-opacity-30"
+                                            >
+                                              <td className="px-6 py-2 whitespace-nowrap text-sm">
+                                                <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                                                  {item.product.code ||
+                                                    "Sin código"}
+                                                </span>
+                                              </td>
+                                              <td className="px-6 py-2 whitespace-nowrap text-sm text-neutral-dark">
+                                                {item.product.name}
+                                              </td>
+                                              <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-medium text-left">
+                                                {item.product.category}
+                                              </td>
+                                              <td className="px-2 py-2 whitespace-nowrap text-sm text-neutral-dark text-left">
+                                                {item.quantity}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </motion.div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* Vista móvil - Tarjetas sin scroll interno */
+                  <div className="p-4 space-y-4">
+                    {filteredAndSortedWithdrawals.map((withdrawal) => (
+                      <motion.div
+                        key={withdrawal.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-neutral-white border border-neutral-light rounded-lg p-4 shadow-sm"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-neutral-dark">
+                                #{withdrawal.id}
+                              </span>
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
+                                {withdrawal.totalItems}{" "}
+                                {withdrawal.totalItems === 1 ? "ítem" : "ítems"}
+                              </span>
+                            </div>
+                            <h3 className="font-medium text-neutral-dark">
+                              {withdrawal.withdrawerName}
+                            </h3>
+                            <p className="text-sm text-neutral-medium">
+                              {withdrawal.withdrawerSection}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Tooltip content="Exportar a Excel" position="top">
+                              <button
+                                onClick={() =>
+                                  handleExportToExcel(withdrawal.id)
+                                }
+                                className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              >
+                                <FaFileExcel size={14} />
+                              </button>
+                            </Tooltip>
+                            <Tooltip
+                              content={
+                                selectedWithdrawal === withdrawal.id
+                                  ? "Ocultar detalles"
+                                  : "Ver detalles"
+                              }
+                              position="top"
+                            >
+                              <button
+                                onClick={() =>
+                                  setSelectedWithdrawal(
+                                    selectedWithdrawal === withdrawal.id
+                                      ? null
+                                      : withdrawal.id
+                                  )
+                                }
+                                className="text-primary hover:bg-primary hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              >
+                                {selectedWithdrawal === withdrawal.id ? (
+                                  <FaTimes size={14} />
+                                ) : (
+                                  <FaClipboardList size={14} />
+                                )}
+                              </button>
+                            </Tooltip>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                          <div>
+                            <span className="text-sm text-neutral-medium">
+                              Fecha:
+                            </span>
+                            <div className="text-sm text-neutral-dark">
+                              {new Date(
+                                withdrawal.createdAt
+                              ).toLocaleDateString()}
+                            </div>
+                            <div className="text-xs text-neutral-medium">
+                              {new Date(
+                                withdrawal.createdAt
+                              ).toLocaleTimeString()}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-sm text-neutral-medium">
+                              Registrado por:
+                            </span>
+                            <div className="text-sm text-neutral-dark">
+                              {withdrawal.userName}
+                            </div>
+                          </div>
+                        </div>
+
+                        {withdrawal.notes && (
+                          <div className="mb-3 p-2 bg-neutral-light bg-opacity-50 rounded text-sm italic">
+                            <strong>Notas:</strong> {withdrawal.notes}
+                          </div>
+                        )}
+
+                        <AnimatePresence>
+                          {selectedWithdrawal === withdrawal.id && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="border-t border-neutral-light pt-3 mt-3"
+                            >
+                              <h4 className="text-sm font-medium text-primary mb-2">
+                                Detalle de productos:
+                              </h4>
+                              <div className="space-y-2">
+                                {withdrawal.items.map((item) => (
+                                  <div
+                                    key={item.productId}
+                                    className="bg-neutral-light bg-opacity-30 rounded p-2"
+                                  >
+                                    <div className="flex justify-between items-start">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="text-xs font-mono bg-neutral-light bg-opacity-70 px-1.5 py-0.5 rounded">
+                                            {item.product.code || "Sin código"}
+                                          </span>
+                                          <span className="text-xs bg-primary-lightest text-primary px-1.5 py-0.5 rounded">
+                                            {item.product.category}
+                                          </span>
+                                        </div>
+                                        <div className="font-medium text-sm text-neutral-dark">
+                                          {item.product.name}
+                                        </div>
+                                      </div>
+                                      <div className="text-sm font-medium text-neutral-dark">
+                                        x{item.quantity}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
                           )}
-                        </>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                        </AnimatePresence>
+                      </motion.div>
+                    ))}
+                  </div>
+                )
               ) : (
                 <div className="text-center py-8">
                   <FaClipboardList className="mx-auto text-neutral-medium text-5xl mb-4" />

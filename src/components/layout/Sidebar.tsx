@@ -15,7 +15,12 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
-const Sidebar = () => {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const { user } = useAuth();
 
   const navLinks = [
@@ -63,6 +68,12 @@ const Sidebar = () => {
     },
   ];
 
+  const handleNavClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
   // Agregar gestión de usuarios solo para admins
   if (user?.role === "admin") {
     navLinks.push({
@@ -101,6 +112,7 @@ const Sidebar = () => {
             <li key={link.to} className="px-4 py-2">
               <NavLink
                 to={link.to}
+                onClick={handleNavClick}
                 className={({ isActive }) =>
                   `flex items-center p-2 rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary ${
                     isActive

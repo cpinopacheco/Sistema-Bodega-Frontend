@@ -51,10 +51,7 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9999]"
-      style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
-    >
+    <div className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9999] !mt-0 px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -75,7 +72,7 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
         </div>
 
         <div className="p-4 flex-1 overflow-y-auto">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
             <p className="text-neutral-medium">
               Total:{" "}
               <span className="font-semibold">
@@ -95,17 +92,17 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
           </div>
 
           {categories.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-neutral-light">
+            <div className="overflow-x-auto -mx-4 px-4">
+              <table className="w-full min-w-full divide-y divide-neutral-light table-auto">
                 <thead className="bg-primary-lightest">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                    <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider w-16">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                    <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                       Nombre
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
+                    <th className="px-2 sm:px-4 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider w-24">
                       Acciones
                     </th>
                   </tr>
@@ -116,31 +113,31 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
                       key={category.id}
                       className="hover:bg-primary-lightest hover:bg-opacity-30"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-medium">
+                      <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-sm text-neutral-medium">
                         {category.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-neutral-dark">
-                          {category.name}
-                        </div>
+                      <td className="px-2 sm:px-4 py-3 text-sm font-medium text-neutral-dark break-words">
+                        {category.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
+                      <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-1">
                           <Tooltip content="Editar" position="top">
                             <button
                               onClick={() => handleEdit(category)}
-                              className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              className="text-state-info hover:bg-state-info hover:text-neutral-white p-1.5 rounded-full transition-colors flex items-center justify-center w-7 h-7"
+                              aria-label={`Editar ${category.name}`}
                             >
-                              <FaEdit size={16} />
+                              <FaEdit size={14} />
                             </button>
                           </Tooltip>
 
                           <Tooltip content="Eliminar" position="top">
                             <button
                               onClick={() => handleDeleteConfirm(category.id)}
-                              className="text-state-error hover:bg-state-error hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              className="text-state-error hover:bg-state-error hover:text-neutral-white p-1.5 rounded-full transition-colors flex items-center justify-center w-7 h-7"
+                              aria-label={`Eliminar ${category.name}`}
                             >
-                              <FaTrash size={16} />
+                              <FaTrash size={14} />
                             </button>
                           </Tooltip>
                         </div>
@@ -188,7 +185,7 @@ const CategoriesList = ({ onClose }: CategoriesListProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-50 px-4 !mt-0"
             onKeyDown={(e) => {
               if (e.key === "Escape") {
                 setConfirmDelete(null);

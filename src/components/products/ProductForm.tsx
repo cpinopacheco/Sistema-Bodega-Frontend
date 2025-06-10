@@ -21,12 +21,14 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
     category: "",
     stock: 0,
     minStock: 0,
+    code: "", // Added code field
   });
   const [errors, setErrors] = useState({
     name: "",
     category: "",
     stock: "",
     minStock: "",
+    code: "", // Added code error field
   });
 
   useEffect(() => {
@@ -37,6 +39,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
         category: product.category,
         stock: product.stock,
         minStock: product.minStock,
+        code: product.code || "", // Initialize with product code
       });
     } else {
       // Set default category if available
@@ -56,6 +59,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
       category: "",
       stock: "",
       minStock: "",
+      code: "",
     };
 
     if (!formData.name.trim()) {
@@ -77,6 +81,12 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
       newErrors.minStock = "El stock mínimo no puede ser negativo";
       isValid = false;
     }
+
+    // Validate code if needed
+    // if (!formData.code.trim()) {
+    //   newErrors.code = "El código es obligatorio"
+    //   isValid = false
+    // }
 
     setErrors(newErrors);
     return isValid;
@@ -152,8 +162,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 !m-0 !p-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000]"
-      style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
+      className="fixed inset-0 bg-neutral-dark bg-opacity-50 flex items-center justify-center z-[9000] !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -165,7 +174,7 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
       }}
     >
       <motion.div
-        className="bg-neutral-white rounded-lg shadow-xl w-full max-w-md"
+        className="bg-neutral-white rounded-lg shadow-xl w-full max-w-md mx-4"
         variants={formVariants}
         initial="hidden"
         animate="visible"
@@ -207,6 +216,28 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-state-error">{errors.name}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="code"
+                className="block text-sm font-medium text-neutral-dark"
+              >
+                Código
+              </label>
+              <input
+                type="text"
+                id="code"
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm ${
+                  errors.code ? "border-state-error" : ""
+                }`}
+              />
+              {errors.code && (
+                <p className="mt-1 text-sm text-state-error">{errors.code}</p>
               )}
             </div>
 

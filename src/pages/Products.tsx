@@ -44,6 +44,18 @@ const Products = () => {
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [showStockManagementForm, setShowStockManagementForm] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar tamaño de pantalla
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Inicializar cantidades
   useEffect(() => {
@@ -159,17 +171,17 @@ const Products = () => {
         <h1 className="text-2xl font-bold text-neutral-dark">
           Gestión de Productos
         </h1>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
           <button
             onClick={() => setShowImportModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-state-success text-neutral-white rounded-md hover:bg-opacity-90 transition-colors w-full sm:w-auto"
           >
             <FaFileImport className="mr-2" />
             Cargar Productos
           </button>
           <button
             onClick={() => setShowCategoriesList(true)}
-            className="inline-flex items-center px-4 py-2 bg-accent text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-accent text-neutral-white rounded-md hover:bg-opacity-90 transition-colors w-full sm:w-auto"
           >
             <FaTags className="mr-2" />
             Gestionar Categorías
@@ -179,7 +191,7 @@ const Products = () => {
               setSelectedProduct(null);
               setShowProductForm(true);
             }}
-            className="inline-flex items-center px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors w-full sm:w-auto"
           >
             <FaPlus className="mr-2" />
             Nuevo Producto
@@ -311,115 +323,281 @@ const Products = () => {
         className="text-sm text-neutral-medium mb-1"
         style={{ marginTop: "32px" }}
       >
-        Haz clic en los encabezados de la tabla para ordenar los productos.
+        {!isMobile
+          ? "Haz clic en los encabezados de la tabla para ordenar los productos."
+          : "Desliza para ver más información"}
       </p>
+
       {filteredProducts.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="bg-neutral-white rounded-lg shadow-md overflow-hidden max-h-[70vh] flex flex-col"
+          className={`bg-neutral-white rounded-lg shadow-md overflow-hidden ${
+            !isMobile ? "max-h-[70vh] flex flex-col" : ""
+          }`}
           style={{ marginTop: "8px" }}
         >
-          <div className="flex-1 overflow-y-auto">
-            <table className="min-w-full divide-y divide-neutral-light">
-              <thead className="bg-primary-lightest sticky top-0 z-10">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
-                    <button
-                      onClick={() => handleSort("code")}
-                      className="flex items-center focus:outline-none"
+          {/* Vista de escritorio - Tabla */}
+          {!isMobile ? (
+            <div className="flex-1 overflow-y-auto">
+              <table className="min-w-full divide-y divide-neutral-light">
+                <thead className="bg-primary-lightest sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                      <button
+                        onClick={() => handleSort("code")}
+                        className="flex items-center focus:outline-none"
+                      >
+                        CÓDIGO
+                        {sortField === "code" &&
+                          (sortDirection === "asc" ? (
+                            <FaSortAmountUp className="ml-1 text-primary" />
+                          ) : (
+                            <FaSortAmountDown className="ml-1 text-primary" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                      <button
+                        onClick={() => handleSort("name")}
+                        className="flex items-center focus:outline-none"
+                      >
+                        PRODUCTO
+                        {sortField === "name" &&
+                          (sortDirection === "asc" ? (
+                            <FaSortAmountUp className="ml-1 text-primary" />
+                          ) : (
+                            <FaSortAmountDown className="ml-1 text-primary" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                      <button
+                        onClick={() => handleSort("category")}
+                        className="flex items-center focus:outline-none"
+                      >
+                        CATEGORÍA
+                        {sortField === "category" &&
+                          (sortDirection === "asc" ? (
+                            <FaSortAmountUp className="ml-1 text-primary" />
+                          ) : (
+                            <FaSortAmountDown className="ml-1 text-primary" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                      <button
+                        onClick={() => handleSort("stock")}
+                        className="flex items-center focus:outline-none"
+                      >
+                        STOCK
+                        {sortField === "stock" &&
+                          (sortDirection === "asc" ? (
+                            <FaSortAmountUp className="ml-1 text-primary" />
+                          ) : (
+                            <FaSortAmountDown className="ml-1 text-primary" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
+                      ACCIONES
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                  {filteredProducts.map((product) => (
+                    <tr
+                      key={product.id}
+                      className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
+                        product.stock <= product.minStock
+                          ? "bg-state-error bg-opacity-10"
+                          : ""
+                      }`}
                     >
-                      CÓDIGO
-                      {sortField === "code" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1 text-primary" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1 text-primary" />
-                        ))}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
-                    <button
-                      onClick={() => handleSort("name")}
-                      className="flex items-center focus:outline-none"
-                    >
-                      PRODUCTO
-                      {sortField === "name" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1 text-primary" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1 text-primary" />
-                        ))}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
-                    <button
-                      onClick={() => handleSort("category")}
-                      className="flex items-center focus:outline-none"
-                    >
-                      CATEGORÍA
-                      {sortField === "category" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1 text-primary" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1 text-primary" />
-                        ))}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
-                    <button
-                      onClick={() => handleSort("stock")}
-                      className="flex items-center focus:outline-none"
-                    >
-                      STOCK
-                      {sortField === "stock" &&
-                        (sortDirection === "asc" ? (
-                          <FaSortAmountUp className="ml-1 text-primary" />
-                        ) : (
-                          <FaSortAmountDown className="ml-1 text-primary" />
-                        ))}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider hover:bg-[#e9e9e9] transition-colors duration-200">
-                    ACCIONES
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                {filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className={`hover:bg-primary-lightest hover:bg-opacity-30 ${
-                      product.stock <= product.minStock
-                        ? "bg-state-error bg-opacity-10"
-                        : ""
-                    }`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
-                        {product.code || "---"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="ml-0">
-                          <div className="text-sm font-medium text-neutral-dark">
-                            {product.name}
-                          </div>
-                          <div className="text-sm text-neutral-medium max-w-xs truncate">
-                            {product.description}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                          {product.code || "---"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="ml-0">
+                            <div className="text-sm font-medium text-neutral-dark">
+                              {product.name}
+                            </div>
+                            <div className="text-sm text-neutral-medium max-w-xs truncate">
+                              {product.description}
+                            </div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
+                          {product.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className={`text-sm font-medium ${
+                            product.stock <= product.minStock
+                              ? "text-state-error"
+                              : product.stock <= product.minStock * 2
+                              ? "text-state-warning"
+                              : "text-state-success"
+                          }`}
+                        >
+                          {product.stock} unidades
+                        </div>
+                        {product.stock <= product.minStock && (
+                          <div className="text-xs text-state-error">
+                            Stock bajo
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end gap-6">
+                          <div className="flex items-center">
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  product.id,
+                                  Math.max(
+                                    1,
+                                    (quantityInputs[product.id] || 1) - 1
+                                  )
+                                )
+                              }
+                              className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
+                              aria-label="Disminuir cantidad"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min="1"
+                              value={quantityInputs[product.id] || 1}
+                              onChange={(e) =>
+                                handleQuantityChange(
+                                  product.id,
+                                  Number.parseInt(e.target.value) || 1
+                                )
+                              }
+                              className="w-16 h-8 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
+                              style={{ textAlign: "center" }}
+                            />
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  product.id,
+                                  (quantityInputs[product.id] || 1) + 1
+                                )
+                              }
+                              className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
+                              aria-label="Aumentar cantidad"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="flex items-center space-x-4">
+                            <Tooltip content="Añadir al carrito" position="top">
+                              <button
+                                onClick={() =>
+                                  handleAddToCart(
+                                    product,
+                                    quantityInputs[product.id] || 1
+                                  )
+                                }
+                                className="text-primary-lighter hover:bg-primary-lighter hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                                disabled={product.stock <= 0}
+                              >
+                                <FaShoppingCart size={16} />
+                              </button>
+                            </Tooltip>
+
+                            <Tooltip content="Gestionar stock" position="top">
+                              <button
+                                onClick={() => handleManageStock(product)}
+                                className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 group"
+                              >
+                                <div className="flex items-center">
+                                  <FaArrowUp
+                                    size={13}
+                                    className="text-state-success group-hover:text-neutral-white"
+                                  />
+                                  <FaArrowDown
+                                    size={13}
+                                    className="text-state-error group-hover:text-neutral-white ml-0"
+                                  />
+                                </div>
+                              </button>
+                            </Tooltip>
+
+                            <Tooltip content="Editar producto" position="top">
+                              <button
+                                onClick={() => handleEdit(product)}
+                                className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              >
+                                <FaEdit size={16} />
+                              </button>
+                            </Tooltip>
+
+                            <Tooltip content="Eliminar producto" position="top">
+                              <button
+                                onClick={() => handleDeleteConfirm(product.id)}
+                                className="text-state-error hover:bg-state-error hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                              >
+                                <FaTrash size={16} />
+                              </button>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            /* Vista móvil - Tarjetas sin scroll interno */
+            <div className="p-4 space-y-4">
+              {filteredProducts.map((product) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`bg-neutral-white border rounded-lg p-4 shadow-sm ${
+                    product.stock <= product.minStock
+                      ? "border-state-error bg-state-error bg-opacity-5"
+                      : "border-neutral-light"
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-mono bg-neutral-light bg-opacity-50 px-2 py-1 rounded">
+                          {product.code || "---"}
+                        </span>
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary whitespace-nowrap">
+                          {product.category}
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-lightest text-primary">
-                        {product.category}
+                      <h3 className="font-medium text-neutral-dark">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-neutral-medium mt-1">
+                        {product.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <span className="text-sm text-neutral-medium">
+                        Stock:
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div
                         className={`text-sm font-medium ${
                           product.stock <= product.minStock
@@ -430,117 +608,114 @@ const Products = () => {
                         }`}
                       >
                         {product.stock} unidades
+                        {product.stock <= product.minStock && (
+                          <div className="text-xs text-state-error">
+                            Stock bajo
+                          </div>
+                        )}
                       </div>
-                      {product.stock <= product.minStock && (
-                        <div className="text-xs text-state-error">
-                          Stock bajo
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-6">
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(
-                                product.id,
-                                Math.max(
-                                  1,
-                                  (quantityInputs[product.id] || 1) - 1
-                                )
-                              )
-                            }
-                            className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
-                            aria-label="Disminuir cantidad"
-                          >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            value={quantityInputs[product.id] || 1}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                product.id,
-                                Number.parseInt(e.target.value) || 1
-                              )
-                            }
-                            className="w-16 h-8 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
-                            style={{ textAlign: "center" }}
-                          />
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(
-                                product.id,
-                                (quantityInputs[product.id] || 1) + 1
-                              )
-                            }
-                            className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
-                            aria-label="Aumentar cantidad"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                          <Tooltip content="Añadir al carrito" position="top">
-                            <button
-                              onClick={() =>
-                                handleAddToCart(
-                                  product,
-                                  quantityInputs[product.id] || 1
-                                )
-                              }
-                              className="text-primary-lighter hover:bg-primary-lighter hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
-                              disabled={product.stock <= 0}
-                            >
-                              <FaShoppingCart size={16} />
-                            </button>
-                          </Tooltip>
-
-                          <Tooltip content="Gestionar stock" position="top">
-                            <button
-                              onClick={() => handleManageStock(product)}
-                              className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 group"
-                            >
-                              <div className="flex items-center">
-                                <FaArrowUp
-                                  size={13}
-                                  className="text-state-success group-hover:text-neutral-white"
-                                />
-                                <FaArrowDown
-                                  size={13}
-                                  className="text-state-error group-hover:text-neutral-white ml-0"
-                                />
-                              </div>
-                            </button>
-                          </Tooltip>
-
-                          <Tooltip content="Editar producto" position="top">
-                            <button
-                              onClick={() => handleEdit(product)}
-                              className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
-                            >
-                              <FaEdit size={16} />
-                            </button>
-                          </Tooltip>
-
-                          <Tooltip content="Eliminar producto" position="top">
-                            <button
-                              onClick={() => handleDeleteConfirm(product.id)}
-                              className="text-state-error hover:bg-state-error hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
-                            >
-                              <FaTrash size={16} />
-                            </button>
-                          </Tooltip>
-                        </div>
+                    </div>
+                    <div>
+                      <span className="text-sm text-neutral-medium">
+                        Cantidad:
+                      </span>
+                      <div className="flex items-center mt-1">
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(
+                              product.id,
+                              Math.max(1, (quantityInputs[product.id] || 1) - 1)
+                            )
+                          }
+                          className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-l-md hover:bg-primary hover:text-neutral-white transition-colors"
+                          aria-label="Disminuir cantidad"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min="1"
+                          value={quantityInputs[product.id] || 1}
+                          onChange={(e) =>
+                            handleQuantityChange(
+                              product.id,
+                              Number.parseInt(e.target.value) || 1
+                            )
+                          }
+                          className="w-12 h-8 text-center border-t border-b border-neutral-light [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:border-primary focus:ring-primary"
+                        />
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(
+                              product.id,
+                              (quantityInputs[product.id] || 1) + 1
+                            )
+                          }
+                          className="w-8 h-8 flex items-center justify-center bg-neutral-light rounded-r-md hover:bg-primary hover:text-neutral-white transition-colors"
+                          aria-label="Aumentar cantidad"
+                        >
+                          +
+                        </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-3 border-t border-neutral-light">
+                    <button
+                      onClick={() =>
+                        handleAddToCart(
+                          product,
+                          quantityInputs[product.id] || 1
+                        )
+                      }
+                      disabled={product.stock <= 0}
+                      className="inline-flex items-center px-3 py-2 bg-primary-lighter text-neutral-white rounded-md hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FaShoppingCart className="mr-2" size={14} />
+                      Añadir al carrito
+                    </button>
+                    <div className="flex items-center space-x-2">
+                      <Tooltip content="Gestionar stock" position="top">
+                        <button
+                          onClick={() => handleManageStock(product)}
+                          className="text-state-success hover:bg-state-success hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8 group"
+                        >
+                          <div className="flex items-center">
+                            <FaArrowUp
+                              size={12}
+                              className="text-state-success group-hover:text-neutral-white"
+                            />
+                            <FaArrowDown
+                              size={12}
+                              className="text-state-error group-hover:text-neutral-white ml-0"
+                            />
+                          </div>
+                        </button>
+                      </Tooltip>
+
+                      <Tooltip content="Editar producto" position="top">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                        >
+                          <FaEdit size={14} />
+                        </button>
+                      </Tooltip>
+
+                      <Tooltip content="Eliminar producto" position="top">
+                        <button
+                          onClick={() => handleDeleteConfirm(product.id)}
+                          className="text-state-error hover:bg-state-error hover:text-neutral-white p-2 rounded-full transition-colors flex items-center justify-center w-8 h-8"
+                        >
+                          <FaTrash size={14} />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
       ) : (
         <div className="bg-neutral-white rounded-lg shadow-md p-8 text-center">

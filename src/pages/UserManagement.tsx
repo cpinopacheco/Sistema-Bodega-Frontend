@@ -54,6 +54,18 @@ const UserManagement = () => {
     "name" | "employee_code" | "role" | "section" | "is_active" | "created_at"
   >("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar tamaño de pantalla
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Función para abrir modal de edición
   const handleEdit = (user: User) => {
@@ -426,241 +438,382 @@ const UserManagement = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="bg-neutral-white rounded-lg shadow-md overflow-hidden"
         >
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-light">
-              <thead className="bg-primary-lightest">
-                <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("name")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Usuario</span>
-                      {sortField === "name" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("employee_code")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Código</span>
-                      {sortField === "employee_code" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("role")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Rol</span>
-                      {sortField === "role" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("section")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Sección</span>
-                      {sortField === "section" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("is_active")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Estado</span>
-                      {sortField === "is_active" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
-                    onClick={() => handleSort("created_at")}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Creado</span>
-                      {sortField === "created_at" && (
-                        <span className="text-primary">
-                          {sortDirection === "asc" ? (
-                            <FaSortAmountUp className="w-3 h-3" />
-                          ) : (
-                            <FaSortAmountDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                {sortedUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className={`hover:bg-primary-lightest hover:bg-opacity-30 transition-colors duration-200 ${
-                      !user.is_active ? "bg-neutral-light bg-opacity-50" : ""
-                    }`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-primary-lightest flex items-center justify-center">
-                            {user.role === "admin" ? (
-                              <FaShieldAlt className="text-primary" />
+          {!isMobile ? (
+            /* Vista de escritorio - Tabla */
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-neutral-light">
+                <thead className="bg-primary-lightest">
+                  <tr>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("name")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Usuario</span>
+                        {sortField === "name" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
                             ) : (
-                              <FaUser className="text-primary" />
+                              <FaSortAmountDown className="w-3 h-3" />
                             )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("employee_code")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Código</span>
+                        {sortField === "employee_code" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
+                            ) : (
+                              <FaSortAmountDown className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("role")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Rol</span>
+                        {sortField === "role" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
+                            ) : (
+                              <FaSortAmountDown className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("section")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Sección</span>
+                        {sortField === "section" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
+                            ) : (
+                              <FaSortAmountDown className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("is_active")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Estado</span>
+                        {sortField === "is_active" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
+                            ) : (
+                              <FaSortAmountDown className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider cursor-pointer hover:bg-primary-light hover:bg-opacity-20 transition-colors"
+                      onClick={() => handleSort("created_at")}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Creado</span>
+                        {sortField === "created_at" && (
+                          <span className="text-primary">
+                            {sortDirection === "asc" ? (
+                              <FaSortAmountUp className="w-3 h-3" />
+                            ) : (
+                              <FaSortAmountDown className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-neutral-white divide-y divide-neutral-light">
+                  {sortedUsers.map((user) => (
+                    <tr
+                      key={user.id}
+                      className={`hover:bg-primary-lightest hover:bg-opacity-30 transition-colors duration-200 ${
+                        !user.is_active ? "bg-neutral-light bg-opacity-50" : ""
+                      }`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-primary-lightest flex items-center justify-center">
+                              {user.role === "admin" ? (
+                                <FaShieldAlt className="text-primary" />
+                              ) : (
+                                <FaUser className="text-primary" />
+                              )}
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-neutral-dark">
+                              {user.name}
+                            </div>
+                            <div className="text-sm text-neutral-medium">
+                              {user.email}
+                            </div>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-neutral-dark">
-                            {user.name}
-                          </div>
-                          <div className="text-sm text-neutral-medium">
-                            {user.email}
-                          </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-neutral-dark">
+                          {user.employee_code}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
+                            user.role === "admin"
+                              ? "bg-accent bg-opacity-10 text-accent"
+                              : "bg-primary-lightest text-primary"
+                          }`}
+                        >
+                          {user.role === "admin" ? "Administrador" : "Usuario"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-neutral-dark">
+                          {user.section}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
+                            user.is_active
+                              ? "bg-state-success bg-opacity-10 text-state-success"
+                              : "bg-state-error bg-opacity-10 text-state-error"
+                          }`}
+                        >
+                          {user.is_active ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-neutral-medium">
+                          {formatDate(user.created_at)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Tooltip
+                            content={
+                              user.is_active
+                                ? "Desactivar usuario"
+                                : "Activar usuario"
+                            }
+                            position="top"
+                          >
+                            <button
+                              onClick={() => handleToggleStatus(user.id)}
+                              disabled={user.id === currentUser.id}
+                              className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
+                                user.id === currentUser.id
+                                  ? "text-neutral-light cursor-not-allowed"
+                                  : user.is_active
+                                  ? "text-state-warning hover:bg-state-warning hover:text-neutral-white hover:scale-110"
+                                  : "text-state-success hover:bg-state-success hover:text-neutral-white hover:scale-110"
+                              }`}
+                            >
+                              {user.is_active ? (
+                                <FaToggleOn size={16} />
+                              ) : (
+                                <FaToggleOff size={16} />
+                              )}
+                            </button>
+                          </Tooltip>
+
+                          <Tooltip content="Editar usuario" position="top">
+                            <button
+                              onClick={() => handleEdit(user)}
+                              className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 hover:scale-110"
+                            >
+                              <FaEdit size={16} />
+                            </button>
+                          </Tooltip>
+
+                          <Tooltip content="Eliminar usuario" position="top">
+                            <button
+                              onClick={() => handleDeleteConfirm(user.id)}
+                              disabled={user.id === currentUser.id}
+                              className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
+                                user.id === currentUser.id
+                                  ? "text-neutral-light cursor-not-allowed"
+                                  : "text-state-error hover:bg-state-error hover:text-neutral-white hover:scale-110"
+                              }`}
+                            >
+                              <FaTrash size={16} />
+                            </button>
+                          </Tooltip>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            /* Vista móvil - Tarjetas */
+            <div className="p-4 space-y-4">
+              {sortedUsers.map((user) => (
+                <motion.div
+                  key={user.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`bg-neutral-white border rounded-lg p-4 shadow-sm ${
+                    !user.is_active
+                      ? "border-neutral-medium bg-neutral-light bg-opacity-20"
+                      : "border-neutral-light"
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center flex-1">
+                      <div className="flex-shrink-0 h-10 w-10 mr-3">
+                        <div className="h-10 w-10 rounded-full bg-primary-lightest flex items-center justify-center">
+                          {user.role === "admin" ? (
+                            <FaShieldAlt className="text-primary" />
+                          ) : (
+                            <FaUser className="text-primary" />
+                          )}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-neutral-dark">
+                            {user.name}
+                          </h3>
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.role === "admin"
+                                ? "bg-accent bg-opacity-10 text-accent"
+                                : "bg-primary-lightest text-primary"
+                            }`}
+                          >
+                            {user.role === "admin" ? "Admin" : "Usuario"}
+                          </span>
+                        </div>
+                        <p className="text-sm text-neutral-medium">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.is_active
+                          ? "bg-state-success bg-opacity-10 text-state-success"
+                          : "bg-state-error bg-opacity-10 text-state-error"
+                      }`}
+                    >
+                      {user.is_active ? "Activo" : "Inactivo"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <span className="text-sm text-neutral-medium">
+                        Código:
+                      </span>
                       <div className="text-sm text-neutral-dark">
                         {user.employee_code}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
-                          user.role === "admin"
-                            ? "bg-accent bg-opacity-10 text-accent"
-                            : "bg-primary-lightest text-primary"
-                        }`}
-                      >
-                        {user.role === "admin" ? "Administrador" : "Usuario"}
+                    </div>
+                    <div>
+                      <span className="text-sm text-neutral-medium">
+                        Sección:
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-neutral-dark">
                         {user.section}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors duration-200 ${
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <span className="text-sm text-neutral-medium">Creado:</span>
+                    <div className="text-sm text-neutral-dark">
+                      {formatDate(user.created_at)}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-3 border-t border-neutral-light">
+                    <div className="flex items-center space-x-2">
+                      <Tooltip
+                        content={
                           user.is_active
-                            ? "bg-state-success bg-opacity-10 text-state-success"
-                            : "bg-state-error bg-opacity-10 text-state-error"
-                        }`}
+                            ? "Desactivar usuario"
+                            : "Activar usuario"
+                        }
+                        position="top"
                       >
-                        {user.is_active ? "Activo" : "Inactivo"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-neutral-medium">
-                        {formatDate(user.created_at)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Tooltip
-                          content={
-                            user.is_active
-                              ? "Desactivar usuario"
-                              : "Activar usuario"
-                          }
-                          position="top"
+                        <button
+                          onClick={() => handleToggleStatus(user.id)}
+                          disabled={user.id === currentUser.id}
+                          className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
+                            user.id === currentUser.id
+                              ? "text-neutral-light cursor-not-allowed"
+                              : user.is_active
+                              ? "text-state-warning hover:bg-state-warning hover:text-neutral-white"
+                              : "text-state-success hover:bg-state-success hover:text-neutral-white"
+                          }`}
                         >
-                          <button
-                            onClick={() => handleToggleStatus(user.id)}
-                            disabled={user.id === currentUser.id}
-                            className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
-                              user.id === currentUser.id
-                                ? "text-neutral-light cursor-not-allowed"
-                                : user.is_active
-                                ? "text-state-warning hover:bg-state-warning hover:text-neutral-white hover:scale-110"
-                                : "text-state-success hover:bg-state-success hover:text-neutral-white hover:scale-110"
-                            }`}
-                          >
-                            {user.is_active ? (
-                              <FaToggleOn size={16} />
-                            ) : (
-                              <FaToggleOff size={16} />
-                            )}
-                          </button>
-                        </Tooltip>
+                          {user.is_active ? (
+                            <FaToggleOn size={16} />
+                          ) : (
+                            <FaToggleOff size={16} />
+                          )}
+                        </button>
+                      </Tooltip>
 
-                        <Tooltip content="Editar usuario" position="top">
-                          <button
-                            onClick={() => handleEdit(user)}
-                            className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 hover:scale-110"
-                          >
-                            <FaEdit size={16} />
-                          </button>
-                        </Tooltip>
+                      <Tooltip content="Editar usuario" position="top">
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="text-state-info hover:bg-state-info hover:text-neutral-white p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8"
+                        >
+                          <FaEdit size={16} />
+                        </button>
+                      </Tooltip>
 
-                        <Tooltip content="Eliminar usuario" position="top">
-                          <button
-                            onClick={() => handleDeleteConfirm(user.id)}
-                            disabled={user.id === currentUser.id}
-                            className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
-                              user.id === currentUser.id
-                                ? "text-neutral-light cursor-not-allowed"
-                                : "text-state-error hover:bg-state-error hover:text-neutral-white hover:scale-110"
-                            }`}
-                          >
-                            <FaTrash size={16} />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <Tooltip content="Eliminar usuario" position="top">
+                        <button
+                          onClick={() => handleDeleteConfirm(user.id)}
+                          disabled={user.id === currentUser.id}
+                          className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-8 h-8 ${
+                            user.id === currentUser.id
+                              ? "text-neutral-light cursor-not-allowed"
+                              : "text-state-error hover:bg-state-error hover:text-neutral-white"
+                          }`}
+                        >
+                          <FaTrash size={16} />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
       ) : (
         <div className="bg-neutral-white rounded-lg shadow-md p-8 text-center">

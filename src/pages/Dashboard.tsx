@@ -100,9 +100,9 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
         <h1 className="text-2xl font-bold text-neutral-dark">Dashboard</h1>
-        <p className="text-sm text-neutral-medium">
+        <p className="text-sm text-neutral-medium mt-1 lg:mt-0">
           Última actualización: {new Date().toLocaleDateString()}{" "}
           {new Date().toLocaleTimeString()}
         </p>
