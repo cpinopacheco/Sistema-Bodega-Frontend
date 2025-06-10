@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
 
         // Buscar usuario por código de empleado (incluir profile_photo)
         const result = await pool.query(
-            "SELECT id, name, email, employee_code, password_hash, role, section, is_active, profile_photo FROM users WHERE employee_code = $1",
+            "SELECT id, name, email, employee_code, password_hash, role, section, is_active, profile_photo, is_temp_password FROM users WHERE employee_code = $1",
             [employeeCode],
         )
 
@@ -124,6 +124,7 @@ router.post("/login", async (req, res) => {
                 role: user.role,
                 section: user.section,
                 profilePhoto: user.profile_photo,
+                isTempPassword: user.is_temp_password || false,
             },
         })
     } catch (error) {
@@ -148,14 +149,16 @@ router.post("/change-password", authenticateToken, async (req, res) => {
         }
 
         // Obtener usuario actual
-        const userResult = await pool.query("SELECT password_hash FROM users WHERE id = $1", [userId])
+        const userResult = await pool.query("SELECT password_hash, is_temp_password FROM users WHERE id = $1", [userId])
 
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" })
         }
 
+        const user = userResult.rows[0]
+
         // Verificar contraseña actual
-        const validPassword = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash)
+        const validPassword = await bcrypt.compare(currentPassword, user.password_hash)
         if (!validPassword) {
             return res.status(400).json({ error: "La contraseña actual es incorrecta" })
         }
@@ -165,7 +168,10 @@ router.post("/change-password", authenticateToken, async (req, res) => {
         const newPasswordHash = await bcrypt.hash(newPassword, saltRounds)
 
         // Actualizar contraseña en la base de datos
-        await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [newPasswordHash, userId])
+        await pool.query("UPDATE users SET password_hash = $1, is_temp_password = FALSE WHERE id = $2", [
+            newPasswordHash,
+            userId,
+        ])
 
         res.json({ message: "Contraseña actualizada correctamente" })
     } catch (error) {
@@ -349,7 +355,7 @@ router.get("/me", authenticateToken, async (req, res) => {
         const userId = req.user.id
 
         const result = await pool.query(
-            "SELECT id, name, email, employee_code, role, section, profile_photo FROM users WHERE id = $1",
+            "SELECT id, name, email, employee_code, role, section, profile_photo, is_temp_password FROM users WHERE id = $1",
             [userId],
         )
 
@@ -366,6 +372,7 @@ router.get("/me", authenticateToken, async (req, res) => {
             role: user.role,
             section: user.section,
             profilePhoto: user.profile_photo,
+            isTempPassword: user.is_temp_password,
         })
     } catch (error) {
         console.error("Error obteniendo información del usuario:", error)
@@ -377,5 +384,249 @@ router.get("/me", authenticateToken, async (req, res) => {
 router.post("/verify-token", authenticateToken, (req, res) => {
     res.json({ valid: true, user: req.user })
 })
+
+// POST /api/auth/forgot-password - Solicitar recuperación de contraseña
+router.post("/forgot-password", async (req, res) => {
+    try {
+        const { employeeCode } = req.body
+
+        if (!employeeCode) {
+            return res.status(400).json({ error: "El código de empleado es requerido" })
+        }
+
+        // Buscar usuario por código de empleado
+        const userResult = await pool.query(
+            "SELECT id, name, email, employee_code, is_active FROM users WHERE employee_code = $1",
+            [employeeCode],
+        )
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" })
+        }
+
+        const user = userResult.rows[0]
+
+        // Verificar si el usuario está activo
+        if (!user.is_active) {
+            return res.status(400).json({ error: "El usuario está desactivado" })
+        }
+
+        // Verificar si ya existe una solicitud pendiente para este usuario
+        const pendingRequestResult = await pool.query(
+            "SELECT id FROM password_recovery_requests WHERE user_id = $1 AND status = 'pending'",
+            [user.id],
+        )
+
+        if (pendingRequestResult.rows.length > 0) {
+            return res.status(400).json({ error: "Ya existe una solicitud pendiente para este usuario" })
+        }
+
+        // Crear nueva solicitud de recuperación
+        await pool.query(
+            "INSERT INTO password_recovery_requests (user_id, status, expires_at) VALUES ($1, 'pending', NOW() + INTERVAL '24 hours')",
+            [user.id],
+        )
+
+        res.json({
+            message: "Solicitud de recuperación de contraseña enviada correctamente",
+            userName: user.name,
+        })
+    } catch (error) {
+        console.error("Error en solicitud de recuperación de contraseña:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
+// GET /api/auth/password-recovery-requests - Obtener solicitudes de recuperación (solo admin)
+router.get("/password-recovery-requests", authenticateToken, async (req, res) => {
+    try {
+        // Verificar si el usuario es administrador
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "No autorizado" })
+        }
+
+        // Obtener solicitudes pendientes y procesadas con información del usuario
+        const result = await pool.query(
+            `SELECT pr.id, pr.user_id, pr.requested_at, pr.status, pr.expires_at, pr.processed_at,
+              u.name, u.email, u.employee_code, u.section
+       FROM password_recovery_requests pr
+       JOIN users u ON pr.user_id = u.id
+       WHERE (pr.status = 'pending' OR pr.status = 'processed') AND pr.expires_at > NOW()
+       ORDER BY pr.status ASC, pr.requested_at DESC`,
+        )
+
+        res.json(result.rows)
+    } catch (error) {
+        console.error("Error obteniendo solicitudes de recuperación:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
+// GET /api/auth/temp-password/:requestId - Obtener contraseña temporal de solicitud procesada (solo admin)
+router.get("/temp-password/:requestId", authenticateToken, async (req, res) => {
+    try {
+        // Verificar si el usuario es administrador
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "No autorizado" })
+        }
+
+        const { requestId } = req.params
+
+        // Obtener la solicitud procesada con la contraseña temporal
+        const result = await pool.query(
+            `SELECT pr.temp_password_hash, u.name, u.employee_code
+       FROM password_recovery_requests pr
+       JOIN users u ON pr.user_id = u.id
+       WHERE pr.id = $1 AND pr.status = 'processed'`,
+            [requestId],
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Solicitud no encontrada o no procesada" })
+        }
+
+        const request = result.rows[0]
+
+        // Nota: En un caso real, deberías almacenar la contraseña temporal de forma segura
+        // Por ahora, generaremos una nueva cada vez (esto es una limitación del diseño actual)
+        res.json({
+            userName: request.name,
+            employeeCode: request.employee_code,
+            message: "Solicitud procesada - contraseña temporal ya generada",
+        })
+    } catch (error) {
+        console.error("Error obteniendo contraseña temporal:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
+// POST /api/auth/generate-temp-password/:requestId - Generar contraseña temporal (solo admin)
+router.post("/generate-temp-password/:requestId", authenticateToken, async (req, res) => {
+    try {
+        // Verificar si el usuario es administrador
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "No autorizado" })
+        }
+
+        const { requestId } = req.params
+        const adminId = req.user.id
+
+        // Obtener la solicitud y verificar que esté pendiente
+        const requestResult = await pool.query(
+            "SELECT id, user_id, status, expires_at FROM password_recovery_requests WHERE id = $1",
+            [requestId],
+        )
+
+        if (requestResult.rows.length === 0) {
+            return res.status(404).json({ error: "Solicitud no encontrada" })
+        }
+
+        const request = requestResult.rows[0]
+
+        if (request.status !== "pending") {
+            return res.status(400).json({ error: "La solicitud ya ha sido procesada" })
+        }
+
+        if (new Date(request.expires_at) < new Date()) {
+            return res.status(400).json({ error: "La solicitud ha expirado" })
+        }
+
+        // Generar contraseña temporal aleatoria
+        const tempPassword = generateTempPassword()
+        const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+        // Iniciar una transacción
+        const client = await pool.connect()
+        try {
+            await client.query("BEGIN")
+
+            // Actualizar la solicitud
+            await client.query(
+                `UPDATE password_recovery_requests 
+         SET status = 'processed', processed_at = NOW(), processed_by_admin_id = $1, temp_password_hash = $2
+         WHERE id = $3`,
+                [adminId, hashedPassword, requestId],
+            )
+
+            // Actualizar la contraseña del usuario y marcarla como temporal
+            await client.query("UPDATE users SET password_hash = $1, is_temp_password = TRUE WHERE id = $2", [
+                hashedPassword,
+                request.user_id,
+            ])
+
+            await client.query("COMMIT")
+
+            // Obtener información del usuario para la respuesta
+            const userResult = await pool.query("SELECT name, employee_code FROM users WHERE id = $1", [request.user_id])
+
+            const user = userResult.rows[0]
+
+            res.json({
+                message: "Contraseña temporal generada correctamente",
+                tempPassword,
+                userName: user.name,
+                employeeCode: user.employee_code,
+            })
+        } catch (error) {
+            await client.query("ROLLBACK")
+            throw error
+        } finally {
+            client.release()
+        }
+    } catch (error) {
+        console.error("Error generando contraseña temporal:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
+// DELETE /api/auth/archive-request/:requestId - Archivar solicitud procesada (solo admin)
+router.delete("/archive-request/:requestId", authenticateToken, async (req, res) => {
+    try {
+        // Verificar si el usuario es administrador
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "No autorizado" })
+        }
+
+        const { requestId } = req.params
+
+        // Actualizar el estado de la solicitud a 'archived'
+        const result = await pool.query(
+            "UPDATE password_recovery_requests SET status = 'archived' WHERE id = $1 AND status = 'processed'",
+            [requestId],
+        )
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Solicitud no encontrada o no puede ser archivada" })
+        }
+
+        res.json({ message: "Solicitud archivada correctamente" })
+    } catch (error) {
+        console.error("Error archivando solicitud:", error)
+        res.status(500).json({ error: "Error interno del servidor" })
+    }
+})
+
+// Función para generar contraseña temporal
+function generateTempPassword() {
+    const length = 6
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    let password = ""
+
+    // Asegurar al menos una mayúscula, una minúscula y un número
+    password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)]
+    password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)]
+    password += "0123456789"[Math.floor(Math.random() * 10)]
+
+    // Completar el resto de la contraseña (3 caracteres más)
+    for (let i = 3; i < length; i++) {
+        password += charset[Math.floor(Math.random() * charset.length)]
+    }
+
+    // Mezclar los caracteres para que no siempre tenga el mismo patrón
+    return password
+        .split("")
+        .sort(() => 0.5 - Math.random())
+        .join("")
+}
 
 module.exports = { router, authenticateToken }
