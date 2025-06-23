@@ -37,6 +37,13 @@ const Login = () => {
       return;
     }
 
+    // Validar formato del código de funcionario
+    const validation = validateEmployeeCode(employeeCode);
+    if (!validation.isValid) {
+      setError(validation.error!);
+      return;
+    }
+
     if (password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
