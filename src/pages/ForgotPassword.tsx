@@ -157,7 +157,7 @@ const ForgotPassword = () => {
                   aria-required="true"
                   aria-describedby="employeeCode-help employeeCode-error"
                   aria-invalid={error ? "true" : "false"}
-                  autoComplete="username"
+                  autoComplete="username new-password"
                 />
                 <div
                   className="absolute inset-y-0 left-0 flex items-center pl-3"

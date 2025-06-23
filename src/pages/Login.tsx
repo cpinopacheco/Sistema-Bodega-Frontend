@@ -37,21 +37,18 @@ const Login = () => {
       return;
     }
 
-    // Validar el formato del código de funcionario usando la nueva validación
-    const validation = validateEmployeeCode(employeeCode);
-    if (!validation.isValid) {
-      setError(validation.error!);
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
     try {
-      setLoading(true);
       setError("");
+      setLoading(true);
       await login(employeeCode, password);
-    } catch (error) {
-      // Mensaje unificado para todos los errores de autenticación
-      setError("Credenciales inválidas");
-      console.error(error);
+      // ...navegación o lógica post-login...
+    } catch (error: any) {
+      setError(error.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
     }
