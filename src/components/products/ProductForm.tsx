@@ -196,6 +196,16 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
 
         <form onSubmit={handleSubmit} className="p-4">
           <div className="space-y-4">
+            {/* Mostrar el código solo como texto, no como input */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-dark">
+                Código
+              </label>
+              <div className="mt-1 pt-2 bg-neutral-lightest rounded-md text-neutral-dark font-mono">
+                {formData.code}
+              </div>
+            </div>
+
             <div>
               <label
                 htmlFor="name"
@@ -216,28 +226,6 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-state-error">{errors.name}</p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="code"
-                className="block text-sm font-medium text-neutral-dark"
-              >
-                Código
-              </label>
-              <input
-                type="text"
-                id="code"
-                name="code"
-                value={formData.code}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-neutral-light shadow-sm focus:border-primary focus:ring-primary sm:text-sm ${
-                  errors.code ? "border-state-error" : ""
-                }`}
-              />
-              {errors.code && (
-                <p className="mt-1 text-sm text-state-error">{errors.code}</p>
               )}
             </div>
 
