@@ -48,9 +48,11 @@ const LowStock = () => {
 
   // Filtrar productos
   const filteredProducts = lowStockProducts.filter((product) => {
+    const search = searchTerm.toLowerCase();
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      product.name.toLowerCase().includes(search) ||
+      product.description.toLowerCase().includes(search) ||
+      (product.code && product.code.toString().toLowerCase().includes(search));
     const matchesCategory =
       selectedCategory === "all" || product.category === selectedCategory;
 
