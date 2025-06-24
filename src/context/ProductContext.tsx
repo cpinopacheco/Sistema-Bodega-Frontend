@@ -147,6 +147,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         )
       );
       toast.success("Categoría actualizada correctamente");
+      await loadProducts();
     } catch (error: any) {
       console.error("Error actualizando categoría:", error);
       toast.error(error.message || "Error al actualizar la categoría");

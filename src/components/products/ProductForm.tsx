@@ -196,15 +196,17 @@ const ProductForm = ({ product, onClose, isVisible }: ProductFormProps) => {
 
         <form onSubmit={handleSubmit} className="p-4">
           <div className="space-y-4">
-            {/* Mostrar el código solo como texto, no como input */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-dark">
-                Código
-              </label>
-              <div className="mt-1 pt-2 bg-neutral-lightest rounded-md text-neutral-dark font-mono">
-                {formData.code}
+            {/* Mostrar el código solo al editar */}
+            {product && (
+              <div>
+                <label className="block text-sm font-medium text-neutral-dark">
+                  Código
+                </label>
+                <div className="mt-1 pt-2 bg-neutral-lightest rounded-md text-neutral-dark font-mono">
+                  {formData.code}
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label
