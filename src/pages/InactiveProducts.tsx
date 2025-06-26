@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaCheck, FaBoxes, FaExclamationTriangle } from "react-icons/fa";
+import {
+  FaCheck,
+  FaBoxes,
+  FaExclamationTriangle,
+  FaSearch,
+  FaFilter,
+} from "react-icons/fa";
 import { useProducts } from "../context/ProductContext";
 import { Tooltip } from "../components/ui/Tooltip";
 
@@ -10,6 +16,8 @@ const InactiveProducts = () => {
   const { inactiveProducts, activateProduct, loadInactiveProducts, loading } =
     useProducts();
   const [confirmActivate, setConfirmActivate] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Cargar productos inactivos al montar el componente
   useEffect(() => {
@@ -30,6 +38,24 @@ const InactiveProducts = () => {
       console.error("Error reactivando producto:", error);
     }
   };
+
+  // Obtener todas las categorías únicas de los productos inactivos
+  const categories = Array.from(
+    new Set(inactiveProducts.map((p) => p.category))
+  ).filter(Boolean);
+
+  // Filtrar productos inactivos según el término de búsqueda y la categoría seleccionada
+  const filteredInactiveProducts = inactiveProducts.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.code &&
+        product.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (product.category &&
+        product.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory =
+      selectedCategory === "all" || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="space-y-4">
@@ -75,6 +101,35 @@ const InactiveProducts = () => {
         </div>
       </div>
 
+      {/* Buscador y filtro de categorías */}
+      <div className="w-full flex flex-col md:flex-row gap-2 md:gap-4 md:items-center mb-2">
+        <div className="relative flex-1 min-w-0">
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-medium" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar productos..."
+            className="w-full pl-10 pr-4 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary min-w-0"
+          />
+        </div>
+        <div className="relative flex-1 min-w-0">
+          <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-medium" />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-neutral-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary appearance-none min-w-0"
+          >
+            <option value="all">Todas las categorías</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Contador de productos desactivados - Solo visible en móvil */}
       <div className="flex justify-end lg:hidden">
         <div className="bg-state-warning bg-opacity-10 px-4 py-2 rounded-lg">
@@ -87,7 +142,7 @@ const InactiveProducts = () => {
         </div>
       </div>
 
-      {inactiveProducts.length > 0 ? (
+      {filteredInactiveProducts.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -96,7 +151,7 @@ const InactiveProducts = () => {
         >
           {/* Vista móvil - Tarjetas */}
           <div className="block lg:hidden divide-y divide-neutral-light">
-            {inactiveProducts.map((product) => (
+            {filteredInactiveProducts.map((product) => (
               <div
                 key={product.id}
                 className="p-4 hover:bg-neutral-lightest hover:bg-opacity-50"
@@ -186,7 +241,7 @@ const InactiveProducts = () => {
                 </tr>
               </thead>
               <tbody className="bg-neutral-white divide-y divide-neutral-light">
-                {inactiveProducts.map((product) => (
+                {filteredInactiveProducts.map((product) => (
                   <tr
                     key={product.id}
                     className="hover:bg-neutral-lightest hover:bg-opacity-50"
