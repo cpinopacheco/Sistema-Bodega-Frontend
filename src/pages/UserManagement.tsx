@@ -689,50 +689,48 @@ const UserManagement = () => {
                       : "border-neutral-light"
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center flex-1">
-                      <div className="flex-shrink-0 h-10 w-10 mr-3">
-                        <div className="h-10 w-10 rounded-full bg-primary-lightest flex items-center justify-center">
-                          {user.role === "admin" ? (
-                            <FaShieldAlt className="text-primary" />
-                          ) : (
-                            <FaUser className="text-primary" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-neutral-dark">
-                            {user.name}
-                          </h3>
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              user.role === "admin"
-                                ? "bg-accent bg-opacity-10 text-accent"
-                                : "bg-primary-lightest text-primary"
-                            }`}
-                          >
-                            {user.role === "admin" ? "Admin" : "Usuario"}
-                          </span>
-                        </div>
-                        <p className="text-sm text-neutral-medium">
-                          {user.email}
-                        </p>
+                  <div className="flex items-center flex-1 mb-6">
+                    <div className="flex-shrink-0 h-10 w-10 mr-3">
+                      <div className="h-10 w-10 rounded-full bg-primary-lightest flex items-center justify-center">
+                        {user.role === "admin" ? (
+                          <FaShieldAlt className="text-primary" />
+                        ) : (
+                          <FaUser className="text-primary" />
+                        )}
                       </div>
                     </div>
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.is_active
-                          ? "bg-state-success bg-opacity-10 text-state-success"
-                          : "bg-state-error bg-opacity-10 text-state-error"
-                      }`}
-                    >
-                      {user.is_active ? "Activo" : "Inactivo"}
-                    </span>
+                    <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <div className="text-base font-bold text-neutral-dark">
+                            {user.name}
+                          </div>
+                          <div className="text-sm text-neutral-medium break-all">
+                            {user.email}
+                          </div>
+                        </div>
+                        {/* Tags: debajo en mobile, a la derecha en sm+ */}
+                        <div className="flex flex-row gap-2 mt-2 sm:mt-0 sm:ml-2 sm:justify-end">
+                          <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-accent bg-opacity-10 text-accent">
+                            {user.role === "admin" ? "Admin" : "Usuario"}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                              user.is_active
+                                ? "bg-state-success bg-opacity-10 text-state-success"
+                                : "bg-state-error bg-opacity-10 text-state-error"
+                            }`}
+                          >
+                            {user.is_active ? "Activo" : "Inactivo"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
+                  {/* Datos de usuario: Código, Sección, Creado */}
+                  <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-0 sm:mb-2">
+                    <div className="sm:border-r sm:border-neutral-light sm:pr-4">
                       <span className="text-sm text-neutral-medium">
                         Código:
                       </span>
@@ -740,7 +738,7 @@ const UserManagement = () => {
                         {user.employee_code}
                       </div>
                     </div>
-                    <div>
+                    <div className="sm:border-r sm:border-neutral-light sm:px-4">
                       <span className="text-sm text-neutral-medium">
                         Sección:
                       </span>
@@ -748,12 +746,13 @@ const UserManagement = () => {
                         {user.section}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <span className="text-sm text-neutral-medium">Creado:</span>
-                    <div className="text-sm text-neutral-dark">
-                      {formatDate(user.created_at)}
+                    <div className="sm:pl-4 mt-2 sm:mt-0">
+                      <span className="text-sm text-neutral-medium">
+                        Creado:
+                      </span>
+                      <div className="text-sm text-neutral-dark">
+                        {formatDate(user.created_at)}
+                      </div>
                     </div>
                   </div>
 
