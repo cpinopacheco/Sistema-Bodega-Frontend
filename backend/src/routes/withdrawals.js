@@ -22,6 +22,7 @@ router.get("/", async (req, res) => {
             'quantity', wi.quantity,
             'product', json_build_object(
               'id', p.id,
+              'code', p.code,
               'name', p.name,
               'description', p.description,
               'category', c.name,
@@ -92,6 +93,7 @@ router.get("/:id", async (req, res) => {
         wi.product_id,
         wi.quantity,
         p.id,
+        p.code,
         p.name,
         p.description,
         p.stock,
@@ -111,6 +113,7 @@ router.get("/:id", async (req, res) => {
             quantity: item.quantity,
             product: {
                 id: item.id,
+                code: item.code,
                 name: item.name,
                 description: item.description,
                 category: item.category_name,

@@ -220,6 +220,25 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: "No puedes eliminar tu propia cuenta" })
         }
 
+        // Verificar si el usuario tiene retiros asociados
+        const withdrawalsResult = await pool.query(
+            "SELECT COUNT(*) as count FROM withdrawals WHERE user_id = $1",
+            [id]
+        )
+        const withdrawalCount = Number.parseInt(withdrawalsResult.rows[0].count)
+        if (withdrawalCount > 0) {
+            return res.status(400).json({
+                error: "USUARIO_CON_RETIROS",
+                withdrawalCount,
+            })
+        }
+
+        // Eliminar solicitudes de recuperación de contraseña asociadas (si existen)
+        await pool.query(
+            "DELETE FROM password_recovery_requests WHERE user_id = $1",
+            [id]
+        )
+
         // Eliminar el usuario
         await pool.query("DELETE FROM users WHERE id = $1", [id])
 
