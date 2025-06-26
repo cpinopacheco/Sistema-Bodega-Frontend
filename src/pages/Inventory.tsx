@@ -142,6 +142,47 @@ const Inventory = () => {
 
       <div className="bg-neutral-white rounded-lg shadow-md overflow-hidden">
         <div className="p-6">
+          {/* Resumen arriba en móvil */}
+          <div className="block sm:hidden mb-4">
+            <div className="bg-primary-lightest p-4 rounded-md">
+              <h3 className="text-lg font-medium text-primary mb-2">Resumen</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">
+                    Total de productos
+                  </p>
+                  <p className="text-2xl font-bold text-neutral-dark">
+                    {filteredProducts.length}
+                  </p>
+                </div>
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">Stock bajo</p>
+                  <p className="text-2xl font-bold text-state-error">
+                    {
+                      filteredProducts.filter((p) => p.stock <= p.minStock)
+                        .length
+                    }
+                  </p>
+                </div>
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">Stock normal</p>
+                  <p className="text-2xl font-bold text-state-success">
+                    {
+                      filteredProducts.filter((p) => p.stock > p.minStock)
+                        .length
+                    }
+                  </p>
+                </div>
+                <div className="bg-neutral-white p-4 rounded-md shadow-sm">
+                  <p className="text-sm text-neutral-medium">Categorías</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {new Set(filteredProducts.map((p) => p.category)).size}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Filtros y exportar - siempre visibles */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div className="w-full sm:w-auto">
               <label
@@ -175,8 +216,8 @@ const Inventory = () => {
               Exportar a Excel
             </button>
           </div>
-
-          <div className="bg-primary-lightest p-4 rounded-md mb-6">
+          {/* Resumen en escritorio */}
+          <div className="hidden sm:block bg-primary-lightest p-4 rounded-md mb-6">
             <h3 className="text-lg font-medium text-primary mb-2">Resumen</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-neutral-white p-4 rounded-md shadow-sm">
