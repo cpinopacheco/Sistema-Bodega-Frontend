@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
@@ -810,9 +811,8 @@ const Withdrawals = () => {
                       </thead>
                       <tbody className="bg-neutral-white divide-y divide-neutral-light">
                         {filteredAndSortedWithdrawals.map((withdrawal) => (
-                          <>
+                          <React.Fragment key={withdrawal.id}>
                             <tr
-                              key={withdrawal.id}
                               className={`hover:bg-primary-lightest hover:bg-opacity-30 cursor-pointer ${
                                 selectedWithdrawal === withdrawal.id
                                   ? "bg-primary-lightest"
@@ -902,10 +902,7 @@ const Withdrawals = () => {
                             </tr>
                             {selectedWithdrawal === withdrawal.id && (
                               <tr>
-                                <td
-                                  colSpan={7}
-                                  className="px-0 py-0 border-t-0"
-                                >
+                                <td colSpan={7} className="px-0 py-0 border-t-0">
                                   <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
@@ -978,7 +975,7 @@ const Withdrawals = () => {
                                 </td>
                               </tr>
                             )}
-                          </>
+                          </React.Fragment>
                         ))}
                       </tbody>
                     </table>
