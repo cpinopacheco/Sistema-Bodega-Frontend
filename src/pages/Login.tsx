@@ -49,16 +49,13 @@ const Login = () => {
       return;
     }
 
-    try {
-      setError("");
-      setLoading(true);
-      await login(employeeCode, password);
-      // ...navegación o lógica post-login...
-    } catch (error: any) {
-      setError(error.message || "Error al iniciar sesión");
-    } finally {
-      setLoading(false);
+    setError("");
+    setLoading(true);
+    const result = await login(employeeCode, password);
+    if (result && result.error) {
+      setError(result.error);
     }
+    setLoading(false);
   };
 
   return (

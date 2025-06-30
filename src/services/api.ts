@@ -35,6 +35,24 @@ const handleResponse = async (response: Response) => {
       throw duplicateError;
     }
 
+    // Manejar credenciales inválidas (login)
+    if (
+      error.error &&
+      (error.error.toLowerCase().includes("credenciales inválidas") ||
+        error.error.toLowerCase().includes("credenciales invalidas") ||
+        error.error.toLowerCase().includes("invalid credentials"))
+    ) {
+      // Devuelve el error como objeto para que la UI lo maneje
+      return error;
+    }
+
+    // Manejar token inválido o expirado
+    if (error.error && error.error.toLowerCase().includes("token")) {
+      localStorage.removeItem("authToken");
+      // Si tienes acceso al router, puedes redirigir al login aquí
+      // window.location.href = "/login";
+    }
+
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
   return response.json();

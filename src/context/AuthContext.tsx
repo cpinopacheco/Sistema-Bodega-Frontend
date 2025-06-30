@@ -26,7 +26,10 @@ interface User {
 // Define los tipos para el contexto
 interface AuthContextType {
   user: User | null;
-  login: (employeeCode: string, password: string) => Promise<void>;
+  login: (
+    employeeCode: string,
+    password: string
+  ) => Promise<{ error?: string }>;
   logout: () => void;
   changePassword: (
     currentPassword: string,
@@ -92,12 +95,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("🚀 AuthContext: Iniciando proceso de login...");
     console.log("👤 Código de empleado:", employeeCode);
 
+    setLoading(true);
     try {
-      setLoading(true);
-
       console.log("🌐 Intentando conectar con el backend...");
       const response = await authAPI.login(employeeCode, password);
       console.log("✅ Respuesta del backend recibida:", response);
+
+      // Si la respuesta tiene error, simplemente la retornamos para que el Login la maneje
+      if (response.error) {
+        return { error: response.error };
+      }
 
       // Guardar token en localStorage
       localStorage.setItem("authToken", response.token);
@@ -106,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(response.user);
 
       // Si el usuario tiene contraseña temporal, redirigir a cambio de contraseña
-      if (response.user.isTempPassword) {
+      if (response.user && response.user.isTempPassword) {
         toast.success(
           "Inicio de sesión exitoso. Debes cambiar tu contraseña temporal."
         );
@@ -115,11 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Inicio de sesión exitoso");
         navigate("/dashboard");
       }
-    } catch (error: any) {
-      console.error("❌ Login error:", error);
-      // Removido el toast.error para evitar duplicación
-      // El componente Login manejará el mensaje de error
-      throw error;
+      return {};
     } finally {
       setLoading(false);
     }
