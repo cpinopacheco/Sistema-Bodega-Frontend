@@ -116,10 +116,6 @@ const UserProfile = () => {
 
       if (success) {
         setHasChanges(false);
-        // Opcional: redirigir después de un tiempo
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
       }
     } catch (error) {
       // El error ya se maneja en el contexto
