@@ -236,7 +236,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const response = await fetch(
         `${
-          process.env.VITE_API_BASE_URL || "http://localhost:3001"
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api"
         }/api/auth/forgot-password`,
         {
           method: "POST",
@@ -274,7 +274,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!token) throw new Error("No hay token de autenticación");
 
       console.log("🔍 Obteniendo solicitudes de recuperación...");
-      const apiUrl = process.env.VITE_API_BASE_URL || "http://localhost:3001";
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
       console.log("🌐 API URL:", apiUrl);
 
       const response = await fetch(
@@ -320,7 +321,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const response = await fetch(
         `${
-          process.env.VITE_API_BASE_URL || "http://localhost:3001"
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api"
         }/api/auth/generate-temp-password/${requestId}`,
         {
           method: "POST",
@@ -357,7 +358,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const response = await fetch(
         `${
-          process.env.VITE_API_BASE_URL || "http://localhost:3001"
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api"
         }/api/auth/archive-request/${requestId}`,
         {
           method: "DELETE",
