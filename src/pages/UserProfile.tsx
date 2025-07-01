@@ -317,7 +317,11 @@ const UserProfile = () => {
               </div>
             </div>
             <div className="flex items-center">
-              <FaShieldAlt className="text-primary mr-3" />
+              {user.role === "admin" ? (
+                <FaShieldAlt className="text-primary mr-3" />
+              ) : (
+                <FaUser className="text-primary mr-3" />
+              )}
               <div>
                 <p className="text-sm font-medium text-neutral-dark">Rol</p>
                 <p className="text-sm text-neutral-medium">
