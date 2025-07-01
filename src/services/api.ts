@@ -1,5 +1,5 @@
 // Configuración base para las peticiones HTTP al backend
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 console.log("🔧 API configurada para:", API_BASE_URL);
 
@@ -179,7 +179,9 @@ export const getProfilePhotoUrl = (
   filename: string | null | undefined
 ): string | null => {
   if (!filename) return null;
-  return `http://localhost:3001/uploads/profile-photos/${filename}`;
+  // Elimina '/api' si está presente para evitar duplicidad en la URL
+  const baseUrl = API_BASE_URL?.replace(/\/api$/, "");
+  return `${baseUrl}/uploads/profile-photos/${filename}`;
 };
 
 // =====================================================
