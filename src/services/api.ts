@@ -93,11 +93,11 @@ export const authAPI = {
   login: async (employeeCode: string, password: string) => {
     console.log(
       "🌐 API: Enviando petición de login a:",
-      `${API_BASE_URL}/auth/login`
+      `${API_BASE_URL}/api/auth/login`
     );
     console.log("📤 Datos enviados:", { employeeCode, password: "***" });
 
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export const authAPI = {
 
   // Cambiar contraseña
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify({ currentPassword, newPassword }),
@@ -125,7 +125,7 @@ export const authAPI = {
     email: string;
     section: string;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
       method: "PUT",
       headers: createAuthHeaders(),
       body: JSON.stringify(profileData),
@@ -138,7 +138,7 @@ export const authAPI = {
     const formData = new FormData();
     formData.append("profilePhoto", file);
 
-    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-photo`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/upload-profile-photo`, {
       method: "POST",
       headers: createAuthHeadersForFormData(),
       body: formData,
@@ -148,7 +148,7 @@ export const authAPI = {
 
   // Eliminar foto de perfil
   deleteProfilePhoto: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/delete-profile-photo`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/delete-profile-photo`, {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
@@ -158,7 +158,7 @@ export const authAPI = {
   // Obtener información del usuario actual
   getMe: async () => {
     console.log("🔍 API: Verificando usuario actual...");
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -166,7 +166,7 @@ export const authAPI = {
 
   // Verificar token
   verifyToken: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/verify-token`, {
       method: "POST",
       headers: createAuthHeaders(),
     });
@@ -191,7 +191,7 @@ export const getProfilePhotoUrl = (
 export const usersAPI = {
   // Obtener todos los usuarios (solo admin)
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/users`, {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -199,7 +199,7 @@ export const usersAPI = {
 
   // Obtener un usuario específico (solo admin)
   getById: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -214,7 +214,7 @@ export const usersAPI = {
     role: "admin" | "user";
     section: string;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/users`, {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify(userData),
@@ -234,7 +234,7 @@ export const usersAPI = {
       isActive: boolean;
     }
   ) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       method: "PUT",
       headers: createAuthHeaders(),
       body: JSON.stringify(userData),
@@ -244,7 +244,7 @@ export const usersAPI = {
 
   // Eliminar usuario (solo admin)
   delete: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
@@ -254,7 +254,7 @@ export const usersAPI = {
   // Verificar si un usuario tiene retiros asociados
   checkUserWithdrawals: async (id: number) => {
     const response = await fetch(
-      `${API_BASE_URL}/users/${id}/check-withdrawals`,
+      `${API_BASE_URL}/api/users/${id}/check-withdrawals`,
       {
         headers: createAuthHeaders(),
       }
@@ -264,7 +264,7 @@ export const usersAPI = {
 
   // Activar/desactivar usuario (solo admin)
   toggleStatus: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/toggle-status`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}/toggle-status`, {
       method: "PATCH",
       headers: createAuthHeaders(),
     });
@@ -279,7 +279,7 @@ export const usersAPI = {
 export const categoriesAPI = {
   // Obtener todas las categorías
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
+    const response = await fetch(`${API_BASE_URL}/api/categories`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -287,7 +287,7 @@ export const categoriesAPI = {
 
   // Crear nueva categoría
   create: async (name: string) => {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
+    const response = await fetch(`${API_BASE_URL}/api/categories`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify({ name }),
@@ -297,7 +297,7 @@ export const categoriesAPI = {
 
   // Actualizar categoría
   update: async (id: number, name: string) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
       method: "PUT",
       headers: createAuthHeaders(),
       body: JSON.stringify({ name }),
@@ -307,7 +307,7 @@ export const categoriesAPI = {
 
   // Eliminar categoría
   delete: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
@@ -322,7 +322,7 @@ export const categoriesAPI = {
 export const productsAPI = {
   // Obtener todos los productos
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+    const response = await fetch(`${API_BASE_URL}/api/products`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -330,7 +330,7 @@ export const productsAPI = {
 
   // Obtener un producto específico
   getById: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -344,7 +344,7 @@ export const productsAPI = {
     stock: number;
     minStock: number;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+    const response = await fetch(`${API_BASE_URL}/api/products`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify(productData),
@@ -363,7 +363,7 @@ export const productsAPI = {
       minStock: number;
     }
   ) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
       method: "PUT",
       headers: createAuthHeaders(),
       body: JSON.stringify(productData),
@@ -373,7 +373,7 @@ export const productsAPI = {
 
   // Actualizar solo el stock de un producto
   updateStock: async (id: number, quantity: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/stock`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}/stock`, {
       method: "PATCH",
       headers: createAuthHeaders(),
       body: JSON.stringify({ quantity }),
@@ -383,7 +383,7 @@ export const productsAPI = {
 
   // Eliminar producto
   delete: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
@@ -400,7 +400,7 @@ export const productsAPI = {
       minStock: number;
     }>
   ) => {
-    const response = await fetch(`${API_BASE_URL}/products/bulk-import`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/bulk-import`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify({ products }),
@@ -410,7 +410,7 @@ export const productsAPI = {
 
   // Obtener productos inactivos (desactivados)
   getInactive: async () => {
-    const response = await fetch(`${API_BASE_URL}/products/inactive`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/inactive`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -418,7 +418,7 @@ export const productsAPI = {
 
   // Desactivar producto (soft delete)
   deactivate: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/deactivate`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}/deactivate`, {
       method: "PATCH",
       headers: createAuthHeaders(),
     });
@@ -427,7 +427,7 @@ export const productsAPI = {
 
   // Reactivar producto
   activate: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/activate`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}/activate`, {
       method: "PATCH",
       headers: createAuthHeaders(),
     });
@@ -442,7 +442,7 @@ export const productsAPI = {
 export const withdrawalsAPI = {
   // Obtener todos los retiros
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals`, {
+    const response = await fetch(`${API_BASE_URL}/api/withdrawals`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -450,7 +450,7 @@ export const withdrawalsAPI = {
 
   // Obtener un retiro específico
   getById: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/withdrawals/${id}`, {
       headers: createAuthHeaders(),
     });
     return handleResponse(response);
@@ -470,7 +470,7 @@ export const withdrawalsAPI = {
       product: any;
     }>;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals`, {
+    const response = await fetch(`${API_BASE_URL}/api/withdrawals`, {
       method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify(withdrawalData),
@@ -480,7 +480,7 @@ export const withdrawalsAPI = {
 
   // Eliminar retiro
   delete: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/withdrawals/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/withdrawals/${id}`, {
       method: "DELETE",
       headers: createAuthHeaders(),
     });
@@ -494,7 +494,7 @@ export const withdrawalsAPI = {
 
 export const healthAPI = {
   check: async () => {
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetch(`${API_BASE_URL}/api/health`);
     return handleResponse(response);
   },
 };
