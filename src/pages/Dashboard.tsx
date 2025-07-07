@@ -14,14 +14,12 @@ import { useWithdrawal } from "../context/WithdrawalContext";
 import { useState, useEffect } from "react";
 
 const Dashboard = () => {
-  const { products, getLowStockProducts } = useProducts();
+  const { products, getLowStockProducts, categories } = useProducts();
   const { withdrawals } = useWithdrawal();
 
   const lowStockProducts = getLowStockProducts();
   const totalProducts = products.length;
-  const totalCategories = [
-    ...new Set(products.map((product) => product.category)),
-  ].length;
+  const totalCategories = categories.length;
   const totalWithdrawals = withdrawals.length;
 
   const [showBars, setShowBars] = useState(false);
@@ -306,20 +304,21 @@ const Dashboard = () => {
                 Principales Categorías
               </h3>
               <div className="space-y-2">
-                {Object.entries(
-                  products.reduce((acc, product) => {
-                    acc[product.category] = (acc[product.category] || 0) + 1;
-                    return acc;
-                  }, {} as Record<string, number>)
-                )
-                  .sort((a, b) => b[1] - a[1])
+                {categories
+                  .map((cat) => {
+                    const count = products.filter(
+                      (p) => p.category === cat.name
+                    ).length;
+                    return { name: cat.name, count };
+                  })
+                  .sort((a, b) => b.count - a.count)
                   .slice(0, 4)
-                  .map(([category, count], index) => (
+                  .map(({ name, count }, index) => (
                     <div
-                      key={category}
+                      key={name}
                       className="flex items-center justify-between"
                     >
-                      <p className="text-sm text-neutral-dark">{category}</p>
+                      <p className="text-sm text-neutral-dark">{name}</p>
                       <div className="flex items-center">
                         <span className="text-sm font-medium mr-2 text-neutral-medium">
                           {count}
@@ -328,9 +327,10 @@ const Dashboard = () => {
                           <div
                             className="bg-primary h-full rounded-full"
                             style={{
-                              width: showBars
-                                ? `${(count / totalProducts) * 100}%`
-                                : "0%",
+                              width:
+                                showBars && totalProducts > 0
+                                  ? `${(count / totalProducts) * 100}%`
+                                  : "0%",
                               transition: `width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
                               transitionDelay: `${index * 150}ms`,
                             }}
