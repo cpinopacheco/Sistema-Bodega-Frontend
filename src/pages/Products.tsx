@@ -319,14 +319,17 @@ const Products = () => {
         )}
       </AnimatePresence>
 
-      <p
-        className="text-sm text-neutral-medium mb-1"
-        style={{ marginTop: "32px" }}
-      >
-        {!isMobile
-          ? "Haz clic en los encabezados de la tabla para ordenar los productos."
-          : "Desliza para ver más información"}
-      </p>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-1">
+        <p className="text-sm text-neutral-medium">
+          {!isMobile
+            ? "Haz clic en los encabezados de la tabla para ordenar los productos."
+            : "Desliza para ver más información"}
+        </p>
+        <span className="text-sm text-neutral-medium mt-1 sm:mt-0 sm:ml-4 self-end sm:self-auto">
+          Total: {filteredProducts.length} producto
+          {filteredProducts.length === 1 ? "" : "s"}
+        </span>
+      </div>
 
       {filteredProducts.length > 0 ? (
         <motion.div
