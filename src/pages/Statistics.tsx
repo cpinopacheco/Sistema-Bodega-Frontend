@@ -8,11 +8,12 @@ import {
   FaChartLine,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { FaBan } from "react-icons/fa";
 import { useProducts } from "../context/ProductContext";
 import { useWithdrawal } from "../context/WithdrawalContext";
 
 const Statistics = () => {
-  const { products } = useProducts();
+  const { products, inactiveProducts } = useProducts();
   const { withdrawals } = useWithdrawal();
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
   const [showBars, setShowBars] = useState(false);
@@ -122,11 +123,31 @@ const Statistics = () => {
     .slice(0, 5)
     .map(([productId, quantity]) => {
       const product = products.find((p) => p.id === Number.parseInt(productId));
-      return {
-        id: productId,
-        name: product?.name || "Producto desconocido",
-        quantity,
-      };
+      const inactiveProduct = inactiveProducts.find(
+        (p) => p.id === Number.parseInt(productId)
+      );
+      if (product) {
+        return {
+          id: productId,
+          name: product.name,
+          isActive: true,
+          quantity,
+        };
+      } else if (inactiveProduct) {
+        return {
+          id: productId,
+          name: inactiveProduct.name,
+          isActive: false,
+          quantity,
+        };
+      } else {
+        return {
+          id: productId,
+          name: "Producto desconocido",
+          isActive: null,
+          quantity,
+        };
+      }
     });
 
   // Estadísticas por sección (filtradas por período)
@@ -343,11 +364,16 @@ const Statistics = () => {
           <div className="p-6">
             {topWithdrawnProducts.length > 0 ? (
               <div className="space-y-4">
-                {topWithdrawnProducts.map(({ id, name, quantity }, index) => (
+                {topWithdrawnProducts.map(({ id, name, quantity, isActive }, index) => (
                   <div key={id}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-neutral-dark">
+                    <div className="flex justify-between text-sm mb-1 items-center">
+                      <span className="font-medium text-neutral-dark flex items-center gap-2">
                         {name}
+                        {isActive === false && (
+                          <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-neutral-light text-neutral-medium flex items-center gap-1">
+                            <FaBan className="text-state-error" /> Inactivo
+                          </span>
+                        )}
                       </span>
                       <span className="text-neutral-medium">
                         {quantity} unidades
@@ -359,11 +385,7 @@ const Statistics = () => {
                         style={{
                           width:
                             showBars && topWithdrawnProducts.length > 0
-                              ? `${
-                                  (quantity /
-                                    topWithdrawnProducts[0].quantity) *
-                                  100
-                                }%`
+                              ? `${(quantity / topWithdrawnProducts[0].quantity) * 100}%`
                               : "0%",
                           transition: `width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
                           transitionDelay: `${index * 250}ms`,
