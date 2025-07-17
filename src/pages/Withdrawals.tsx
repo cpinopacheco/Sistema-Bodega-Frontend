@@ -17,6 +17,7 @@ import {
   FaSortAmountUp,
   FaSearch,
   FaFilter,
+  FaSpinner,
 } from "react-icons/fa";
 import { useWithdrawal } from "../context/WithdrawalContext";
 import { Tooltip } from "../components/ui/Tooltip";
@@ -42,6 +43,7 @@ const Withdrawals = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,6 +77,18 @@ const Withdrawals = () => {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
+
+  // Simula la carga de retiros (ajusta según tu lógica real)
+  useEffect(() => {
+    setLoading(true);
+    const timeout = setTimeout(
+      () => {
+        setLoading(false);
+      },
+      withdrawals.length === 0 ? 300 : 600
+    ); // Ajusta el tiempo si lo deseas
+    return () => clearTimeout(timeout);
+  }, [withdrawals]);
 
   // Calcular el total de items en el carrito
   const cartTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -282,6 +296,7 @@ const Withdrawals = () => {
 
       <AnimatePresence mode="wait">
         {!showWithdrawalHistory ? (
+          // Carrito de retiro (sin loader)
           <motion.div
             key="cart"
             initial={{ opacity: 0, y: 20 }}
@@ -592,6 +607,7 @@ const Withdrawals = () => {
             </div>
           </motion.div>
         ) : (
+          // Historial de retiros (tabla)
           <motion.div
             key="history"
             initial={{ opacity: 0, y: 20 }}
@@ -752,7 +768,14 @@ const Withdrawals = () => {
 
             {/* Sección de tabla - Separada de los filtros */}
             <div className="bg-neutral-white rounded-lg shadow-md overflow-hidden">
-              {filteredAndSortedWithdrawals.length > 0 ? (
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <FaSpinner className="animate-spin text-4xl text-primary mb-4" />
+                  <span className="text-neutral-medium">
+                    Cargando retiros...
+                  </span>
+                </div>
+              ) : filteredAndSortedWithdrawals.length > 0 ? (
                 !isMobile ? (
                   /* Vista de escritorio - Tabla con scroll */
                   <div className="overflow-x-auto max-h-[32rem] overflow-y-auto">
@@ -902,7 +925,10 @@ const Withdrawals = () => {
                             </tr>
                             {selectedWithdrawal === withdrawal.id && (
                               <tr>
-                                <td colSpan={7} className="px-0 py-0 border-t-0">
+                                <td
+                                  colSpan={7}
+                                  className="px-0 py-0 border-t-0"
+                                >
                                   <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
