@@ -2,32 +2,19 @@ const express = require("express")
 const { pool } = require("../config/database")
 const router = express.Router()
 
-// Función para generar código de producto correlativo con 4 dígitos
+// Generación de código usando secuencia de Postgres
+// Debes crear la secuencia en tu base de datos:
+// CREATE SEQUENCE product_code_seq START 1;
+// Y asegurarte que el campo code en la tabla products NO sea unique si quieres permitir reintentos, o sí lo sea si quieres máxima seguridad.
 async function generateProductCode() {
     try {
-        // Obtener el último código de producto creado
-        const lastCodeResult = await pool.query(
-            "SELECT code FROM products WHERE code LIKE 'PROD-%' ORDER BY CAST(SUBSTRING(code FROM 6) AS INTEGER) DESC LIMIT 1",
-        )
-
-        let nextNumber = 1
-        if (lastCodeResult.rows.length > 0) {
-            // Extraer el número del último código
-            const lastCode = lastCodeResult.rows[0].code
-            const lastNumber = Number.parseInt(lastCode.split("-")[1], 10)
-            if (!isNaN(lastNumber)) {
-                nextNumber = lastNumber + 1
-            }
-        }
-
-        // Formatear el número con ceros a la izquierda (4 dígitos)
-        const formattedNumber = nextNumber.toString().padStart(4, "0")
-
-        return `PROD-${formattedNumber}`
+        const seqResult = await pool.query("SELECT nextval('product_code_seq') as seq");
+        const nextNumber = seqResult.rows[0].seq;
+        const formattedNumber = nextNumber.toString().padStart(4, "0");
+        return `PROD-${formattedNumber}`;
     } catch (error) {
-        console.error("Error generando código de producto:", error)
-        // Código de respaldo en caso de error
-        return `PROD-${Date.now().toString().substring(9).padStart(4, "0")}`
+        console.error("Error generando código de producto:", error);
+        return `PROD-${Date.now().toString().substring(9).padStart(4, "0")}`;
     }
 }
 
@@ -500,12 +487,12 @@ router.post("/bulk-import", async (req, res) => {
             total: products.length,
         }
 
-        // Procesar cada producto
         for (let i = 0; i < products.length; i++) {
-            const product = products[i]
-
+            const product = products[i];
             try {
-                const { name, description, categoryId, stock, minStock } = product
+                // Generar código único usando la secuencia
+                const productCode = await generateProductCode();
+                const { name, description, categoryId, stock, minStock } = product;
 
                 // Validaciones básicas
                 if (!name || !name.trim()) {
@@ -513,64 +500,55 @@ router.post("/bulk-import", async (req, res) => {
                         index: i + 1,
                         product: product,
                         error: "El nombre es requerido",
-                    })
-                    continue
+                    });
+                    continue;
                 }
-
                 if (!categoryId) {
                     results.errors.push({
                         index: i + 1,
                         product: product,
                         error: "La categoría es requerida",
-                    })
-                    continue
+                    });
+                    continue;
                 }
-
                 if (stock < 0 || minStock < 0) {
                     results.errors.push({
                         index: i + 1,
                         product: product,
                         error: "Stock y stock mínimo no pueden ser negativos",
-                    })
-                    continue
+                    });
+                    continue;
                 }
-
                 // Verificar si ya existe un producto ACTIVO con el mismo nombre
                 const nameCheck = await pool.query(
                     "SELECT id FROM products WHERE LOWER(name) = LOWER($1) AND is_active = true",
-                    [name.trim()],
-                )
+                    [name.trim()]
+                );
                 if (nameCheck.rows.length > 0) {
                     results.errors.push({
                         index: i + 1,
                         product: product,
                         error: "Ya existe un producto activo con este nombre",
-                    })
-                    continue
+                    });
+                    continue;
                 }
-
                 // Verificar que la categoría existe
-                const categoryCheck = await pool.query("SELECT id, name FROM categories WHERE id = $1", [categoryId])
+                const categoryCheck = await pool.query("SELECT id, name FROM categories WHERE id = $1", [categoryId]);
                 if (categoryCheck.rows.length === 0) {
                     results.errors.push({
                         index: i + 1,
                         product: product,
                         error: "La categoría especificada no existe",
-                    })
-                    continue
+                    });
+                    continue;
                 }
-
-                // Generar código único para el producto
-                const productCode = await generateProductCode()
-
                 // Insertar producto
                 const result = await pool.query(
                     `INSERT INTO products (name, description, category_id, stock, min_stock, code, is_active) 
            VALUES ($1, $2, $3, $4, $5, $6, true) 
            RETURNING id, name, description, stock, min_stock, code, is_active, created_at, updated_at`,
-                    [name.trim(), description || "", categoryId, stock || 0, minStock || 0, productCode],
-                )
-
+                    [name.trim(), description || "", categoryId, stock || 0, minStock || 0, productCode]
+                );
                 const newProduct = {
                     id: result.rows[0].id,
                     name: result.rows[0].name,
@@ -583,19 +561,29 @@ router.post("/bulk-import", async (req, res) => {
                     isActive: result.rows[0].is_active,
                     createdAt: result.rows[0].created_at,
                     updatedAt: result.rows[0].updated_at,
-                }
-
+                };
                 results.success.push({
                     index: i + 1,
                     product: newProduct,
-                })
+                });
             } catch (error) {
-                console.error(`Error procesando producto ${i + 1}:`, error)
+                console.error(`Error procesando producto ${i + 1}:`, error);
+                let errorMsg = error.message || "Error interno del servidor";
+                // Si es error de Postgres, mostrar el detalle si existe
+                if (error.detail) {
+                    errorMsg += ` | Detalle: ${error.detail}`;
+                }
+                if (error.code) {
+                    errorMsg += ` | Código: ${error.code}`;
+                }
+                if (error.constraint) {
+                    errorMsg += ` | Restricción: ${error.constraint}`;
+                }
                 results.errors.push({
                     index: i + 1,
                     product: product,
-                    error: error.message || "Error interno del servidor",
-                })
+                    error: errorMsg,
+                });
             }
         }
 
