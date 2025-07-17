@@ -16,6 +16,7 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaFileImport,
+  FaSpinner,
 } from "react-icons/fa";
 import { useProducts, type Product } from "../context/ProductContext";
 import { useWithdrawal } from "../context/WithdrawalContext";
@@ -45,6 +46,7 @@ const Products = () => {
   const [showStockManagementForm, setShowStockManagementForm] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Detectar tamaño de pantalla
   useEffect(() => {
@@ -64,6 +66,19 @@ const Products = () => {
       initialQuantities[product.id] = 1;
     });
     setQuantityInputs(initialQuantities);
+  }, [products]);
+
+  // Simula la carga de productos (ajusta según tu lógica real)
+  useEffect(() => {
+    setLoading(true);
+    // Si products viene de una API, espera a que cambie
+    const timeout = setTimeout(
+      () => {
+        setLoading(false);
+      },
+      products.length === 0 ? 300 : 600
+    ); // Ajusta el tiempo si lo deseas
+    return () => clearTimeout(timeout);
   }, [products]);
 
   // Manejar cierre con tecla Escape para modales
@@ -331,7 +346,12 @@ const Products = () => {
         </span>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-16">
+          <FaSpinner className="animate-spin text-4xl text-primary mb-4" />
+          <span className="text-neutral-medium">Cargando productos...</span>
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
