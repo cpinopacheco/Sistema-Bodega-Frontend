@@ -428,67 +428,7 @@ const ProductImportModal = ({
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <AnimatePresence mode="wait">
-            {!showPreview ? (
-              <motion.div
-                key="upload"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                {/* Instrucciones */}
-                <div className="bg-primary-lightest p-4 rounded-lg">
-                  <h3 className="font-medium text-primary mb-2">
-                    Instrucciones:
-                  </h3>
-                  <ul className="text-sm text-neutral-dark space-y-1">
-                    <li>
-                      • El archivo debe tener las columnas: nombre, descripcion,
-                      categoria, stock, stockMinimo
-                    </li>
-                    <li>
-                      • Las categorías deben existir previamente en el sistema
-                    </li>
-                    <li>• Los nombres de productos deben ser únicos</li>
-                    <li>• Stock y stock mínimo deben ser números positivos</li>
-                  </ul>
-                </div>
-
-                {/* Descargar plantilla */}
-                <div className="text-center">
-                  <button
-                    onClick={downloadTemplate}
-                    className="inline-flex items-center px-4 py-2 bg-accent text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
-                  >
-                    <FaDownload className="mr-2" />
-                    Descargar Plantilla Excel
-                  </button>
-                </div>
-
-                {/* Subir archivo */}
-                <div className="border-2 border-dashed border-neutral-light rounded-lg p-8 text-center">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <FaFileUpload className="mx-auto text-neutral-medium text-4xl mb-4" />
-                  <p className="text-neutral-dark mb-2">
-                    {file ? file.name : "Selecciona un archivo Excel"}
-                  </p>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors"
-                  >
-                    <FaFileUpload className="mr-2" />
-                    Seleccionar Archivo
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
+            {showPreview ? (
               <motion.div
                 key="preview"
                 initial={{ opacity: 0, y: 20 }}
@@ -497,6 +437,32 @@ const ProductImportModal = ({
                 transition={{ duration: 0.3 }}
                 className="space-y-4"
               >
+                {/* Botones de acción - AHORA ARRIBA del resumen */}
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => {
+                      setShowPreview(false);
+                      setImportData([]);
+                      setFile(null);
+                    }}
+                    className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                  >
+                    Volver
+                  </button>
+                  <button
+                    onClick={handleImport}
+                    disabled={
+                      isProcessing ||
+                      importData.filter((item) => item.isValid).length === 0
+                    }
+                    className="px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing
+                      ? "Importando..."
+                      : "Importar Productos Válidos"}
+                  </button>
+                </div>
+
                 {/* Resumen */}
                 <div className="bg-neutral-light p-4 rounded-lg">
                   <h3 className="font-medium text-neutral-dark mb-2">
@@ -587,30 +553,64 @@ const ProductImportModal = ({
                     </tbody>
                   </table>
                 </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="upload"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                {/* Instrucciones */}
+                <div className="bg-primary-lightest p-4 rounded-lg">
+                  <h3 className="font-medium text-primary mb-2">
+                    Instrucciones:
+                  </h3>
+                  <ul className="text-sm text-neutral-dark space-y-1">
+                    <li>
+                      • El archivo debe tener las columnas: nombre, descripcion,
+                      categoria, stock, stockMinimo
+                    </li>
+                    <li>
+                      • Las categorías deben existir previamente en el sistema
+                    </li>
+                    <li>• Los nombres de productos deben ser únicos</li>
+                    <li>• Stock y stock mínimo deben ser números positivos</li>
+                  </ul>
+                </div>
 
-                {/* Botones de acción */}
-                <div className="flex justify-between">
+                {/* Descargar plantilla */}
+                <div className="text-center">
                   <button
-                    onClick={() => {
-                      setShowPreview(false);
-                      setImportData([]);
-                      setFile(null);
-                    }}
-                    className="px-4 py-2 border border-neutral-light rounded-md text-neutral-dark hover:bg-neutral-light"
+                    onClick={downloadTemplate}
+                    className="inline-flex items-center px-4 py-2 bg-accent text-neutral-white rounded-md hover:bg-opacity-90 transition-colors"
                   >
-                    Volver
+                    <FaDownload className="mr-2" />
+                    Descargar Plantilla Excel
                   </button>
+                </div>
+
+                {/* Subir archivo */}
+                <div className="border-2 border-dashed border-neutral-light rounded-lg p-8 text-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <FaFileUpload className="mx-auto text-neutral-medium text-4xl mb-4" />
+                  <p className="text-neutral-dark mb-2">
+                    {file ? file.name : "Selecciona un archivo Excel"}
+                  </p>
                   <button
-                    onClick={handleImport}
-                    disabled={
-                      isProcessing ||
-                      importData.filter((item) => item.isValid).length === 0
-                    }
-                    className="px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center px-4 py-2 bg-primary text-neutral-white rounded-md hover:bg-primary-light transition-colors"
                   >
-                    {isProcessing
-                      ? "Importando..."
-                      : "Importar Productos Válidos"}
+                    <FaFileUpload className="mr-2" />
+                    Seleccionar Archivo
                   </button>
                 </div>
               </motion.div>
